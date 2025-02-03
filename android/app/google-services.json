@@ -1,0 +1,49 @@
+{
+  "project_info": {
+    "project_number": "612438421763",
+    "firebase_url": "https://eyevolve-5cdac-default-rtdb.firebaseio.com",
+    "project_id": "eyevolve-5cdac",
+    "storage_bucket": "eyevolve-5cdac.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:612438421763:android:7b0f740bc7f56793e6f936",
+        "android_client_info": {
+          "package_name": "com.example.eye_volve"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAYhTJXPAm-Ml01vtC0FX-B4rWaNZax_qk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:612438421763:android:cb921347663293f0e6f936",
+        "android_client_info": {
+          "package_name": "com.example.eyevolve"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAYhTJXPAm-Ml01vtC0FX-B4rWaNZax_qk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

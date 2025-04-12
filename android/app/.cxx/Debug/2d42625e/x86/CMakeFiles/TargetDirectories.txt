@@ -1,0 +1,2 @@
+/home/ubuntu/eye_volve/android/app/.cxx/Debug/2d42625e/x86/CMakeFiles/edit_cache.dir
+/home/ubuntu/eye_volve/android/app/.cxx/Debug/2d42625e/x86/CMakeFiles/rebuild_cache.dir

@@ -1,0 +1,144 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import '../../domain/entities/app_user.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+
+class FirebaseAuthDataSource {
+  final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+  final FlutterSecureStorage _storage = const FlutterSecureStorage();
+
+  Future<AppUser> signInWithEmailAndPassword(String email, String password) async {
+    try {
+      final userCredential = await _firebaseAuth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      final user = userCredential.user;
+      if (user == null) throw Exception("Utilisateur non trouvé");
+
+      final token = await user.getIdToken();
+      if (token == null) throw Exception("Token non généré");
+
+      final userEmail = user.email;
+      if (userEmail == null) throw Exception("Email non trouvé");
+
+      await storeTokenLocally(token);
+
+      return AppUser(
+        id: user.uid,
+        email: userEmail,
+        jwt: token,
+      );
+    } catch (e) {
+      throw Exception("Erreur de connexion : ${e.toString()}");
+    }
+  }
+
+  Future<AppUser> signUpWithEmailAndPassword(String email, String password) async {
+    try {
+      final userCredential = await _firebaseAuth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      final user = userCredential.user;
+      if (user == null) throw Exception("Utilisateur non créé");
+
+      final token = await user.getIdToken();
+      if (token == null) throw Exception("Token non généré");
+
+      final userEmail = user.email;
+      if (userEmail == null) throw Exception("Email non trouvé");
+
+      await storeTokenLocally(token);
+
+      return AppUser(
+        id: user.uid,
+        email: userEmail,
+        jwt: token,
+      );
+    } catch (e) {
+      throw Exception("Erreur d'inscription : ${e.toString()}");
+    }
+  }
+
+  Future<AppUser?> signInWithGoogle() async {
+    try {
+      await GoogleSignIn().signOut();
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      if (googleUser == null) return null;
+
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final AuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      final userCredential = await _firebaseAuth.signInWithCredential(credential);
+      final user = userCredential.user;
+      if (user == null) return null;
+
+      final token = await user.getIdToken();
+      final userEmail = user.email;
+
+      if (token == null || userEmail == null) return null;
+
+      return AppUser(
+        id: user.uid,
+        email: userEmail,
+        jwt: token,
+      );
+    } catch (e) {
+      throw Exception("Erreur Google Sign-In : ${e.toString()}");
+    }
+  }
+
+  Future<AppUser?> signInWithFacebook() async {
+    try {
+      final LoginResult loginResult = await FacebookAuth.instance.login();
+      if (loginResult.status != LoginStatus.success) return null;
+
+      final token = loginResult.accessToken?.token;
+      if (token == null) throw Exception("Token Facebook manquant");
+
+      final credential = FacebookAuthProvider.credential(token);
+      final userCredential = await _firebaseAuth.signInWithCredential(credential);
+      final user = userCredential.user;
+      if (user == null) return null;
+
+      final firebaseToken = await user.getIdToken();
+      final userEmail = user.email;
+
+      if (firebaseToken == null || userEmail == null) return null;
+
+      return AppUser(
+        id: user.uid,
+        email: userEmail,
+        jwt: firebaseToken,
+      );
+    } catch (e) {
+      throw Exception("Erreur Facebook Sign-In : ${e.toString()}");
+    }
+  }
+
+  Future<void> storeTokenLocally(String token) async {
+    await _storage.write(key: 'firebase_token', value: token);
+  }
+
+  Future<void> signOut() async {
+    try {
+      await _storage.delete(key: 'firebase_token');
+      await _firebaseAuth.signOut();
+      await GoogleSignIn().signOut();
+      await FacebookAuth.instance.logOut();
+    } catch (e) {
+      throw Exception("Erreur déconnexion : ${e.toString()}");
+    }
+  }
+
+  Future<String?> getFirebaseToken() async {
+    return FirebaseAuth.instance.currentUser?.getIdToken();
+  }
+}

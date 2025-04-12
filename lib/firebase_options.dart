@@ -78,7 +78,6 @@ class DefaultFirebaseOptions {
     storageBucket: 'eyevolve-5cdac.firebasestorage.app',
     iosBundleId: 'com.example.eyeVolve',
   );
-
   static const FirebaseOptions windows = FirebaseOptions(
     apiKey: 'AIzaSyDYP0aHRroNphUKdAUEqg_Uay8moYzLGco',
     appId: '1:612438421763:web:7d5d7215aceb6e7de6f936',

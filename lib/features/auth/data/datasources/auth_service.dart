@@ -9,7 +9,7 @@ import 'package:jwt_decoder/jwt_decoder.dart';
 
 class AuthService {
     final FlutterSecureStorage _storage = const FlutterSecureStorage();
-    final String baseUrl = "https://ef1d-197-23-137-142.ngrok-free.app";
+    final String baseUrl = "https://b04e-197-20-218-0.ngrok-free.app";
 
 
     Future<void> storeToken(String token) async {

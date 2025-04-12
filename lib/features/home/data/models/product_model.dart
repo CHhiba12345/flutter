@@ -10,6 +10,7 @@ class ProductModel {
   final bool halalStatus;
   final List<String> allergens;
   final String imageUrl;
+  final bool isFavorite; // 👈 Ajouté
 
   ProductModel({
     required this.code,
@@ -21,10 +22,10 @@ class ProductModel {
     required this.halalStatus,
     required this.allergens,
     required this.imageUrl,
+    this.isFavorite = false, // 👈 Par défaut false
   });
 
   factory ProductModel.fromJson(Map<String, dynamic> json) {
-    // Gérer les ingrédients
     dynamic ingredients = json['ingredients'];
     List<String> ingredientsList = [];
     if (ingredients is List) {
@@ -33,7 +34,6 @@ class ProductModel {
       ingredientsList = [ingredients];
     }
 
-    // Gérer les catégories
     dynamic categories = json['categories'];
     List<String> categoriesList = [];
     if (categories is List) {
@@ -42,7 +42,6 @@ class ProductModel {
       categoriesList = [categories];
     }
 
-    // Gérer les allergènes
     dynamic allergens = json['allergens'];
     List<String> allergensList = [];
     if (allergens is List) {
@@ -53,26 +52,46 @@ class ProductModel {
 
     return ProductModel(
       code: json['code'] ?? '',
-      name: json['name'] ?? 'Unknown',
-      nutriscore: json['nutriscore'] ?? 'unknown',
+      name: json['name'] ?? '',
+      nutriscore: json['nutriscore'] ?? '',
       ingredients: ingredientsList,
-      brand: json['brand'] ?? 'Unknown',
+      brand: json['brand'] ?? '',
       categories: categoriesList,
-      halalStatus: (json['halalStatus'] as bool?) ?? false,
+      halalStatus: json['halal_status'] ?? false,
       allergens: allergensList,
-      imageUrl: json['imageUrl'] ?? '',
+      imageUrl: json['image_url'] ?? '',
     );
   }
 
-  Product toEntity() => Product(
-    code: code,
-    name: name,
-    nutriscore: nutriscore,
-    ingredients: ingredients,
-    brand: brand,
-    categories: categories,
-    halalStatus: halalStatus,
-    allergens: allergens,
-    imageUrl: imageUrl,
-  );
+  // 🔥 Ajout d'un copyWith pour pouvoir modifier isFavorite
+  ProductModel copyWith({bool? isFavorite}) {
+    return ProductModel(
+      code: code,
+      name: name,
+      nutriscore: nutriscore,
+      ingredients: ingredients,
+      brand: brand,
+      categories: categories,
+      halalStatus: halalStatus,
+      allergens: allergens,
+      imageUrl: imageUrl,
+      isFavorite: isFavorite ?? this.isFavorite,
+    );
+  }
+
+  // 🔥 Méthode pour convertir en entité (domain layer)
+  Product toEntity() {
+    return Product(
+      code: code,
+      name: name,
+      nutriscore: nutriscore,
+      ingredients: ingredients,
+      brand: brand,
+      categories: categories,
+      halalStatus: halalStatus,
+      allergens: allergens,
+      imageUrl: imageUrl,
+      isFavorite: isFavorite, // 👈 bien propager dans l'entité
+    );
+  }
 }

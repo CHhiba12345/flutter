@@ -68,7 +68,7 @@ void main() async {
   final jwtToken = await authService.getToken() ?? '';
 
   // Dépendances Home
-  final homeDataSource = HomeDataSource(jwtToken: jwtToken);
+  final homeDataSource = HomeDataSource(jwtToken: jwtToken, favorisList: []);
   final homeRepository = HomeRepositoryImpl(homeDataSource: homeDataSource);
   final scanProductUseCase = ScanProduct(homeRepository);
 

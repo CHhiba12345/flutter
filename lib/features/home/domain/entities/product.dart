@@ -8,7 +8,7 @@ class Product {
   final bool halalStatus;
   final List<String> allergens; // Doit être List<String>
   final String imageUrl;
-
+  final bool isFavorite;
   Product({
     required this.code,
     required this.name,
@@ -19,6 +19,7 @@ class Product {
     required this.halalStatus,
     required this.allergens, // Type corrigé
     required this.imageUrl,
+    required this.isFavorite,
   });
 
 

@@ -38,11 +38,11 @@ class ShowProductDetailEvent extends HomeEvent {
 }
 
 class BackToHomeEvent extends HomeEvent {}
-class ToggleFavoriteEvent extends HomeEvent {
+class HomeToggleFavoriteEvent extends HomeEvent {
   final String uid;
   final Product productId;
 
-  const ToggleFavoriteEvent({required this.uid, required this.productId});
+  const HomeToggleFavoriteEvent({required this.uid, required this.productId});
 
   @override
   List<Object> get props => [uid, productId];

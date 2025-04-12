@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:auto_route/auto_route.dart';
+import '../../../../app_router.dart';
 import '../../../home/presentation/styles/constant.dart';
 import '../../../home/presentation/styles/th.dart';
 
@@ -12,7 +14,7 @@ class HomeBottomNav extends StatelessWidget {
     this.onScanPressed,
   });
 
-  final int currentIndex; // Indice pour savoir quelle page est active
+  final int currentIndex;
   final VoidCallback? onHomePressed;
   final VoidCallback? onHistoryPressed;
   final VoidCallback? onFavoritesPressed;
@@ -34,18 +36,22 @@ class HomeBottomNav extends StatelessWidget {
           _buildNavItem(
             icon: Icons.history_rounded,
             label: 'Historique',
-            isActive: currentIndex == 1,
-            onTap: onHistoryPressed,
+            isActive: currentIndex == 1,  // ✅ Ajouter isActive ici
+            onTap: () {
+              context.router.push(HistoryRoute());
+            },
           ),
           _buildNavItem(
             icon: Icons.favorite_border_rounded,
             label: 'Favoris',
             isActive: currentIndex == 2,
-            onTap: onFavoritesPressed,
+            onTap: () {
+              context.router.push(FavoritesRoute(uid: ''));
+            },
           ),
           _buildNavItem(
-            icon: Icons.article_sharp,
-            label: 'Scan',
+            icon: Icons.qr_code_scanner_rounded,
+            label: 'Scanner',
             isActive: currentIndex == 3,
             onTap: onScanPressed,
           ),
@@ -54,10 +60,11 @@ class HomeBottomNav extends StatelessWidget {
     );
   }
 
+  // Le widget privé _buildNavItem
   Widget _buildNavItem({
     required IconData icon,
     required String label,
-    required bool isActive,
+    required bool isActive, // ✅ Obligatoire
     VoidCallback? onTap,
   }) {
     return GestureDetector(

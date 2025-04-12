@@ -5,7 +5,7 @@ import 'package:http/http.dart' as http;
 
 class FavoriteDataSource {
   final String jwtToken;
-  static const String baseUrl= "https://ef1d-197-23-137-142.ngrok-free.app";
+  static const String baseUrl= "https://b04e-197-20-218-0.ngrok-free.app";
 
   FavoriteDataSource({required this.jwtToken});
 

@@ -4,12 +4,15 @@ import '../../domain/entities/product.dart';
 import '../models/product_model.dart';
 
 class HomeDataSource {
-  static const String _baseUrl = "https://ef1d-197-23-137-142.ngrok-free.app/products";
+  static const String _baseUrl = "https://b04e-197-20-218-0.ngrok-free.app/products";
 
   final String jwtToken;
+  final List<Product> favorisList; // 👈 Ajout de la liste des favoris locale
 
-  HomeDataSource({required this.jwtToken});
-
+  HomeDataSource({
+    required this.jwtToken,
+    required this.favorisList, // 👈 Injecte la liste dans le constructeur
+  });
 
   Future<Map<String, dynamic>> getProductData(String code) async {
     final uri = Uri.parse("$_baseUrl/$code");
@@ -26,7 +29,6 @@ class HomeDataSource {
     }
   }
 
-
   Future<List<Product>> searchProductByName(String name) async {
     final uri = Uri.parse("$_baseUrl/search/$name");
     final response = await http.get(
@@ -35,31 +37,25 @@ class HomeDataSource {
     );
     if (response.statusCode == 200) {
       final decodedResponse = json.decode(response.body);
+
       if (decodedResponse is List) {
-        return decodedResponse.map((json) =>
-            ProductModel.fromJson(json).toEntity()).toList();
-      } else
-      if (decodedResponse is Map && decodedResponse.containsKey('products')) {
+        return decodedResponse.map<Product>((json) {
+          ProductModel model = ProductModel.fromJson(json);
+          bool isFav = favorisList.any((fav) => fav.code == model.code);
+          return model.copyWith(isFavorite: isFav).toEntity(); // 👈 Ici
+        }).toList();
+      } else if (decodedResponse is Map && decodedResponse.containsKey('products')) {
         final products = decodedResponse['products'] as List;
-        return products
-            .map((json) => ProductModel.fromJson(json).toEntity())
-            .toList();
+        return products.map<Product>((json) {
+          ProductModel model = ProductModel.fromJson(json);
+          bool isFav = favorisList.any((fav) => fav.code == model.code);
+          return model.copyWith(isFavorite: isFav).toEntity(); // 👈 Ici aussi
+        }).toList();
       }
+
       throw FormatException('Format JSON inattendu');
     } else {
       throw Exception('Erreur HTTP ${response.statusCode}');
-    }
-  }
-  String _handleHttpError(int statusCode) {
-    switch (statusCode) {
-      case 404:
-        return 'Product not found';
-      case 400:
-        return 'Invalid request';
-      case 500:
-        return 'Server error';
-      default:
-        return 'HTTP error $statusCode';
     }
   }
 }

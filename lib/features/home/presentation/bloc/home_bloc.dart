@@ -26,7 +26,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     on<ViewProductEvent>(_onViewProduct);
     on<ShowProductDetailEvent>(_onShowProductDetail);
     on<BackToHomeEvent>(_onBackToHome);
-    on<ToggleFavoriteEvent>(_onToggleFavorite);
+    on<HomeToggleFavoriteEvent>(_onToggleFavorite); // Renommé ici
   }
 
   // 🔥 Utilitaire pour debounce les événements de recherche
@@ -34,10 +34,8 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     return (events, mapper) => events.debounceTime(duration).switchMap(mapper);
   }
 
-
-
   /////////////
-  Future<void> _onToggleFavorite(ToggleFavoriteEvent event, Emitter<HomeState> emit) async {
+  Future<void> _onToggleFavorite(HomeToggleFavoriteEvent event, Emitter<HomeState> emit) async { // Renommé ici
     if (state is ProductsLoaded) {
       final currentState = state as ProductsLoaded;
       final updatedFavorites = currentState.favorites.toList();
@@ -54,9 +52,6 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       emit(ProductsLoaded(products: currentState.products, favorites: updatedFavorites));
     }
   }
-
-
-
 
   Future<void> _onScanProduct(ScanProductEvent event, Emitter<HomeState> emit) async {
     emit(ProductLoading());
@@ -105,6 +100,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       emit(ProductError(message: e.toString()));
     }
   }
+
   void _onResetSearch(ResetSearchEvent event, Emitter<HomeState> emit) {
     emit(HomeInitial());
   }

@@ -24,7 +24,7 @@ import 'package:eye_volve/features/auth/domain/usecases/sign_up_with_email_and_p
 import 'package:eye_volve/features/favorites/domain/repositories/favorite_repository.dart'
     as _i7;
 import 'package:eye_volve/features/favorites/domain/usecases/toggle_favorite_usecase.dart'
-    as _i21;
+    as _i20;
 import 'package:eye_volve/features/history/domain/entities/history.dart'
     as _i18;
 import 'package:eye_volve/features/history/domain/repositories/history_repository.dart'
@@ -33,7 +33,6 @@ import 'package:eye_volve/features/history/domain/usecases/delete_history_usecas
     as _i19;
 import 'package:eye_volve/features/history/domain/usecases/record_history.dart'
     as _i17;
-import 'package:eye_volve/features/home/data/models/product_model.dart' as _i20;
 import 'package:eye_volve/features/home/domain/entities/product.dart' as _i5;
 import 'package:eye_volve/features/home/domain/repositories/home_repository.dart'
     as _i4;
@@ -702,22 +701,21 @@ class MockFavoriteRepository extends _i1.Mock
       ) as _i8.Future<void>);
 
   @override
-  _i8.Future<List<_i20.ProductModel>> getFavorites(String? uid) =>
+  _i8.Future<List<_i5.Product>> getFavorites(String? uid) =>
       (super.noSuchMethod(
         Invocation.method(
           #getFavorites,
           [uid],
         ),
-        returnValue:
-            _i8.Future<List<_i20.ProductModel>>.value(<_i20.ProductModel>[]),
-      ) as _i8.Future<List<_i20.ProductModel>>);
+        returnValue: _i8.Future<List<_i5.Product>>.value(<_i5.Product>[]),
+      ) as _i8.Future<List<_i5.Product>>);
 }
 
 /// A class which mocks [ToggleFavoriteUseCase].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockToggleFavoriteUseCase extends _i1.Mock
-    implements _i21.ToggleFavoriteUseCase {
+    implements _i20.ToggleFavoriteUseCase {
   MockToggleFavoriteUseCase() {
     _i1.throwOnMissingStub(this);
   }
@@ -750,13 +748,12 @@ class MockToggleFavoriteUseCase extends _i1.Mock
       ) as _i8.Future<void>);
 
   @override
-  _i8.Future<List<_i20.ProductModel>> getFavorites(String? uid) =>
+  _i8.Future<List<_i5.Product>> getFavorites(String? uid) =>
       (super.noSuchMethod(
         Invocation.method(
           #getFavorites,
           [uid],
         ),
-        returnValue:
-            _i8.Future<List<_i20.ProductModel>>.value(<_i20.ProductModel>[]),
-      ) as _i8.Future<List<_i20.ProductModel>>);
+        returnValue: _i8.Future<List<_i5.Product>>.value(<_i5.Product>[]),
+      ) as _i8.Future<List<_i5.Product>>);
 }

@@ -26,8 +26,10 @@ import '../styles/constant.dart';
 import '../styles/home_styles.dart';
 import '../widgets/home_bottom_nav.dart';
 import '../widgets/product_search_card.dart';
-import 'package:eye_volve/features/favorites/presentation/bloc/favorite_event.dart' ;
-import'package:eye_volve/features/home/presentation/bloc/home_bloc.dart';
+import 'package:eye_volve/features/favorites/presentation/bloc/favorite_event.dart';
+import 'package:eye_volve/features/home/presentation/bloc/home_bloc.dart';
+import 'package:eye_volve/features/favorites/presentation/bloc/favorite_event.dart' as fav; // Utilisation de alias
+
 @RoutePage()
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -39,7 +41,7 @@ class HomePage extends StatelessWidget {
       providers: [
         BlocProvider(
           create: (context) => HomeBloc(
-            scanProduct: ScanProduct(HomeRepositoryImpl(homeDataSource: HomeDataSource(jwtToken: ''))),
+            scanProduct: ScanProduct(HomeRepositoryImpl(homeDataSource: HomeDataSource(jwtToken: '', favorisList: []))),
             recordHistory: RecordHistory(repository: HistoryRepositoryImpl(dataSource: HistoryDataSource(jwtToken: ''))),
             toggleFavorite: ToggleFavoriteUseCase(FavoriteRepositoryImpl(dataSource: FavoriteDataSource(jwtToken: ''))),
           ),
@@ -184,14 +186,14 @@ class _ProductDisplay extends StatelessWidget {
           const SizedBox(height: 20),
           Text('Nutriscore: ${product.nutriscore}'),
           Text('Marque: ${product.brand}'),
-          Text('Catégories: ${product.categories.join(', ')}'),  // Joindre la liste en une chaîne
+          Text('Catégories: ${product.categories.join(', ')}'),
           const SizedBox(height: 10),
           const Text('Ingrédients:', style: TextStyle(fontWeight: FontWeight.bold)),
           Text(product.ingredients.join(', ')),
           const SizedBox(height: 10),
           const Text('Allergènes:', style: TextStyle(fontWeight: FontWeight.bold)),
           Text(product.allergens.isNotEmpty
-              ? product.allergens.join(', ')  // Joindre la liste en une chaîne
+              ? product.allergens.join(', ')
               : 'Non spécifié'),
           const SizedBox(height: 10),
           Text('Statut Halal: ${product.halalStatus ? 'Oui' : 'Non'}'),
@@ -205,7 +207,7 @@ class _ProductDisplay extends StatelessWidget {
       itemCount: products.length,
       itemBuilder: (context, index) {
         final product = products[index];
-        final isFavorite = favorites.contains(product.code);
+        bool isFavorite = favorites.any((favorite) => favorite.code == product.code); // Vérification du favori
 
         return Card(
           margin: const EdgeInsets.all(10),
@@ -217,27 +219,28 @@ class _ProductDisplay extends StatelessWidget {
               height: 50,
               errorBuilder: (context, error, stackTrace) => const Icon(Icons.error),
             )
-                : const Icon(Icons.image), // Image par défaut si imageUrl est vide
+                : const Icon(Icons.image),
             title: Text(product.name),
             subtitle: Text(product.brand),
             trailing: BlocConsumer<FavoriteBloc, FavoriteState>(
               listener: (context, favoriteState) {
-                if (favoriteState is FavoritesLoaded) {
-                  // Action à effectuer si nécessaire
+                if (favoriteState is FavoriteSuccess) {
+                  // Action supplémentaire si nécessaire
                 }
               },
               builder: (context, favoriteState) {
                 return IconButton(
                   icon: Icon(
                     isFavorite ? Icons.favorite : Icons.favorite_border,
-                    color: isFavorite ? Colors.red : null,
+                    color: isFavorite ? Colors.red : null, // Le cœur devient rouge si le produit est favori
                   ),
                   onPressed: () {
-                    context.read<FavoriteBloc>().add(
-                      fav.ToggleFavoriteEvent(
-                        uid: 'current_user_uid',
-                        productId: product.code,
-                      ),
+                    context.read<FavoriteBloc>().add(ToggleFavoriteEvent(
+                      uid: 'current_user_uid',
+                      productId: product.code,
+                      isFavorite: !isFavorite, // Si le produit est déjà un favori, il faut inverser l'état
+                    ),
+
                     );
                   },
                 );
@@ -250,9 +253,5 @@ class _ProductDisplay extends StatelessWidget {
         );
       },
     );
-
-
   }
-  }
-  
-
+}

@@ -28,7 +28,8 @@ import '../widgets/home_bottom_nav.dart';
 import '../widgets/product_search_card.dart';
 import 'package:eye_volve/features/favorites/presentation/bloc/favorite_event.dart';
 import 'package:eye_volve/features/home/presentation/bloc/home_bloc.dart';
-import 'package:eye_volve/features/favorites/presentation/bloc/favorite_event.dart' as fav; // Utilisation de alias
+import 'package:eye_volve/features/favorites/presentation/bloc/favorite_event.dart'
+    as fav; // Utilisation de alias
 
 @RoutePage()
 class HomePage extends StatelessWidget {
@@ -41,17 +42,25 @@ class HomePage extends StatelessWidget {
       providers: [
         BlocProvider(
           create: (context) => HomeBloc(
-            scanProduct: ScanProduct(HomeRepositoryImpl(homeDataSource: HomeDataSource(jwtToken: '', favorisList: []))),
-            recordHistory: RecordHistory(repository: HistoryRepositoryImpl(dataSource: HistoryDataSource(jwtToken: ''))),
-            toggleFavorite: ToggleFavoriteUseCase(FavoriteRepositoryImpl(dataSource: FavoriteDataSource(jwtToken: ''))),
+            scanProduct: ScanProduct(HomeRepositoryImpl(
+                homeDataSource: HomeDataSource(jwtToken: '', favorisList: []))),
+            recordHistory: RecordHistory(
+                repository: HistoryRepositoryImpl(
+                    dataSource: HistoryDataSource(jwtToken: ''))),
+            toggleFavorite: ToggleFavoriteUseCase(FavoriteRepositoryImpl(
+                dataSource: FavoriteDataSource(jwtToken: ''))),
           ),
         ),
         BlocProvider(
           create: (context) => FavoriteBloc(
-            addToFavorites: AddToFavorites(FavoriteRepositoryImpl(dataSource: FavoriteDataSource(jwtToken: ''))),
-            getFavorites: GetFavorites(FavoriteRepositoryImpl(dataSource: FavoriteDataSource(jwtToken: ''))),
-            removeFromFavorites: RemoveFromFavorites(FavoriteRepositoryImpl(dataSource: FavoriteDataSource(jwtToken: ''))),
-          )..add(LoadFavoritesEvent(uid: 'current_user_uid')), // Charge les favoris au démarrage
+            addToFavorites: AddToFavorites(FavoriteRepositoryImpl(
+                dataSource: FavoriteDataSource(jwtToken: ''))),
+            getFavorites: GetFavorites(FavoriteRepositoryImpl(
+                dataSource: FavoriteDataSource(jwtToken: ''))),
+            removeFromFavorites: RemoveFromFavorites(FavoriteRepositoryImpl(
+                dataSource: FavoriteDataSource(jwtToken: ''))),
+          )..add(LoadFavoritesEvent(
+              uid: 'current_user_uid')), // Charge les favoris au démarrage
         ),
       ],
       child: const _HomeView(),
@@ -80,9 +89,10 @@ class _HomeView extends StatelessWidget {
             builder: (context, state) {
               return state is ProductDetailState
                   ? IconButton(
-                icon: const Icon(Icons.arrow_back),
-                onPressed: () => context.read<HomeBloc>().add(BackToHomeEvent()),
-              )
+                      icon: const Icon(Icons.arrow_back),
+                      onPressed: () =>
+                          context.read<HomeBloc>().add(BackToHomeEvent()),
+                    )
                   : const SizedBox();
             },
           ),
@@ -127,7 +137,9 @@ class _SearchBarAndScan extends StatelessWidget {
           Expanded(
             child: TextField(
               decoration: HomeStyles.searchInputDecoration(context),
-              onChanged: (query) => context.read<HomeBloc>().add(SearchProductsEvent(query: query)),
+              onChanged: (query) => context
+                  .read<HomeBloc>()
+                  .add(SearchProductsEvent(query: query)),
               style: HomeStyles.searchTextStyle(context),
             ),
           ),
@@ -137,7 +149,9 @@ class _SearchBarAndScan extends StatelessWidget {
             onPressed: () async {
               final barcode = await BarcodeScanner.scan();
               if (barcode.rawContent.isNotEmpty) {
-                context.read<HomeBloc>().add(ScanProductEvent(barcode: barcode.rawContent));
+                context
+                    .read<HomeBloc>()
+                    .add(ScanProductEvent(barcode: barcode.rawContent));
               }
             },
           ),
@@ -188,10 +202,12 @@ class _ProductDisplay extends StatelessWidget {
           Text('Marque: ${product.brand}'),
           Text('Catégories: ${product.categories.join(', ')}'),
           const SizedBox(height: 10),
-          const Text('Ingrédients:', style: TextStyle(fontWeight: FontWeight.bold)),
+          const Text('Ingrédients:',
+              style: TextStyle(fontWeight: FontWeight.bold)),
           Text(product.ingredients.join(', ')),
           const SizedBox(height: 10),
-          const Text('Allergènes:', style: TextStyle(fontWeight: FontWeight.bold)),
+          const Text('Allergènes:',
+              style: TextStyle(fontWeight: FontWeight.bold)),
           Text(product.allergens.isNotEmpty
               ? product.allergens.join(', ')
               : 'Non spécifié'),
@@ -207,18 +223,20 @@ class _ProductDisplay extends StatelessWidget {
       itemCount: products.length,
       itemBuilder: (context, index) {
         final product = products[index];
-        bool isFavorite = favorites.any((favorite) => favorite.code == product.code); // Vérification du favori
+        bool isFavorite = favorites.any((favorite) =>
+            favorite.code == product.code); // Vérification du favori
 
         return Card(
           margin: const EdgeInsets.all(10),
           child: ListTile(
             leading: product.imageUrl.isNotEmpty
                 ? Image.network(
-              product.imageUrl,
-              width: 50,
-              height: 50,
-              errorBuilder: (context, error, stackTrace) => const Icon(Icons.error),
-            )
+                    product.imageUrl,
+                    width: 50,
+                    height: 50,
+                    errorBuilder: (context, error, stackTrace) =>
+                        const Icon(Icons.error),
+                  )
                 : const Icon(Icons.image),
             title: Text(product.name),
             subtitle: Text(product.brand),
@@ -226,29 +244,35 @@ class _ProductDisplay extends StatelessWidget {
               listener: (context, favoriteState) {
                 if (favoriteState is FavoriteSuccess) {
                   // Action supplémentaire si nécessaire
+                  setState() {
+                    isFavorite = !isFavorite;
+                  }
                 }
               },
               builder: (context, favoriteState) {
                 return IconButton(
                   icon: Icon(
                     isFavorite ? Icons.favorite : Icons.favorite_border,
-                    color: isFavorite ? Colors.red : null, // Le cœur devient rouge si le produit est favori
+                    color: isFavorite
+                        ? Colors.red
+                        : null, // Le cœur devient rouge si le produit est favori
                   ),
                   onPressed: () {
-                    context.read<FavoriteBloc>().add(ToggleFavoriteEvent(
-                      uid: 'current_user_uid',
-                      productId: product.code,
-                      isFavorite: !isFavorite, // Si le produit est déjà un favori, il faut inverser l'état
-                    ),
-
-                    );
+                    context.read<FavoriteBloc>().add(
+                          ToggleFavoriteEvent(
+                            uid: 'current_user_uid',
+                            productId: product.code,
+                            isFavorite:
+                                !isFavorite, // Si le produit est déjà un favori, il faut inverser l'état
+                          ),
+                        );
                   },
                 );
               },
             ),
             onTap: () => context.read<HomeBloc>().add(
-              ViewProductEvent(product: product, fromSearch: true),
-            ),
+                  ViewProductEvent(product: product, fromSearch: true),
+                ),
           ),
         );
       },

@@ -29,11 +29,30 @@ class HomeRepositoryImpl implements HomeRepository {
       print("Erreur lors de la recherche de produits : $e");
       throw Exception('Échec de la recherche de produits: $e');
     }
-  } @override
+  }
+
+  @override
   Future<Product> scanProduct(String barcode) async {
     try {
       final data = await homeDataSource.getProductData(barcode);
       return ProductModel.fromJson(data).toEntity();
+    } catch (e) {
+      throw Exception('Échec du scan du produit: $e');
+    }
+  }
+
+////////////
+  /// Function with type [Bool] that send to bloc for update the component Icon-favorite
+//////////
+  @override
+  Future<bool> getfavoriteProduct(String uid, String productid) async {
+    try {
+      final data = await homeDataSource.getProductFavorite(uid, productid);
+      if (data["action"] == "added") {
+        return true;
+      } else {
+        return false;
+      }
     } catch (e) {
       throw Exception('Échec du scan du produit: $e');
     }

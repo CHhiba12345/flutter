@@ -15,7 +15,10 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   final RecordHistory recordHistory;
   final ToggleFavoriteUseCase toggleFavorite;
 
-  HomeBloc({required this.scanProduct, required this.recordHistory, required this.toggleFavorite})
+  HomeBloc(
+      {required this.scanProduct,
+      required this.recordHistory,
+      required this.toggleFavorite})
       : super(HomeInitial()) {
     on<SearchProductsEvent>(
       _onSearchProduct,
@@ -35,7 +38,9 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   }
 
   /////////////
-  Future<void> _onToggleFavorite(HomeToggleFavoriteEvent event, Emitter<HomeState> emit) async { // Renommé ici
+  Future<void> _onToggleFavorite(
+      HomeToggleFavoriteEvent event, Emitter<HomeState> emit) async {
+    // Renommé ici
     if (state is ProductsLoaded) {
       final currentState = state as ProductsLoaded;
       final updatedFavorites = currentState.favorites.toList();
@@ -47,13 +52,16 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       }
 
       // Appel au backend pour mettre à jour les favoris
-      await toggleFavorite.execute(uid: event.uid, productId: event.productId.code);
+      await toggleFavorite.execute(
+          uid: event.uid, productId: event.productId.code);
 
-      emit(ProductsLoaded(products: currentState.products, favorites: updatedFavorites));
+      emit(ProductsLoaded(
+          products: currentState.products, favorites: updatedFavorites));
     }
   }
 
-  Future<void> _onScanProduct(ScanProductEvent event, Emitter<HomeState> emit) async {
+  Future<void> _onScanProduct(
+      ScanProductEvent event, Emitter<HomeState> emit) async {
     emit(ProductLoading());
     try {
       final product = await scanProduct.execute(event.barcode);
@@ -68,7 +76,8 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     }
   }
 
-  Future<void> _onViewProduct(ViewProductEvent event, Emitter<HomeState> emit) async {
+  Future<void> _onViewProduct(
+      ViewProductEvent event, Emitter<HomeState> emit) async {
     try {
       if (event.fromSearch) {
         await recordHistory.recordView(productId: event.product.code);
@@ -79,7 +88,8 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     }
   }
 
-  Future<void> _onSearchProduct(SearchProductsEvent event, Emitter<HomeState> emit) async {
+  Future<void> _onSearchProduct(
+      SearchProductsEvent event, Emitter<HomeState> emit) async {
     if (event.query.isEmpty) {
       emit(HomeInitial());
       return;
@@ -92,7 +102,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       final products = await scanProduct.search(event.query);
 
       // Récupération des favoris de l'utilisateur
-      final  favorites = await toggleFavorite.getFavorites('current_user_uid');
+      final favorites = await toggleFavorite.getFavorites('current_user_uid');
 
       // Émission de l'état avec les produits et les favoris
       emit(ProductsLoaded(products: products, favorites: favorites));
@@ -105,7 +115,8 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     emit(HomeInitial());
   }
 
-  void _onShowProductDetail(ShowProductDetailEvent event, Emitter<HomeState> emit) {
+  void _onShowProductDetail(
+      ShowProductDetailEvent event, Emitter<HomeState> emit) {
     emit(ProductDetailState(product: event.product));
   }
 

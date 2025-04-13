@@ -161,8 +161,43 @@ class _SearchBarAndScan extends StatelessWidget {
   }
 }
 
-class _ProductDisplay extends StatelessWidget {
-  const _ProductDisplay();
+class _ProductDisplay extends StatefulWidget {
+  @override
+  State<_ProductDisplay> createState() => _ProductDisplayState();
+}
+
+class _ProductDisplayState extends State<_ProductDisplay> {
+  /// ========== new variable update ============
+  List<String> favorites = [];
+
+  ///
+  /// Function for return Type [bool]
+  /// is favorite product or not
+  ///
+  bool existeFavoriteProduct(String productId) {
+    if (favorites.contains(productId)) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  ///
+  /// update the list of favorite products
+  ///
+  void updateListFavorite(String id) {
+    if (!existeFavoriteProduct(id)) {
+      setState(() {
+        favorites.remove(id);
+        existeFavoriteProduct(id);
+      });
+    } else {
+      setState(() {
+        favorites.add(id);
+        existeFavoriteProduct(id);
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -218,6 +253,8 @@ class _ProductDisplay extends StatelessWidget {
     );
   }
 
+  /// favorite ????
+  /// /favorites/
   Widget _buildProductList(List<Product> products, List<Product> favorites) {
     return ListView.builder(
       itemCount: products.length,
@@ -244,15 +281,22 @@ class _ProductDisplay extends StatelessWidget {
               listener: (context, favoriteState) {
                 if (favoriteState is FavoriteSuccess) {
                   // Action supplémentaire si nécessaire
-                  setState() {
+
+                  //// update :
+                  setState(() {
                     isFavorite = !isFavorite;
-                  }
+                  });
                 }
               },
               builder: (context, favoriteState) {
                 return IconButton(
+                  ////
+                  ///update widget
+                  ///
                   icon: Icon(
-                    isFavorite ? Icons.favorite : Icons.favorite_border,
+                    existeFavoriteProduct(product.code)
+                        ? Icons.favorite
+                        : Icons.favorite_border,
                     color: isFavorite
                         ? Colors.red
                         : null, // Le cœur devient rouge si le produit est favori
@@ -266,6 +310,7 @@ class _ProductDisplay extends StatelessWidget {
                                 !isFavorite, // Si le produit est déjà un favori, il faut inverser l'état
                           ),
                         );
+                    updateListFavorite(product.code);
                   },
                 );
               },

@@ -17,13 +17,19 @@ class HistoryCard extends StatelessWidget {
 
     return Card(
       child: ListTile(
-        leading: CachedNetworkImage(
+        leading: history.imageUrl.isNotEmpty
+            ? CachedNetworkImage(
           imageUrl: history.imageUrl,
           width: 50,
           height: 50,
-          placeholder: (context, url) => const CircularProgressIndicator(),
+          fit: BoxFit.cover,
+          placeholder: (context, url) => Container(
+            color: Colors.grey[200],
+            child: const Icon(Icons.image),
+          ),
           errorWidget: (context, url, error) => const Icon(Icons.error),
-        ),
+        )
+            : const Icon(Icons.image),
         title: Text(history.productName),// Adaptez selon vos besoins
         subtitle: Text(
           ' ${date.day}/${date.month}/${date.year}',

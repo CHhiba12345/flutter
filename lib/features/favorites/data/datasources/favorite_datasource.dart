@@ -32,7 +32,12 @@ class FavoriteDataSource {
   // Récupère la liste des favoris pour un utilisateur donné
   Future<List<Product>> getFavorites(String uid) async {
     final url = Uri.parse('$baseUrl/favorites').replace(queryParameters: {'uid': uid});
+    print('Request URL: ${url.toString()}');
+    print('Request Headers: ${_buildHeaders()}');
+
     final response = await http.get(url, headers: _buildHeaders());
+    print('Response Status Code: ${response.statusCode}');
+    print('Response Body: ${response.body}');
 
     if (response.statusCode == 200) {
       final List<dynamic> jsonResponse = jsonDecode(response.body);

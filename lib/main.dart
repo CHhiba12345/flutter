@@ -2,6 +2,7 @@ import 'package:eye_volve/features/favorites/domain/usecases/remove_from_favorit
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:provider/provider.dart';
 import 'app_router.dart';
 import 'features/auth/data/datasources/auth_service.dart';
 import 'features/auth/presentation/blocs/auth_bloc.dart';
@@ -68,7 +69,7 @@ void main() async {
   final jwtToken = await authService.getToken() ?? '';
 
   // Dépendances Home
-  final homeDataSource = HomeDataSource(jwtToken: jwtToken, favorisList: []);
+  final homeDataSource = HomeDataSource(jwtToken: jwtToken);
   final homeRepository = HomeRepositoryImpl(homeDataSource: homeDataSource);
   final scanProductUseCase = ScanProduct(homeRepository);
 
@@ -176,12 +177,16 @@ class MyApp extends StatelessWidget {
         ),
 
         // Bloc Favorites
+        // Bloc Favorites
+        Provider<FavoriteRepository>(
+          create: (_) => favoriteRepository, // Expose FavoriteRepository ici
+        ),
         BlocProvider(
           create: (context) => FavoriteBloc(
-            addToFavorites: AddToFavorites(favoriteRepository),
-            getFavorites: GetFavorites(favoriteRepository),
-            removeFromFavorites:RemoveFromFavorites(favoriteRepository),
-          )..add(LoadFavoritesEvent(uid: 'current_user_uid')), // Charge les favoris au démarrage
+            addToFavorites: AddToFavorites(context.read<FavoriteRepository>()),
+            getFavorites: GetFavorites(context.read<FavoriteRepository>()),
+            removeFromFavorites: RemoveFromFavorites(context.read<FavoriteRepository>()),
+          )..add(LoadFavoritesEvent(uid: 'current_user_uid')),
         ),
       ],
       child: MaterialApp.router(

@@ -41,7 +41,7 @@ class HomePage extends StatelessWidget {
       providers: [
         BlocProvider(
           create: (context) => HomeBloc(
-            scanProduct: ScanProduct(HomeRepositoryImpl(homeDataSource: HomeDataSource(jwtToken: '', favorisList: []))),
+            scanProduct: ScanProduct(HomeRepositoryImpl(homeDataSource: HomeDataSource(jwtToken: ''))),
             recordHistory: RecordHistory(repository: HistoryRepositoryImpl(dataSource: HistoryDataSource(jwtToken: ''))),
             toggleFavorite: ToggleFavoriteUseCase(FavoriteRepositoryImpl(dataSource: FavoriteDataSource(jwtToken: ''))),
           ),
@@ -170,43 +170,64 @@ class _ProductDisplay extends StatelessWidget {
   }
 
   Widget _buildProductDetail(Product product) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (product.imageUrl.isNotEmpty)
-            Center(
-              child: Image.network(
-                product.imageUrl,
-                height: 200,
-                fit: BoxFit.contain,
+    return Card(
+      elevation: 5,
+      margin: const EdgeInsets.all(16),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (product.imageUrl.isNotEmpty)
+              Center(
+                child: Image.network(
+                  product.imageUrl,
+                  height: 200,
+                  fit: BoxFit.contain,
+                ),
               ),
+            const SizedBox(height: 20),
+            Text(
+              'Name: ${product.name}',
+              style: const TextStyle(fontWeight: FontWeight.bold),
             ),
-          const SizedBox(height: 20),
-          Text('Nutriscore: ${product.nutriscore}'),
-          Text('Marque: ${product.brand}'),
-          Text('Catégories: ${product.categories.join(', ')}'),
-          const SizedBox(height: 10),
-          const Text('Ingrédients:', style: TextStyle(fontWeight: FontWeight.bold)),
-          Text(product.ingredients.join(', ')),
-          const SizedBox(height: 10),
-          const Text('Allergènes:', style: TextStyle(fontWeight: FontWeight.bold)),
-          Text(product.allergens.isNotEmpty
-              ? product.allergens.join(', ')
-              : 'Non spécifié'),
-          const SizedBox(height: 10),
-          Text('Statut Halal: ${product.halalStatus ? 'Oui' : 'Non'}'),
-        ],
+            Text(
+              'Nutriscore: ${product.nutriscore}',
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            Text('Marque: ${product.brand}'),
+            Text('Catégories: ${product.categories.join(', ')}'),
+            const SizedBox(height: 10),
+            const Text(
+              'Ingrédients:',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            Text(product.ingredients.join(', ')),
+            const SizedBox(height: 10),
+            const Text(
+              'Allergènes:',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            Text(product.allergens.isNotEmpty
+                ? product.allergens.join(', ')
+                : 'Non spécifié'),
+            const SizedBox(height: 10),
+            Text('Statut Halal: ${product.halalStatus ? 'Oui' : 'Non'}'),
+          ],
+        ),
       ),
     );
   }
+
 
   Widget _buildProductList(List<Product> products, List<Product> favorites) {
     return ListView.builder(
       itemCount: products.length,
       itemBuilder: (context, index) {
-        final product = products[index];
+        Product product = products[index];
         bool isFavorite = favorites.any((favorite) => favorite.code == product.code); // Vérification du favori
 
         return Card(
@@ -225,7 +246,12 @@ class _ProductDisplay extends StatelessWidget {
             trailing: BlocConsumer<FavoriteBloc, FavoriteState>(
               listener: (context, favoriteState) {
                 if (favoriteState is FavoriteSuccess) {
+                  print("========action done");
                   // Action supplémentaire si nécessaire
+                  setState() {
+                    isFavorite = !isFavorite;
+                    print("================valeur favorite is favorite  $isFavorite ");
+                  }
                 }
               },
               builder: (context, favoriteState) {
@@ -235,13 +261,17 @@ class _ProductDisplay extends StatelessWidget {
                     color: isFavorite ? Colors.red : null, // Le cœur devient rouge si le produit est favori
                   ),
                   onPressed: () {
+                    print("========================before");
                     context.read<FavoriteBloc>().add(ToggleFavoriteEvent(
+
                       uid: 'current_user_uid',
                       productId: product.code,
                       isFavorite: !isFavorite, // Si le produit est déjà un favori, il faut inverser l'état
+
                     ),
 
                     );
+                    print("========================after");
                   },
                 );
               },

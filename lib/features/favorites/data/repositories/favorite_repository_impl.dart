@@ -21,4 +21,5 @@ class FavoriteRepositoryImpl implements FavoriteRepository {
     return favoriteList;
     //return favoriteList.toList(); // Convertir le Set en List
   }
+
 }

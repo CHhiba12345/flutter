@@ -18,14 +18,19 @@ class HistoryModel {
   });
 
   factory HistoryModel.fromJson(Map<String, dynamic> json) {
+    print('[HistoryModel] Raw JSON: $json'); // Log du JSON reçu
+
+    final id = json['_id']?.toString() ?? 'unknown_id'; // Conversion forcée en String
+    print('[HistoryModel] Parsed ID: $id');
+
     return HistoryModel(
-      id: json['_id'] as String? ?? 'unknown_id', // Gestion de null
-      uid: json['uid'] as String? ?? 'unknown_user',
-      productName: json['product_name'] ?? 'Produit inconnu', // Nouveau
-      imageUrl: json['image_url'] ?? '', // Nouveau
-      productId: json['product_id'] as String? ?? '',
-      actionType: json['action_type'] as String? ?? 'scan',
-      timestamp: json['timestamp'] as String? ?? DateTime.now().toIso8601String(),
+      id: id,
+      uid: json['uid']?.toString() ?? 'unknown_user',
+      productName: json['product_name'] ?? json['productName'] ?? 'Produit inconnu',
+      imageUrl: json['image_url'] ?? json['imageUrl'] ?? '',
+      productId: json['product_id']?.toString() ?? json['productId']?.toString() ?? '',
+      actionType: json['action_type']?.toString() ?? json['actionType']?.toString() ?? 'scan',
+      timestamp: json['timestamp']?.toString() ?? DateTime.now().toIso8601String(),
     );
   }
 

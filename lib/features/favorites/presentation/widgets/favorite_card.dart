@@ -19,7 +19,9 @@ class FavoriteCard extends StatelessWidget {
           width: 50,
           height: 50,
           placeholder: (context, url) => const CircularProgressIndicator(),
-          errorWidget: (context, url, error) => const Icon(Icons.error),
+          errorWidget: (context, url, error) {
+            return const Icon(Icons.error, color: Colors.red); // Icone d'erreur rouge
+          },
         ),
         title: Text(favorite.productName),
         subtitle: Text('${date.day}/${date.month}/${date.year}'),

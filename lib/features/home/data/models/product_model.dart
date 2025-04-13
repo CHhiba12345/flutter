@@ -1,18 +1,17 @@
-import '../../domain/entities/product.dart';
+    import '../../domain/entities/product.dart';
 
-class ProductModel {
-  final String code;
-  final String name;
-  final String nutriscore;
-  final List<String> ingredients;
-  final String brand;
-  final List<String> categories;
-  final bool halalStatus;
-  final List<String> allergens;
-  final String imageUrl;
-  final bool isFavorite; // 👈 Ajouté
+    class ProductModel {
+    final String code;
+    final String name;
+    final String nutriscore;
+    final List<String> ingredients;
+    final String brand;
+    final List<String> categories;
+    final bool halalStatus;
+    final List<String> allergens;
+    final String imageUrl;
 
-  ProductModel({
+    ProductModel({
     required this.code,
     required this.name,
     required this.nutriscore,
@@ -22,76 +21,58 @@ class ProductModel {
     required this.halalStatus,
     required this.allergens,
     required this.imageUrl,
-    this.isFavorite = false, // 👈 Par défaut false
-  });
+    });
 
-  factory ProductModel.fromJson(Map<String, dynamic> json) {
+    factory ProductModel.fromJson(Map<String, dynamic> json) {
+    // Gérer les ingrédients
     dynamic ingredients = json['ingredients'];
     List<String> ingredientsList = [];
     if (ingredients is List) {
-      ingredientsList = ingredients.map((e) => e.toString()).toList();
+    ingredientsList = ingredients.map((e) => e.toString()).toList();
     } else if (ingredients is String) {
-      ingredientsList = [ingredients];
+    ingredientsList = [ingredients];
     }
 
+    // Gérer les catégories
     dynamic categories = json['categories'];
     List<String> categoriesList = [];
     if (categories is List) {
-      categoriesList = categories.map((e) => e.toString()).toList();
+    categoriesList = categories.map((e) => e.toString()).toList();
     } else if (categories is String) {
-      categoriesList = [categories];
+    categoriesList = [categories];
     }
 
+    // Gérer les allergènes
     dynamic allergens = json['allergens'];
     List<String> allergensList = [];
     if (allergens is List) {
-      allergensList = allergens.map((e) => e.toString()).toList();
+    allergensList = allergens.map((e) => e.toString()).toList();
     } else if (allergens is String) {
-      allergensList = [allergens];
+    allergensList = [allergens];
     }
 
     return ProductModel(
-      code: json['code'] ?? '',
-      name: json['name'] ?? '',
-      nutriscore: json['nutriscore'] ?? '',
-      ingredients: ingredientsList,
-      brand: json['brand'] ?? '',
-      categories: categoriesList,
-      halalStatus: json['halal_status'] ?? false,
-      allergens: allergensList,
-      imageUrl: json['image_url'] ?? '',
+    code: json['code'] ?? '',
+    name: json['name'] ?? 'Unknown',
+    nutriscore: json['nutriscore'] ?? 'unknown',
+    ingredients: ingredientsList,
+    brand: json['brand'] ?? 'Unknown',
+    categories: categoriesList,
+    halalStatus: (json['halalStatus'] as bool?) ?? false,
+    allergens: allergensList,
+    imageUrl: json['imageUrl'] ?? '',
     );
-  }
+    }
 
-  // 🔥 Ajout d'un copyWith pour pouvoir modifier isFavorite
-  ProductModel copyWith({bool? isFavorite}) {
-    return ProductModel(
-      code: code,
-      name: name,
-      nutriscore: nutriscore,
-      ingredients: ingredients,
-      brand: brand,
-      categories: categories,
-      halalStatus: halalStatus,
-      allergens: allergens,
-      imageUrl: imageUrl,
-      isFavorite: isFavorite ?? this.isFavorite,
+    Product toEntity() => Product(
+    code: code,
+    name: name,
+    nutriscore: nutriscore,
+    ingredients: ingredients,
+    brand: brand,
+    categories: categories,
+    halalStatus: halalStatus,
+    allergens: allergens,
+    imageUrl: imageUrl,
     );
-  }
-
-  // 🔥 Méthode pour convertir en entité (domain layer)
-  Product toEntity() {
-    return Product(
-      code: code,
-      name: name,
-      nutriscore: nutriscore,
-      ingredients: ingredients,
-      brand: brand,
-      categories: categories,
-      halalStatus: halalStatus,
-      allergens: allergens,
-      imageUrl: imageUrl,
-      isFavorite: isFavorite, // 👈 bien propager dans l'entité
-    );
-  }
-}
+    }

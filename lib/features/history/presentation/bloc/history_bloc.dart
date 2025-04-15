@@ -50,6 +50,10 @@ class HistoryBloc extends Bloc<HistoryEvent, HistoryState> {
       }
     });
     on<DeleteHistoryEvent>((event, emit) async {
+      if (event.historyId.isEmpty) {
+        emit(HistoryError('ID invalide pour la suppression'));
+        return;
+      }
       try {
         await deleteHistory.execute(event.historyId); // Supprime l'entrée
         add(LoadHistoryEvent()); // Recharge l'historique après suppression

@@ -26,17 +26,25 @@ class FirebaseAuthDataSource {
 
       await storeTokenLocally(token);
 
+      final displayName = user.displayName?.split(' ') ?? [];
       return AppUser(
         id: user.uid,
         email: userEmail,
         jwt: token,
+        firstName: displayName.isNotEmpty ? displayName[0] : '',
+        lastName: displayName.length > 1 ? displayName.sublist(1).join(' ') : '',
       );
     } catch (e) {
       throw Exception("Erreur de connexion : ${e.toString()}");
     }
   }
 
-  Future<AppUser> signUpWithEmailAndPassword(String email, String password) async {
+  Future<AppUser> signUpWithEmailAndPassword(
+      String email,
+      String password,
+      String firstName,
+      String lastName,)
+  async {
     try {
       final userCredential = await _firebaseAuth.createUserWithEmailAndPassword(
         email: email,
@@ -45,6 +53,10 @@ class FirebaseAuthDataSource {
 
       final user = userCredential.user;
       if (user == null) throw Exception("Utilisateur non créé");
+      // Mise à jour du profil avec firstName et lastName
+      await user.updateDisplayName("$firstName $lastName");
+      await user.reload(); // Recharger les données utilisateur
+
 
       final token = await user.getIdToken();
       if (token == null) throw Exception("Token non généré");
@@ -56,8 +68,10 @@ class FirebaseAuthDataSource {
 
       return AppUser(
         id: user.uid,
-        email: userEmail,
+        email: email,
         jwt: token,
+        firstName: firstName,
+        lastName: lastName,
       );
     } catch (e) {
       throw Exception("Erreur d'inscription : ${e.toString()}");
@@ -85,10 +99,13 @@ class FirebaseAuthDataSource {
 
       if (token == null || userEmail == null) return null;
 
+      final displayName = user.displayName?.split(' ') ?? [];
       return AppUser(
         id: user.uid,
         email: userEmail,
         jwt: token,
+        firstName: displayName.isNotEmpty ? displayName[0] : '',
+        lastName: displayName.length > 1 ? displayName.sublist(1).join(' ') : '',
       );
     } catch (e) {
       throw Exception("Erreur Google Sign-In : ${e.toString()}");
@@ -113,10 +130,13 @@ class FirebaseAuthDataSource {
 
       if (firebaseToken == null || userEmail == null) return null;
 
+      final displayName = user.displayName?.split(' ') ?? [];
       return AppUser(
         id: user.uid,
         email: userEmail,
-        jwt: firebaseToken,
+        jwt: token,
+        firstName: displayName.isNotEmpty ? displayName[0] : '',
+        lastName: displayName.length > 1 ? displayName.sublist(1).join(' ') : '',
       );
     } catch (e) {
       throw Exception("Erreur Facebook Sign-In : ${e.toString()}");

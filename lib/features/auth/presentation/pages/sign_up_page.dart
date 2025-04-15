@@ -143,6 +143,8 @@ class _SignUpPageState extends State<SignUpPage> {
         SignUpWithEmailAndPasswordEvent(
           _emailController.text.trim(),
           _passwordController.text.trim(),
+          _firstNameController.text.trim(),
+          _lastNameController.text.trim(),
         ),
       );
     }

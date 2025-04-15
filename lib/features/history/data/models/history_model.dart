@@ -1,5 +1,5 @@
 class HistoryModel {
-  final String? id;
+  final String id;
   final String uid;
   final String productName; // Nouveau
   final String imageUrl;    // Nouveau
@@ -8,7 +8,7 @@ class HistoryModel {
   final String timestamp;
 
   HistoryModel({
-    this.id,
+    required this.id,
     required this.uid,
     required this.productName,
     required this.imageUrl,
@@ -18,24 +18,26 @@ class HistoryModel {
   });
 
   factory HistoryModel.fromJson(Map<String, dynamic> json) {
-    print('[HistoryModel] Raw JSON: $json'); // Log du JSON reçu
-
-    final id = json['_id']?.toString() ?? 'unknown_id'; // Conversion forcée en String
-    print('[HistoryModel] Parsed ID: $id');
+    // Récupérer _id du JSON (maintenant présent)
+    final id = json['_id']?.toString();
+    if (id == null) {
+      throw FormatException('_id manquant dans : $json');
+    }
 
     return HistoryModel(
-      id: id,
-      uid: json['uid']?.toString() ?? 'unknown_user',
-      productName: json['product_name'] ?? json['productName'] ?? 'Produit inconnu',
-      imageUrl: json['image_url'] ?? json['imageUrl'] ?? '',
-      productId: json['product_id']?.toString() ?? json['productId']?.toString() ?? '',
-      actionType: json['action_type']?.toString() ?? json['actionType']?.toString() ?? 'scan',
-      timestamp: json['timestamp']?.toString() ?? DateTime.now().toIso8601String(),
+      id: id, // Maintenant obligatoire
+      uid: json['uid'] as String,
+      productName: (json['productName'] ?? json['product_name'] ?? '') as String,
+      imageUrl: (json['imageUrl'] ?? json['image_url'] ?? '') as String,
+      productId: (json['productId'] ?? json['product_id']) as String,
+      actionType: (json['actionType'] ?? json['action_type']) as String,
+      timestamp: json['timestamp'] as String,
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
+      'id':id,
       'uid': uid,
       'product_id': productId,
       'productName':productName,

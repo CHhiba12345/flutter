@@ -9,7 +9,7 @@ class HistoryDataSource {
 
   HistoryDataSource({
     required this.jwtToken,
-    this.baseUrl = 'https://b04e-197-20-218-0.ngrok-free.app',
+    this.baseUrl = 'https://180e-197-21-123-184.ngrok-free.app',
   });
 
   Future<List<HistoryModel>> getUserHistory(String uid) async {

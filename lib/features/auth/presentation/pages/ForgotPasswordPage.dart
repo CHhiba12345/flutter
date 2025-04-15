@@ -1,4 +1,5 @@
 import 'package:auto_route/annotations.dart';
+import 'package:email_validator/email_validator.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -35,11 +36,15 @@ class ForgotPasswordPage extends StatelessWidget {
               ),
               ElevatedButton(
                 onPressed: () {
-                  context.read<AuthBloc>().add(
-                    ForgotPasswordRequested(_emailController.text),
-                  );
+                  if (_emailController.text.isNotEmpty && EmailValidator.validate(_emailController.text)) {
+                    context.read<AuthBloc>().add(ForgotPasswordRequested(_emailController.text));
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("Adresse email invalide")),
+                    );
+                  }
                 },
-                child: Text('Envoyer le lien'),
+                child: const Text('Envoyer le lien'),
               ),
             ],
           ),

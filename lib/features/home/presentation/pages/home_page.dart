@@ -2,6 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:barcode_scan2/barcode_scan2.dart';
 import 'package:eye_volve/features/home/data/models/product_model.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show SystemChrome, SystemUiOverlayStyle;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../app_router.dart';
 import '../../../favorites/data/datasources/favorite_datasource.dart';
@@ -54,37 +55,69 @@ class HomePage extends StatelessWidget {
           )..add(LoadFavoritesEvent(uid: 'current_user_uid')), // Charge les favoris au démarrage
         ),
       ],
-      child: const _HomeView(),
+      child:  _HomeView(),
     );
   }
 }
 
 class _HomeView extends StatelessWidget {
-  const _HomeView();
-
+  //const _HomeView();
+ //List<int>getfavorites=[];
+ ////void _actionProductFavorie(int product_id){
+  // if(!getfavorites.where())
+// }
   void _navigateToHistory(BuildContext context) {
     AutoRouter.of(context).push(const HistoryRoute());
   }
 
   @override
   Widget build(BuildContext context) {
+    // Définir la couleur de la barre système
+    SystemChrome.setSystemUIOverlayStyle(
+      const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent, // Fond transparent pour la barre système
+        statusBarIconBrightness: Brightness.dark, // Icônes sombres (pour un fond clair)
+      ),
+    );
+
     return GestureDetector(
       onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
       child: Scaffold(
         backgroundColor: AppConstants.scaffoldBackgroundColor,
-        appBar: AppBar(
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          title: HomeStyles.appTitle(context),
-          leading: BlocBuilder<HomeBloc, HomeState>(
-            builder: (context, state) {
-              return state is ProductDetailState
-                  ? IconButton(
-                icon: const Icon(Icons.arrow_back),
-                onPressed: () => context.read<HomeBloc>().add(BackToHomeEvent()),
-              )
-                  : const SizedBox();
-            },
+        appBar: PreferredSize(
+          preferredSize: const Size.fromHeight(56), // Hauteur standard pour une AppBar
+          child: Container(
+            margin: EdgeInsets.only(top: MediaQuery.of(context).padding.top), // Ajouter un espace pour la barre système
+            decoration: BoxDecoration(
+              color: const Color(0xFFF32747),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 5,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                // Icône de profil (à gauche)
+                IconButton(
+                  icon: const Icon(Icons.person_pin, color: Colors.white,size: 40,),
+                  onPressed: () {
+                    //AutoRouter.of(context).push(const ProfileRoute()); // Navigation vers la page de profil
+                  },
+                ),
+                // Titre de l'application (au centre)
+                Expanded(
+                  child: Center(
+                    child: HomeStyles.appTitle(context), // Utilisation du titre défini dans les styles
+                  ),
+                ),
+                // Espace réservé pour équilibrer la mise en page
+                const SizedBox(width: 40),
+              ],
+            ),
           ),
         ),
         body: const SafeArea(
@@ -147,8 +180,45 @@ class _SearchBarAndScan extends StatelessWidget {
   }
 }
 
-class _ProductDisplay extends StatelessWidget {
+class _ProductDisplay extends StatefulWidget {
   const _ProductDisplay();
+
+  @override
+  State<_ProductDisplay> createState() => _ProductDisplayState();
+}
+
+class _ProductDisplayState extends State<_ProductDisplay> {
+  /// ========== new variable update ============
+  List<String> favorites = [];
+
+  ///
+  /// Function for return Type [bool]
+  /// is favorite product or not
+  ///
+  bool existeFavoriteProduct(String productId) {
+    if (favorites.contains(productId)) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  ///
+  /// update the list of favorite products
+  ///
+  void updateListFavorite(String id) {
+    if (!existeFavoriteProduct(id)) {
+      setState(() {
+        favorites.remove(id);
+        existeFavoriteProduct(id);
+      });
+    } else {
+      setState(() {
+        favorites.add(id);
+        existeFavoriteProduct(id);
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -222,7 +292,6 @@ class _ProductDisplay extends StatelessWidget {
     );
   }
 
-
   Widget _buildProductList(List<Product> products, List<Product> favorites) {
     return ListView.builder(
       itemCount: products.length,
@@ -246,18 +315,18 @@ class _ProductDisplay extends StatelessWidget {
             trailing: BlocConsumer<FavoriteBloc, FavoriteState>(
               listener: (context, favoriteState) {
                 if (favoriteState is FavoriteSuccess) {
+                  setState((){
+                    isFavorite = !isFavorite;
+                  });
                   print("========action done");
                   // Action supplémentaire si nécessaire
-                  setState() {
-                    isFavorite = !isFavorite;
-                    print("================valeur favorite is favorite  $isFavorite ");
-                  }
+
                 }
               },
               builder: (context, favoriteState) {
                 return IconButton(
                   icon: Icon(
-                    isFavorite ? Icons.favorite : Icons.favorite_border,
+                    existeFavoriteProduct(product.code) ? Icons.favorite : Icons.favorite_border,
                     color: isFavorite ? Colors.red : null, // Le cœur devient rouge si le produit est favori
                   ),
                   onPressed: () {

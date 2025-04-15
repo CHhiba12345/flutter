@@ -18,7 +18,7 @@ class HomeStyles {
   static Widget appTitle(BuildContext context) {
     return GradientText(
       AppConstants.appName,
-      style: Theme.of(context).textTheme.headlineLarge,
+      style: Theme.of(context).textTheme.bodyLarge,
       colors: AppConstants.titleGradient,
       gradientType: GradientType.radial,
       radius: 3,

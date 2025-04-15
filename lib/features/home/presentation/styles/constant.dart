@@ -11,9 +11,9 @@ class AppConstants {
   static const Color scaffoldBackgroundColor = Color(0xFFFFF9F9);
 
   static const List<Color> titleGradient = [
-    Color(0xFF1E201E),
-    Color(0xFFEF1C58),
-    Color(0xFF253921)
+    Color(0xFFF6FCF6),
+    Color(0xFFECE3E3),
+    Color(0xFFF5ECEC)
   ];
 
   static OutlineInputBorder searchInputBorder = OutlineInputBorder(

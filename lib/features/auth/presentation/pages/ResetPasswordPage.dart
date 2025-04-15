@@ -51,16 +51,13 @@ class ResetPasswordPage extends StatelessWidget {
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () {
-                  if (oobCode != null && oobCode!.isNotEmpty) {
+                  if (oobCode != null && oobCode!.isNotEmpty && _passwordController.text.isNotEmpty) {
                     context.read<AuthBloc>().add(
-                      PasswordResetRequested(
-                        oobCode!,
-                        _passwordController.text,
-                      ),
+                      PasswordResetRequested(oobCode!, _passwordController.text),
                     );
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("Code de réinitialisation invalide.")),
+                      const SnackBar(content: Text("Code ou mot de passe invalide")),
                     );
                   }
                 },

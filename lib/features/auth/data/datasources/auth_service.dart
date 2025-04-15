@@ -9,8 +9,8 @@ import 'package:jwt_decoder/jwt_decoder.dart';
 
 class AuthService {
     final FlutterSecureStorage _storage = const FlutterSecureStorage();
-    final String baseUrl = "https://b04e-197-20-218-0.ngrok-free.app";
-
+    final String baseUrl = "https://180e-197-21-123-184.ngrok-free.app";
+    final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
 
     Future<void> storeToken(String token) async {
         await _storage.write(key: 'firebase_token', value: token);
@@ -47,47 +47,25 @@ class AuthService {
             throw Exception("Échec vérification token : ${e.toString()}");
         }
     }
-    Future<void> sendForgotPasswordRequest(String email) async {
-        if (!EmailValidator.validate(email)) {
-            throw AuthException(message: 'Format email invalide');
-        }
 
+    // Envoyer l'email de réinitialisation
+    Future<void> sendPasswordResetEmail(String email) async {
         try {
-            final response = await http.post(
-                Uri.parse('$baseUrl/auth/forgot-password'),
-                headers: {'Content-Type': 'application/json'},
-                body: jsonEncode({'email': email}),
-            );
-
-            if (response.statusCode != 200) {
-                throw AuthException(
-                    message: 'Erreur lors de l\'envoi',
-                    code: response.statusCode.toString(),
-                );
-            }
-        } on SocketException {
-            throw AuthException(message: 'Pas de connexion Internet');
-        } on http.ClientException {
-            throw AuthException(message: 'Serveur injoignable');
+            await _firebaseAuth.sendPasswordResetEmail(email: email);
+        } catch (e) {
+            throw Exception("Erreur lors de l'envoi de l'email : $e");
         }
     }
 
-    Future<void> resetPassword(String oobCode, String newPassword) async {
+    // Confirmer le nouveau mot de passe
+    Future<void> confirmPasswordReset(String oobCode, String newPassword) async {
         try {
-            final response = await http.post(
-                Uri.parse('$baseUrl/auth/reset-password'),
-                headers: {'Content-Type': 'application/json'},
-                body: jsonEncode({
-                    'oobCode': oobCode,
-                    'newPassword': newPassword,
-                }),
+            await _firebaseAuth.confirmPasswordReset(
+                code: oobCode,
+                newPassword: newPassword,
             );
-
-            if (response.statusCode != 200) {
-                throw Exception('Erreur lors de la réinitialisation');
-            }
         } catch (e) {
-            throw Exception('Erreur réseau: $e');
+            throw Exception("Erreur lors de la confirmation : $e");
         }
     }
 
@@ -130,5 +108,21 @@ class AuthService {
             }
         }
         return null; // Retourne null si aucun token n'est trouvé
+    }
+    Future<String?> getCurrentUserId() async {
+        try {
+            // Récupérez le token JWT actuel
+            final token = await getCurrentUserToken();
+            if (token == null) {
+                throw Exception("Aucun token trouvé pour l'utilisateur connecté");
+            }
+
+            // Extrayez l'ID utilisateur à partir du token
+            final userId = await getUserIdFromToken(token);
+            return userId;
+        } catch (e) {
+            print("Erreur lors de la récupération de l'ID utilisateur : $e");
+            return null; // Retournez null en cas d'erreur
+        }
     }
 }

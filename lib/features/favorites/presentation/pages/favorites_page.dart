@@ -1,6 +1,7 @@
 import 'package:auto_route/annotations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
 import '../../domain/entities/favorite.dart';
 import '../../domain/repositories/favorite_repository.dart';
 import '../../domain/usecases/add_to_favorites.dart';
@@ -21,9 +22,9 @@ class FavoritesPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => FavoriteBloc(
-        addToFavorites: AddToFavorites(context.read<FavoriteRepository>()),
-        removeFromFavorites: RemoveFromFavorites(context.read<FavoriteRepository>()),
-        getFavorites: GetFavorites(context.read<FavoriteRepository>()),
+        addToFavorites: AddToFavorites(Provider.of<FavoriteRepository>(context, listen: false)),
+        removeFromFavorites: RemoveFromFavorites(Provider.of<FavoriteRepository>(context, listen: false)),
+        getFavorites: GetFavorites(Provider.of<FavoriteRepository>(context, listen: false)),
       )..add(LoadFavoritesEvent(uid: uid)), // Ensure the uid is passed correctly
       child: Scaffold(
         appBar: AppBar(title: const Text('Mes Favoris')),
@@ -41,7 +42,7 @@ class FavoritesPage extends StatelessWidget {
                     final product = state.favorites[index]; // Supposons que ce soit un Product
                     final favorite = Favorite(
                       id: product.code,
-                      uid: 'current_user_uid',
+                      uid: uid,
                       productId: product.code,
                       productName: product.name,
                       imageUrl: product.imageUrl,

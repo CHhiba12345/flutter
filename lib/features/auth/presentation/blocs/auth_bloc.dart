@@ -75,7 +75,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         emit(AuthError('Adresse email invalide'));
         return;
       }
-      final user = await signUpWithEmailAndPassword(event.email, event.password);
+      final user = await signUpWithEmailAndPassword(
+        event.email,
+        event.password,
+        event.firstName,
+        event.lastName,
+      );
       emit(AuthSuccess(user));
     } catch (e) {
       emit(AuthError(e.toString()));

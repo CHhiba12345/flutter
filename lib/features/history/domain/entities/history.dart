@@ -7,7 +7,7 @@ class History {
   final String actionType;
   final String timestamp;
   History({
-    this.id,
+    required this.id,
     required this.uid,
     required this.productName,
     required this.imageUrl,

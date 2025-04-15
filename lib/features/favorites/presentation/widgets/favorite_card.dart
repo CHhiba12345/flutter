@@ -15,13 +15,14 @@ class FavoriteCard extends StatelessWidget {
     return Card(
       child: ListTile(
         leading: CachedNetworkImage(
-          imageUrl: favorite.imageUrl,
+          imageUrl: favorite.imageUrl.isNotEmpty ? favorite.imageUrl : 'https://via.placeholder.com/50', // Fallback URL
           width: 50,
           height: 50,
           placeholder: (context, url) => const CircularProgressIndicator(),
           errorWidget: (context, url, error) {
-            return const Icon(Icons.error, color: Colors.red); // Icone d'erreur rouge
+            return const Icon(Icons.error, color: Colors.red); // Icône d'erreur rouge
           },
+
         ),
         title: Text(favorite.productName),
         subtitle: Text('${date.day}/${date.month}/${date.year}'),

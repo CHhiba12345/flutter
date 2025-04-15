@@ -5,7 +5,7 @@ import 'package:http/http.dart' as http;
 
 class FavoriteDataSource {
   final String jwtToken;
-  static const String baseUrl= "https://b04e-197-20-218-0.ngrok-free.app";
+  static const String baseUrl= "https://180e-197-21-123-184.ngrok-free.app";
 
   FavoriteDataSource({required this.jwtToken});
 
@@ -31,6 +31,9 @@ class FavoriteDataSource {
   // Récupère la liste des favoris pour un utilisateur donné
   // Récupère la liste des favoris pour un utilisateur donné
   Future<List<Product>> getFavorites(String uid) async {
+    if (uid.isEmpty) {
+      throw Exception('UID is required to load favorites');
+    }
     final url = Uri.parse('$baseUrl/favorites').replace(queryParameters: {'uid': uid});
     print('Request URL: ${url.toString()}');
     print('Request Headers: ${_buildHeaders()}');

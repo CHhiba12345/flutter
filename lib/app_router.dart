@@ -20,7 +20,13 @@ class AppRouter extends _$AppRouter {
     AutoRoute(page: HomeRoute.page),
     AutoRoute(page: SignInRoute.page),
     AutoRoute(page: HistoryRoute.page),
-    AutoRoute(page: FavoritesRoute.page),
+   ///////////////////
+    CustomRoute(
+      page: FavoritesRoute.page,
+      transitionsBuilder: TransitionsBuilders.fadeIn,
+      durationInMilliseconds: 800,
+      path: '/favorites/:uid', // Ajoutez un paramètre uid dans le chemin
+    ),
 
     // Nouvelle route pour le mot de passe oublié
     AutoRoute(page: ForgotPasswordRoute.page),

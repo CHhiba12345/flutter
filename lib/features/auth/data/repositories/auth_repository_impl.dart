@@ -22,12 +22,22 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<AppUser> signUpWithEmailAndPassword(String email, String password) async {
-    final user = await dataSource.signUpWithEmailAndPassword(email, password);
+  Future<AppUser> signUpWithEmailAndPassword(
+      String email,
+      String password,
+      String firstName,
+      String lastName,
+      ) async {
+    final user = await dataSource.signUpWithEmailAndPassword(
+      email,
+      password,
+      firstName,
+      lastName,
+    );
     if (user.jwt == null) {
       throw AuthException(message: "Token JWT non généré");
     }
-    await authService.verifyFirebaseToken(user.jwt!); // Envoyer le token au backend
+    await authService.verifyFirebaseToken(user.jwt!);
     return user;
   }
 
@@ -62,7 +72,7 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<void> sendPasswordResetEmail(String email) async {
     try {
-      await authService.sendForgotPasswordRequest(email);
+      await authService.sendPasswordResetEmail(email);
     } catch (e) {
       throw AuthException(message: 'Erreur: ${e.toString()}');
     }
@@ -71,7 +81,7 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<void> confirmPasswordReset(String oobCode, String newPassword) async {
     try {
-      await authService.resetPassword(oobCode, newPassword);
+      await authService.confirmPasswordReset(oobCode, newPassword);
     } catch (e) {
       throw AuthException(message: 'Erreur: ${e.toString()}');
     }
@@ -87,6 +97,8 @@ class AuthRepositoryImpl implements AuthRepository {
       throw Exception('Erreur lors de la récupération de l\'UID: ${e.toString()}');
     }
   }
+  //
+
 
 
   // Implémentation de la méthode getFirebaseToken

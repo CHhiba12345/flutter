@@ -6,7 +6,12 @@ class SignUpWithEmailAndPassword {
 
   SignUpWithEmailAndPassword(this.repository);
 
-  Future<AppUser> call(String email, String password) {
-    return repository.signUpWithEmailAndPassword(email, password);
+  Future<AppUser> call(
+      String email,
+      String password,
+      String firstName,
+      String lastName,
+      ) {
+    return repository.signUpWithEmailAndPassword(email, password, firstName, lastName);
   }
 }

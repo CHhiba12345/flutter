@@ -84,23 +84,28 @@ void main() async {
   final favoriteRepository = FavoriteRepositoryImpl(dataSource: favoriteDataSource);
   final toggleFavoriteUseCase = ToggleFavoriteUseCase(favoriteRepository);
 
+  // Récupération de l'ID utilisateur connecté
+  final userId = await authService.getCurrentUserId() ?? '';
+
   runApp(
     MyApp(
-      authRepository: authRepository,
-      signInWithEmailAndPassword: signInWithEmailAndPassword,
-      signUpWithEmailAndPassword: signUpWithEmailAndPassword,
-      signInWithGoogle: signInWithGoogle,
-      signInWithFacebook: signInWithFacebook,
-      signOut: signOut,
-      forgotPasswordUseCase: forgotPasswordUseCase,
-      resetPasswordUseCase: resetPasswordUseCase,
-      scanProductUseCase: scanProductUseCase,
-      recordHistory: recordHistory,
-      historyRepository: historyRepository,
-      deleteHistoryUseCase: deleteHistoryUseCase,
-      toggleFavoriteUseCase: toggleFavoriteUseCase, // Nouveau paramètre
-      favoriteRepository: favoriteRepository, // Nouveau paramètre
-    ),
+        authRepository: authRepository,
+        signInWithEmailAndPassword: signInWithEmailAndPassword,
+        signUpWithEmailAndPassword: signUpWithEmailAndPassword,
+        signInWithGoogle: signInWithGoogle,
+        signInWithFacebook: signInWithFacebook,
+        signOut: signOut,
+        forgotPasswordUseCase: forgotPasswordUseCase,
+        resetPasswordUseCase: resetPasswordUseCase,
+        scanProductUseCase: scanProductUseCase,
+        recordHistory: recordHistory,
+        historyRepository: historyRepository,
+        deleteHistoryUseCase: deleteHistoryUseCase,
+        toggleFavoriteUseCase: toggleFavoriteUseCase,
+        favoriteRepository: favoriteRepository,
+        initialUid: userId, // Passez l'ID utilisateur dynamique
+      ),
+
   );
 }
 
@@ -117,8 +122,9 @@ class MyApp extends StatelessWidget {
   final RecordHistory recordHistory;
   final HistoryRepository historyRepository;
   final DeleteHistoryUseCase deleteHistoryUseCase;
-  final ToggleFavoriteUseCase toggleFavoriteUseCase; // Nouveau paramètre
-  final FavoriteRepository favoriteRepository; // Nouveau paramètre
+  final ToggleFavoriteUseCase toggleFavoriteUseCase;
+  final FavoriteRepository favoriteRepository;
+  final String initialUid; // Ajout de l'ID utilisateur
 
   final _appRouter = AppRouter();
 
@@ -136,8 +142,9 @@ class MyApp extends StatelessWidget {
     required this.recordHistory,
     required this.historyRepository,
     required this.deleteHistoryUseCase,
-    required this.toggleFavoriteUseCase, // Ajout du paramètre
-    required this.favoriteRepository, // Ajout du paramètre
+    required this.toggleFavoriteUseCase,
+    required this.favoriteRepository,
+    required this.initialUid, // Ajout du paramètre
   });
 
   @override
@@ -163,7 +170,7 @@ class MyApp extends StatelessWidget {
           create: (context) => HomeBloc(
             scanProduct: scanProductUseCase,
             recordHistory: recordHistory,
-            toggleFavorite: toggleFavoriteUseCase, // Injection du use case
+            toggleFavorite: toggleFavoriteUseCase,
           ),
         ),
 
@@ -177,18 +184,18 @@ class MyApp extends StatelessWidget {
         ),
 
         // Bloc Favorites
-        // Bloc Favorites
-        Provider<FavoriteRepository>(
-          create: (_) => favoriteRepository, // Expose FavoriteRepository ici
-        ),
         BlocProvider(
           create: (context) => FavoriteBloc(
-            addToFavorites: AddToFavorites(context.read<FavoriteRepository>()),
-            getFavorites: GetFavorites(context.read<FavoriteRepository>()),
-            removeFromFavorites: RemoveFromFavorites(context.read<FavoriteRepository>()),
-          )..add(LoadFavoritesEvent(uid: 'current_user_uid')),
+            addToFavorites: AddToFavorites(favoriteRepository),
+            getFavorites: GetFavorites(favoriteRepository),
+            removeFromFavorites: RemoveFromFavorites(favoriteRepository),
+          )..add(LoadFavoritesEvent(uid: initialUid)),
         ),
       ],
+    child: MultiProvider(
+    providers: [
+    Provider<FavoriteRepository>(create: (_) => favoriteRepository), // Ajout du provider
+    ],
       child: MaterialApp.router(
         debugShowCheckedModeBanner: false,
         title: 'Eye Volve',
@@ -198,6 +205,7 @@ class MyApp extends StatelessWidget {
         ),
         routerConfig: _appRouter.config(),
       ),
+    ),
     );
   }
 }

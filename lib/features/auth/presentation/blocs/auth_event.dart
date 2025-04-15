@@ -12,11 +12,16 @@ class SignInWithEmailAndPasswordEvent extends AuthEvent {
 
 /// Événement pour l'inscription avec un email et un mot de passe
 class SignUpWithEmailAndPasswordEvent extends AuthEvent {
-  final String email;  // Adresse email de l'utilisateur
-  final String password;  // Mot de passe de l'utilisateur
+  final String email;
+  final String password;
+  final String firstName;
+  final String lastName;
 
-  /// Constructeur pour initialiser l'email et le mot de passe
-  SignUpWithEmailAndPasswordEvent(this.email, this.password);
+  SignUpWithEmailAndPasswordEvent(
+      this.email,
+      this.password,
+      this.firstName,
+      this.lastName,);
 }
 
 /// Événement pour la connexion avec Google

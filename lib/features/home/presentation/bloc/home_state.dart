@@ -12,7 +12,7 @@ class ProductLoading extends HomeState {}
 
 class ProductsLoaded extends HomeState {
   final List<Product> products;
-  final List<Product> favorites;
+  final List<FavoriteModel> favorites;
   const ProductsLoaded({required this.products, required this.favorites});
   @override
   List<Object> get props => [products, favorites];

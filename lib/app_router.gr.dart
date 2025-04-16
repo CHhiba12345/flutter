@@ -16,13 +16,9 @@ abstract class _$AppRouter extends RootStackRouter {
   @override
   final Map<String, PageFactory> pagesMap = {
     FavoritesRoute.name: (routeData) {
-      final args = routeData.argsAs<FavoritesRouteArgs>();
       return AutoRoutePage<dynamic>(
         routeData: routeData,
-        child: FavoritesPage(
-          key: args.key,
-          uid: args.uid,
-        ),
+        child: const FavoritesPage(),
       );
     },
     ForgotPasswordRoute.name: (routeData) {
@@ -79,40 +75,16 @@ abstract class _$AppRouter extends RootStackRouter {
 
 /// generated route for
 /// [FavoritesPage]
-class FavoritesRoute extends PageRouteInfo<FavoritesRouteArgs> {
-  FavoritesRoute({
-    Key? key,
-    required String uid,
-    List<PageRouteInfo>? children,
-  }) : super(
+class FavoritesRoute extends PageRouteInfo<void> {
+  const FavoritesRoute({List<PageRouteInfo>? children})
+      : super(
           FavoritesRoute.name,
-          args: FavoritesRouteArgs(
-            key: key,
-            uid: uid,
-          ),
           initialChildren: children,
         );
 
   static const String name = 'FavoritesRoute';
 
-  static const PageInfo<FavoritesRouteArgs> page =
-      PageInfo<FavoritesRouteArgs>(name);
-}
-
-class FavoritesRouteArgs {
-  const FavoritesRouteArgs({
-    this.key,
-    required this.uid,
-  });
-
-  final Key? key;
-
-  final String uid;
-
-  @override
-  String toString() {
-    return 'FavoritesRouteArgs{key: $key, uid: $uid}';
-  }
+  static const PageInfo<void> page = PageInfo<void>(name);
 }
 
 /// generated route for

@@ -46,7 +46,7 @@ class HomeBottomNav extends StatelessWidget {
             label: 'Favoris',
             isActive: currentIndex == 2,
             onTap: () {
-              context.router.push(FavoritesRoute(uid: ''));
+              context.router.push(FavoritesRoute());
             },
           ),
           _buildNavItem(

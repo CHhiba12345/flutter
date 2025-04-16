@@ -1,8 +1,11 @@
 import 'package:eye_volve/features/home/domain/entities/product.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../domain/entities/favorite.dart';
+import '../bloc/favorite_bloc.dart';
+import '../bloc/favorite_event.dart';
 
 class FavoriteCard extends StatelessWidget {
   final Favorite favorite;
@@ -11,25 +14,34 @@ class FavoriteCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final date = DateTime.parse(favorite.timestamp);
+    final date = DateTime.tryParse(favorite.timestamp) ?? DateTime.now();
+    final formattedDate = '${date.day}/${date.month}/${date.year}';
+
     return Card(
       child: ListTile(
         leading: CachedNetworkImage(
-          imageUrl: favorite.imageUrl.isNotEmpty ? favorite.imageUrl : 'https://via.placeholder.com/50', // Fallback URL
+          imageUrl: favorite.imageUrl,
           width: 50,
           height: 50,
-          placeholder: (context, url) => const CircularProgressIndicator(),
-          errorWidget: (context, url, error) {
-            return const Icon(Icons.error, color: Colors.red); // Icône d'erreur rouge
-          },
-
+          placeholder: (context, url) =>
+              Container(
+                color: Colors.grey[200],
+                child: const Icon(Icons.image),
+              ),
+          errorWidget: (context, url, error) => const Icon(Icons.error),
         ),
-        title: Text(favorite.productName),
-        subtitle: Text('${date.day}/${date.month}/${date.year}'),
+        title: Text(favorite.productName.isNotEmpty
+            ? favorite.productName
+            : 'Produit inconnu'),
+        subtitle: Text(formattedDate),
         trailing: IconButton(
           icon: const Icon(Icons.delete),
           onPressed: () {
-            // Trigger suppression ici
+            context.read<FavoriteBloc>().add(ToggleFavoriteEvent(
+              uid: favorite.uid,
+              productId: favorite.productId,
+              isFavorite: false,
+            ));
           },
         ),
       ),

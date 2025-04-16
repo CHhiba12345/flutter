@@ -17,12 +17,12 @@ class FavoriteModel {
 
   factory FavoriteModel.fromJson(Map<String, dynamic> json) {
     return FavoriteModel(
-      id: json['_id'],
-      uid: json['uid'],
-      productId: json['product_id'],
-      productName: json['product_name'] ?? 'Unknown Product',
-      imageUrl: json['image_url'] ?? '',
-      timestamp: json['timestamp'],
+      id: json['_id'] ?? 'default_id',
+      uid: json['uid'] ?? 'default_user_uid',
+      productId: json['product_id'] ?? 'default_product_id',
+      productName: json['product_name']?.toString().trim() ?? 'Produit inconnu',
+      imageUrl: json['image_url']?.toString().trim() ?? 'https://via.placeholder.com/150', // URL par défaut si manquant
+      timestamp: json['timestamp']?.toString().trim() ?? DateTime.now().toIso8601String(),
     );
   }
 

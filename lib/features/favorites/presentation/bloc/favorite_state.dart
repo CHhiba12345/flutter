@@ -1,3 +1,5 @@
+import 'package:eye_volve/features/favorites/data/models/favorite_model.dart';
+
 import '../../../home/domain/entities/product.dart';
 
 enum FavoriteStatus { initial, loading, success, error }
@@ -14,7 +16,7 @@ class FavoriteInitial extends FavoriteState {
 }
 
 class FavoritesLoaded extends FavoriteState {
-  final List<Product> favorites;
+  final List<FavoriteModel> favorites;
 
   FavoritesLoaded(this.favorites, {FavoriteStatus status = FavoriteStatus.initial})
       : super(status: status);

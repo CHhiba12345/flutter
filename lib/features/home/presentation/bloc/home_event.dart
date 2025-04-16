@@ -40,7 +40,7 @@ class ShowProductDetailEvent extends HomeEvent {
 class BackToHomeEvent extends HomeEvent {}
 class HomeToggleFavoriteEvent extends HomeEvent {
   final String uid;
-  final Product productId;
+  final String productId;
 
   const HomeToggleFavoriteEvent({required this.uid, required this.productId});
 

@@ -9,7 +9,7 @@ import 'package:jwt_decoder/jwt_decoder.dart';
 
 class AuthService {
     final FlutterSecureStorage _storage = const FlutterSecureStorage();
-    final String baseUrl = "https://180e-197-21-123-184.ngrok-free.app";
+    final String baseUrl = "https://65a5-197-18-42-245.ngrok-free.app";
     final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
 
     Future<void> storeToken(String token) async {
@@ -109,15 +109,13 @@ class AuthService {
         }
         return null; // Retourne null si aucun token n'est trouvé
     }
+    // Dans AuthService
     Future<String?> getCurrentUserId() async {
         try {
-            // Récupérez le token JWT actuel
             final token = await getCurrentUserToken();
             if (token == null) {
                 throw Exception("Aucun token trouvé pour l'utilisateur connecté");
             }
-
-            // Extrayez l'ID utilisateur à partir du token
             final userId = await getUserIdFromToken(token);
             return userId;
         } catch (e) {

@@ -47,7 +47,7 @@ class ProductSearchCard extends StatelessWidget {
     return BlocBuilder<FavoriteBloc, FavoriteState>(
       builder: (context, favoriteState) {
         final isFavorite = favoriteState is FavoritesLoaded &&
-            favoriteState.favorites.any((fav) => fav.code == product.code);  // Correction ici : fav.productId -> fav.code
+            favoriteState.favorites.any((fav) => fav.productId == product.code);  // Correction ici : fav.productId -> fav.code
 
         return Card(
           child: Padding(

@@ -3,7 +3,7 @@ abstract class FavoriteEvent {}
 class ToggleFavoriteEvent extends FavoriteEvent {
   final String uid;
   final String productId;
-  final bool isFavorite; // This is used to toggle the favorite status
+  final bool isFavorite;
 
   ToggleFavoriteEvent({
     required this.uid,

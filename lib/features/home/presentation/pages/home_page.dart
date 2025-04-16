@@ -1,10 +1,12 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:barcode_scan2/barcode_scan2.dart';
+import 'package:eye_volve/features/favorites/data/models/favorite_model.dart';
 import 'package:eye_volve/features/home/data/models/product_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show SystemChrome, SystemUiOverlayStyle;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../app_router.dart';
+import '../../../auth/data/datasources/auth_service.dart';
 import '../../../favorites/data/datasources/favorite_datasource.dart';
 import '../../../favorites/data/repositories/favorite_repository_impl.dart';
 import '../../../favorites/domain/usecases/add_to_favorites.dart';
@@ -188,169 +190,164 @@ class _ProductDisplay extends StatefulWidget {
 }
 
 class _ProductDisplayState extends State<_ProductDisplay> {
-  /// ========== new variable update ============
-  List<String> favorites = [];
+/// Liste locale des identifiants des produits favoris
+List<String> favorites = [];
 
-  ///
-  /// Function for return Type [bool]
-  /// is favorite product or not
-  ///
-  bool existeFavoriteProduct(String productId) {
+/// Vérifie si un produit est dans les favoris
+bool isFavoriteProduct(String productId) {
+  return favorites.contains(productId);
+}
+
+/// Met à jour la liste des favoris en ajoutant ou supprimant un produit
+void toggleFavorite(String productId) {
+  setState(() {
     if (favorites.contains(productId)) {
-      return true;
+      favorites.remove(productId); // Supprimer des favoris
     } else {
-      return false;
+      favorites.add(productId); // Ajouter aux favoris
     }
-  }
+  });
+}
 
-  ///
-  /// update the list of favorite products
-  ///
-  void updateListFavorite(String id) {
-    if (!existeFavoriteProduct(id)) {
-      setState(() {
-        favorites.remove(id);
-        existeFavoriteProduct(id);
-      });
-    } else {
-      setState(() {
-        favorites.add(id);
-        existeFavoriteProduct(id);
-      });
-    }
+/// Récupère le UID dynamique de l'utilisateur connecté
+Future<String> getCurrentUserId() async {
+  final authService = AuthService();
+  final token = await authService.getCurrentUserToken();
+  print("Token JWT récupéré : $token");
+  if (token == null) {
+    print("Aucun token JWT trouvé, utilisation de l'ID par défaut.");
+    return 'default_user_uid';
   }
+  final userId = await authService.getUserIdFromToken(token);
+  print("ID utilisateur extrait : $userId");
+  return userId ?? 'default_user_uid';
+}
 
-  @override
-  Widget build(BuildContext context) {
-    return BlocBuilder<HomeBloc, HomeState>(
-      builder: (context, state) {
-        if (state is ProductLoading) {
-          return const Center(child: CircularProgressIndicator());
-        } else if (state is ProductDetailState) {
-          return _buildProductDetail(state.product);
-        } else if (state is ProductsLoaded) {
-          return _buildProductList(state.products, state.favorites);
-        } else if (state is ProductError) {
-          return Center(child: Text(state.message));
-        } else {
-          return const ProductSearchCard();
+@override
+Widget build(BuildContext context) {
+  return BlocBuilder<HomeBloc, HomeState>(
+    builder: (context, state) {
+      if (state is ProductLoading) {
+        return const Center(child: CircularProgressIndicator());
+      } else if (state is ProductDetailState) {
+        return _buildProductDetail(state.product);
+      } else if (state is ProductsLoaded) {
+        // Initialiser la liste des favoris avec les données du backend
+        if (favorites.isEmpty && state.favorites.isNotEmpty) {
+          favorites = state.favorites.map((product) => product.productId).toList();
         }
-      },
-    );
-  }
+        return _buildProductList(state.products, state.favorites.cast<Product>());
+      } else if (state is ProductError) {
+        return Center(child: Text(state.message));
+      } else {
+        return const ProductSearchCard();
+      }
+    },
+  );
+}
 
-  Widget _buildProductDetail(Product product) {
-    return Card(
-      elevation: 5,
-      margin: const EdgeInsets.all(16),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (product.imageUrl.isNotEmpty)
-              Center(
-                child: Image.network(
-                  product.imageUrl,
-                  height: 200,
-                  fit: BoxFit.contain,
-                ),
+Widget _buildProductDetail(Product product) {
+  return Card(
+    elevation: 5,
+    margin: const EdgeInsets.all(16),
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(10),
+    ),
+    child: SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (product.imageUrl.isNotEmpty)
+            Center(
+              child: Image.network(
+                product.imageUrl,
+                height: 200,
+                fit: BoxFit.contain,
               ),
-            const SizedBox(height: 20),
-            Text(
-              'Name: ${product.name}',
-              style: const TextStyle(fontWeight: FontWeight.bold),
             ),
-            Text(
-              'Nutriscore: ${product.nutriscore}',
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-            Text('Marque: ${product.brand}'),
-            Text('Catégories: ${product.categories.join(', ')}'),
-            const SizedBox(height: 10),
-            const Text(
-              'Ingrédients:',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            Text(product.ingredients.join(', ')),
-            const SizedBox(height: 10),
-            const Text(
-              'Allergènes:',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            Text(product.allergens.isNotEmpty
-                ? product.allergens.join(', ')
-                : 'Non spécifié'),
-            const SizedBox(height: 10),
-            Text('Statut Halal: ${product.halalStatus ? 'Oui' : 'Non'}'),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildProductList(List<Product> products, List<Product> favorites) {
-    return ListView.builder(
-      itemCount: products.length,
-      itemBuilder: (context, index) {
-        Product product = products[index];
-        bool isFavorite = favorites.any((favorite) => favorite.code == product.code); // Vérification du favori
-
-        return Card(
-          margin: const EdgeInsets.all(10),
-          child: ListTile(
-            leading: product.imageUrl.isNotEmpty
-                ? Image.network(
-              product.imageUrl,
-              width: 50,
-              height: 50,
-              errorBuilder: (context, error, stackTrace) => const Icon(Icons.error),
-            )
-                : const Icon(Icons.image),
-            title: Text(product.name),
-            subtitle: Text(product.brand),
-            trailing: BlocConsumer<FavoriteBloc, FavoriteState>(
-              listener: (context, favoriteState) {
-                if (favoriteState is FavoriteSuccess) {
-                  setState((){
-                    isFavorite = !isFavorite;
-                  });
-                  print("========action done");
-                  // Action supplémentaire si nécessaire
-
-                }
-              },
-              builder: (context, favoriteState) {
-                return IconButton(
-                  icon: Icon(
-                    existeFavoriteProduct(product.code) ? Icons.favorite : Icons.favorite_border,
-                    color: isFavorite ? Colors.red : null, // Le cœur devient rouge si le produit est favori
-                  ),
-                  onPressed: () {
-                    print("========================before");
-                    context.read<FavoriteBloc>().add(ToggleFavoriteEvent(
-
-                      uid: 'current_user_uid',
-                      productId: product.code,
-                      isFavorite: !isFavorite, // Si le produit est déjà un favori, il faut inverser l'état
-
-                    ),
-
-                    );
-                    print("========================after");
-                  },
-                );
-              },
-            ),
-            onTap: () => context.read<HomeBloc>().add(
-              ViewProductEvent(product: product, fromSearch: true),
-            ),
+          const SizedBox(height: 20),
+          Text(
+            'Name: ${product.name}',
+            style: const TextStyle(fontWeight: FontWeight.bold),
           ),
-        );
-      },
-    );
-  }
+          Text(
+            'Nutriscore: ${product.nutriscore}',
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+          Text('Marque: ${product.brand}'),
+          Text('Catégories: ${product.categories.join(', ')}'),
+          const SizedBox(height: 10),
+          const Text(
+            'Ingrédients:',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          Text(product.ingredients.join(', ')),
+          const SizedBox(height: 10),
+          const Text(
+            'Allergènes:',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          Text(product.allergens.isNotEmpty
+              ? product.allergens.join(', ')
+              : 'Non spécifié'),
+          const SizedBox(height: 10),
+          Text('Statut Halal: ${product.halalStatus ? 'Oui' : 'Non'}'),
+        ],
+      ),
+    ),
+  );
+}
+
+Widget _buildProductList(List<Product> products, List<Product> initialFavorites) {
+  return ListView.builder(
+    itemCount: products.length,
+    itemBuilder: (context, index) {
+      Product product = products[index];
+      bool isFavorite = favorites.contains(product.code);
+      return Card(
+        margin: const EdgeInsets.all(10),
+        child: ListTile(
+          leading: product.imageUrl.isNotEmpty
+              ? Image.network(
+            product.imageUrl,
+            width: 50,
+            height: 50,
+            errorBuilder: (context, error, stackTrace) => const Icon(Icons.error),
+          )
+              : const Icon(Icons.image),
+          title: Text(product.name),
+          subtitle: Text(product.brand),
+          trailing: BlocConsumer<FavoriteBloc, FavoriteState>(
+            listener: (context, favoriteState) {
+              if (favoriteState is FavoriteSuccess) {
+                // Mettre à jour l'état local après confirmation du backend
+                toggleFavorite(product.code);
+              }
+            },
+            builder: (context, favoriteState) {
+              return IconButton(
+                icon: Icon(
+                  isFavorite ? Icons.favorite : Icons.favorite_border,
+                  color: isFavorite ? Colors.red : null,
+                ),
+                onPressed: () async {
+                  final userId = await getCurrentUserId();
+                  context.read<FavoriteBloc>().add(ToggleFavoriteEvent(
+                    uid: userId,
+                    productId: product.code,
+                    isFavorite: !isFavorite,
+                  ));
+                },
+              );
+            },
+          ),
+          onTap: () => context.read<HomeBloc>().add(
+            ViewProductEvent(product: product, fromSearch: true),
+          ),
+        ),
+      );
+    },
+  );
+}
 }

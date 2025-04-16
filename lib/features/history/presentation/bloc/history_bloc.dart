@@ -24,11 +24,14 @@ class HistoryBloc extends Bloc<HistoryEvent, HistoryState> {
       emit(HistoryLoading());
       try {
         final histories = await getHistoryUseCase.execute();
+        print("=========");
         emit(HistoryLoaded(histories));
       } on FormatException catch (e) {
         emit(HistoryError('Format de données invalide : ${e.message}'));
       } on Exception catch (e) {
         emit(HistoryError('Erreur : ${e.toString()}'));
+      }catch(e){
+        print("************** $e");
       }
     });
 

@@ -1,3 +1,4 @@
+import 'package:eye_volve/features/favorites/data/models/favorite_model.dart';
 import 'package:eye_volve/features/home/data/models/product_model.dart';
 import 'package:eye_volve/features/home/domain/entities/product.dart';
 
@@ -16,7 +17,7 @@ class FavoriteRepositoryImpl implements FavoriteRepository {
   }
 
   @override
-  Future<List<Product>> getFavorites(String uid) async {
+  Future<List<FavoriteModel>> getFavorites(String uid) async {
     final favoriteList = await dataSource.getFavorites(uid);
     return favoriteList;
     //return favoriteList.toList(); // Convertir le Set en List

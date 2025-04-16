@@ -1,8 +1,10 @@
+import 'package:eye_volve/features/favorites/data/models/favorite_model.dart';
 import 'package:eye_volve/features/home/data/models/product_model.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:eye_volve/features/home/domain/entities/product.dart';
 import 'package:rxdart/rxdart.dart';
+import '../../../auth/data/datasources/auth_service.dart';
 import '../../../favorites/domain/usecases/toggle_favorite_usecase.dart';
 import '../../../history/domain/usecases/record_history.dart';
 import '../../domain/usecases/scan_product.dart';
@@ -35,21 +37,28 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   }
 
   /////////////
-  Future<void> _onToggleFavorite(HomeToggleFavoriteEvent event, Emitter<HomeState> emit) async { // Renommé ici
+  Future<void> _onToggleFavorite(HomeToggleFavoriteEvent event, Emitter<HomeState> emit) async {
     if (state is ProductsLoaded) {
       final currentState = state as ProductsLoaded;
       final updatedFavorites = currentState.favorites.toList();
+      final isFavorite = updatedFavorites.contains(event.productId);
 
-      if (updatedFavorites.contains(event.productId)) {
+      // Toggle dans la liste locale
+      if (isFavorite) {
         updatedFavorites.remove(event.productId);
       } else {
-        updatedFavorites.add(event.productId);
+        updatedFavorites.add(event.productId as FavoriteModel);
       }
 
-      // Appel au backend pour mettre à jour les favoris
-      await toggleFavorite.execute(uid: event.uid, productId: event.productId.code);
+      try {
+        // Appel au backend pour mettre à jour les favoris avec le bon UID
+        await toggleFavorite.execute(uid: 'current_user_uid', productId: event.productId);
 
-      emit(ProductsLoaded(products: currentState.products, favorites: updatedFavorites));
+        // Mettre à jour l'état local
+        emit(ProductsLoaded(products: currentState.products, favorites: updatedFavorites));
+      } catch (e) {
+        emit(ProductError(message: "Erreur lors de la mise à jour des favoris: $e"));
+      }
     }
   }
 
@@ -86,18 +95,17 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     }
 
     emit(ProductLoading());
-
     try {
       // Recherche des produits
       final products = await scanProduct.search(event.query);
 
-      // Récupération des favoris de l'utilisateur
-      final  favorites = await toggleFavorite.getFavorites('current_user_uid');
+      // Récupération des favoris de l'utilisateur avec le bon UID
+      final favorites = await toggleFavorite.getFavorites('current_user_uid');
 
       // Émission de l'état avec les produits et les favoris
       emit(ProductsLoaded(products: products, favorites: favorites));
     } catch (e) {
-      emit(ProductError(message: e.toString()));
+      emit(ProductError(message: "Erreur lors de la recherche de produits: $e"));
     }
   }
 
@@ -107,6 +115,15 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
 
   void _onShowProductDetail(ShowProductDetailEvent event, Emitter<HomeState> emit) {
     emit(ProductDetailState(product: event.product));
+  }
+  Future<String> getCurrentUserId() async {
+    final authService = AuthService();
+    final token = await authService.getCurrentUserToken();
+    if (token == null) {
+      throw Exception("Token JWT non disponible");
+    }
+    final userId = await authService.getUserIdFromToken(token);
+    return userId ?? 'default_user_uid';
   }
 
   void _onBackToHome(BackToHomeEvent event, Emitter<HomeState> emit) {

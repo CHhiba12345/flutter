@@ -1,15 +1,18 @@
 import 'dart:convert';
+import 'package:eye_volve/features/favorites/data/models/favorite_model.dart';
 import 'package:eye_volve/features/home/data/models/product_model.dart';
 import 'package:eye_volve/features/home/domain/entities/product.dart';
 import 'package:http/http.dart' as http;
+import 'package:rxdart/rxdart.dart';
 
 class FavoriteDataSource {
   final String jwtToken;
-  static const String baseUrl= "https://180e-197-21-123-184.ngrok-free.app";
+  static const String baseUrl= "https://65a5-197-18-42-245.ngrok-free.app";
 
   FavoriteDataSource({required this.jwtToken});
 
   // Toggle un produit (ajout/suppression) dans les favoris
+
   Future<void> toggleFavorite({
     required String uid,
     required String productId,
@@ -29,27 +32,18 @@ class FavoriteDataSource {
   }
 
   // Récupère la liste des favoris pour un utilisateur donné
-  // Récupère la liste des favoris pour un utilisateur donné
-  Future<List<Product>> getFavorites(String uid) async {
-    if (uid.isEmpty) {
-      throw Exception('UID is required to load favorites');
-    }
+  Future<List<FavoriteModel>> getFavorites(String uid) async {
     final url = Uri.parse('$baseUrl/favorites').replace(queryParameters: {'uid': uid});
-    print('Request URL: ${url.toString()}');
-    print('Request Headers: ${_buildHeaders()}');
-
     final response = await http.get(url, headers: _buildHeaders());
-    print('Response Status Code: ${response.statusCode}');
-    print('Response Body: ${response.body}');
-
     if (response.statusCode == 200) {
       final List<dynamic> jsonResponse = jsonDecode(response.body);
-      return jsonResponse.map((e) => ProductModel.fromJson(e).toEntity()).toList();
+      print("Réponse JSON complète pour les favoris : $jsonResponse");
+
+      return jsonResponse.map((e) => FavoriteModel.fromJson(e)).toList();
     } else {
-      throw Exception('Failed to load favorites: ${response.statusCode}');
+      throw Exception('Échec de la récupération des favoris : ${response.statusCode}');
     }
   }
-
   Map<String, String> _buildHeaders() {
     return {
       'Content-Type': 'application/json',

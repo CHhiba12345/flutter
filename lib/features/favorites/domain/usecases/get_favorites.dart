@@ -1,3 +1,4 @@
+import 'package:eye_volve/features/favorites/data/models/favorite_model.dart';
 import 'package:eye_volve/features/home/data/models/product_model.dart';
 import 'package:eye_volve/features/home/domain/entities/product.dart';
 
@@ -9,7 +10,7 @@ class GetFavorites {
 
   GetFavorites(this.repository);
 
-  Future<Future<List<Product>>> execute(String uid) async {
+  Future<Future<List<FavoriteModel>>> execute(String uid) async {
     return repository.getFavorites(uid);
   }
 }

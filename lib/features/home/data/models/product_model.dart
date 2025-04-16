@@ -24,46 +24,47 @@
     });
 
     factory ProductModel.fromJson(Map<String, dynamic> json) {
-    // Gérer les ingrédients
-    dynamic ingredients = json['ingredients'];
-    List<String> ingredientsList = [];
-    if (ingredients is List) {
-    ingredientsList = ingredients.map((e) => e.toString()).toList();
-    } else if (ingredients is String) {
-    ingredientsList = [ingredients];
-    }
+        print("Données JSON reçues dans ProductModel : $json");
 
-    // Gérer les catégories
-    dynamic categories = json['categories'];
-    List<String> categoriesList = [];
-    if (categories is List) {
-    categoriesList = categories.map((e) => e.toString()).toList();
-    } else if (categories is String) {
-    categoriesList = [categories];
-    }
+        // Gérer les ingrédients
+        dynamic ingredients = json['ingredients'];
+        List<String> ingredientsList = [];
+        if (ingredients is List) {
+            ingredientsList = ingredients.map((e) => e.toString()).toList();
+        } else if (ingredients is String) {
+            ingredientsList = [ingredients];
+        }
 
-    // Gérer les allergènes
-    dynamic allergens = json['allergens'];
-    List<String> allergensList = [];
-    if (allergens is List) {
-    allergensList = allergens.map((e) => e.toString()).toList();
-    } else if (allergens is String) {
-    allergensList = [allergens];
-    }
+        // Gérer les catégories
+        dynamic categories = json['categories'];
+        List<String> categoriesList = [];
+        if (categories is List) {
+            categoriesList = categories.map((e) => e.toString()).toList();
+        } else if (categories is String) {
+            categoriesList = [categories];
+        }
 
-    return ProductModel(
-    code: json['code'] ?? '',
-    name: json['name'] ?? 'Unknown',
-    nutriscore: json['nutriscore'] ?? 'unknown',
-    ingredients: ingredientsList,
-    brand: json['brand'] ?? 'Unknown',
-    categories: categoriesList,
-    halalStatus: (json['halalStatus'] as bool?) ?? false,
-    allergens: allergensList,
-    imageUrl: json['imageUrl'] ?? '',
-    );
-    }
+        // Gérer les allergènes
+        dynamic allergens = json['allergens'];
+        List<String> allergensList = [];
+        if (allergens is List) {
+            allergensList = allergens.map((e) => e.toString()).toList();
+        } else if (allergens is String) {
+            allergensList = [allergens];
+        }
 
+        return ProductModel(
+            code: json['code'] ?? 'default_code',
+            name: json['name']?.toString().trim() ?? 'Unknown Product',
+            nutriscore: json['nutriscore']?.toString().trim() ?? 'unknown',
+            ingredients: ingredientsList,
+            brand: json['brand']?.toString().trim() ?? 'Unknown Brand',
+            categories: categoriesList,
+            halalStatus: (json['halalStatus'] as bool?) ?? false,
+            allergens: allergensList,
+            imageUrl: json['imageUrl']?.toString().trim() ?? '',
+        );
+    }
     Product toEntity() => Product(
     code: code,
     name: name,

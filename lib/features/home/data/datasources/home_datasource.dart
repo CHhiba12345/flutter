@@ -4,7 +4,7 @@ import '../../domain/entities/product.dart';
 import '../models/product_model.dart';
 
 class HomeDataSource {
-  static const String _baseUrl = "https://180e-197-21-123-184.ngrok-free.app/products";
+  static const String _baseUrl = "https://65a5-197-18-42-245.ngrok-free.app/products";
 
   final String jwtToken;
 
@@ -47,15 +47,18 @@ class HomeDataSource {
 
         // Ajouter une logique de fallback supplémentaire
         if (decodedResponse is List) {
-          return decodedResponse.map((json) => ProductModel.fromJson(json).toEntity()).toList();
+          return decodedResponse.map((json) =>
+              ProductModel.fromJson(json).toEntity()).toList();
         }
 
         if (decodedResponse is Map) {
           if (decodedResponse.containsKey('data')) {
-            return (decodedResponse['data'] as List).map((json) => ProductModel.fromJson(json).toEntity()).toList();
+            return (decodedResponse['data'] as List).map((json) =>
+                ProductModel.fromJson(json).toEntity()).toList();
           }
           if (decodedResponse.containsKey('products')) {
-            return (decodedResponse['products'] as List).map((json) => ProductModel.fromJson(json).toEntity()).toList();
+            return (decodedResponse['products'] as List).map((json) =>
+                ProductModel.fromJson(json).toEntity()).toList();
           }
         }
 
@@ -68,13 +71,15 @@ class HomeDataSource {
       rethrow;
     }
   }
+
   ///
   /// Call the endpoind["/favorites/toggle"] that return an array object
   /// as params body contain the [productid] and [uid]
   /// {"action":"added"} if product not find in table favorite
   /// {"action":"removed"} if user untoggle the favorite button
   ///
-  Future<Map<String, dynamic>> getProductFavorite(String uid, String productid) async {
+  Future<Map<String, dynamic>> getProductFavorite(String uid,
+      String productid) async {
     final uri = Uri.parse("$_baseUrl/favorites/toggle");
     final response = await http.post(
       uri,
@@ -96,20 +101,6 @@ class HomeDataSource {
       throw Exception("Product Not Found");
     } else {
       throw Exception("Something went wrong");
-    }
-  }
-
-
-  String _handleHttpError(int statusCode) {
-    switch (statusCode) {
-      case 404:
-        return 'Product not found';
-      case 400:
-        return 'Invalid request';
-      case 500:
-        return 'Server error';
-      default:
-        return 'HTTP error $statusCode';
     }
   }
 }

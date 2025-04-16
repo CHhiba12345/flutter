@@ -1,9 +1,9 @@
-import 'package:eye_volve/features/favorites/domain/entities/favorite.dart';
 import 'package:eye_volve/features/home/domain/entities/product.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../auth/data/datasources/auth_service.dart';
 import '../../domain/usecases/add_to_favorites.dart';
-import '../../domain/usecases/remove_from_favorites.dart';
 import '../../domain/usecases/get_favorites.dart';
+import '../../domain/usecases/remove_from_favorites.dart';
 import 'favorite_event.dart';
 import 'favorite_state.dart';
 
@@ -34,12 +34,25 @@ class FavoriteBloc extends Bloc<FavoriteEvent, FavoriteState> {
       emit(FavoriteError(e.toString()));
     }
   }
+  Future<String> getCurrentUserId() async {
+    final authService = AuthService();
+    final token = await authService.getCurrentUserToken();
+    if (token == null) {
+      throw Exception("Token JWT non disponible");
+    }
+    final userId = await authService.getUserIdFromToken(token);
+    return userId ?? 'default_user_uid';
+  }
 
   Future<void> _handleLoadFavorites(LoadFavoritesEvent event, Emitter<FavoriteState> emit) async {
     emit(FavoriteLoading());
     try {
       final favorites = await getFavorites.execute(event.uid);
-      emit(FavoritesLoaded(await favorites));  // Assuming that favorites is already a List<Product>
+      print("$favorites");
+
+      print("this is the list of the favs : $favorites");
+
+      emit(FavoritesLoaded(await favorites)); // Convertir le Future<List<Product>> en List<Product>
     } catch (e) {
       emit(FavoriteError(e.toString()));
     }

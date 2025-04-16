@@ -9,7 +9,7 @@ class HistoryDataSource {
 
   HistoryDataSource({
     required this.jwtToken,
-    this.baseUrl = 'https://180e-197-21-123-184.ngrok-free.app',
+    this.baseUrl = 'https://65a5-197-18-42-245.ngrok-free.app',
   });
 
   Future<List<HistoryModel>> getUserHistory(String uid) async {
@@ -34,6 +34,8 @@ class HistoryDataSource {
 
       print('[HistoryDataSource] Response Status: ${response.statusCode}');
       print('[HistoryDataSource] Response Body: ${response.body}');
+      print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%% ${response.body}");
+      print("**************************************************************************************************");
 
       if (response.statusCode == 200) {
         try {

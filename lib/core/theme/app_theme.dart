@@ -39,4 +39,8 @@ class AppTheme {
       prefixIconColor: AppColors.textSecondary,
     ),
   );
+
+  static var primaryDark;
+
+  static var secondaryText;
 }

@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class AppConstants {
-  static const String appName = 'Open Food Facts';
+  static const String appName = '';
   static const String searchHint = 'Search for a product...';
 
   static const EdgeInsets defaultPadding = EdgeInsets.all(16);

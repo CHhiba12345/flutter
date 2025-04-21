@@ -1,55 +1,214 @@
-import 'package:auto_route/annotations.dart';
-import 'package:email_validator/email_validator.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:auto_route/auto_route.dart';
+import 'package:flutter_animate/flutter_animate.dart';
+import 'package:email_validator/email_validator.dart';
+import 'package:lottie/lottie.dart'; // Import pour Lottie
 
+import '../../../../app_router.dart';
+import '../../../../core/constants/export.dart';
 import '../blocs/auth_bloc.dart';
 import '../blocs/auth_event.dart';
 import '../blocs/auth_state.dart';
+
 @RoutePage()
 class ForgotPasswordPage extends StatelessWidget {
   final _emailController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+
+  ForgotPasswordPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+
     return Scaffold(
-      appBar: AppBar(title: Text('Mot de passe oublié')),
       body: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
           if (state is ForgotPasswordError) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message)),
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: AppColors.error,
+                behavior: SnackBarBehavior.floating,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                margin: const EdgeInsets.all(16),
+              ),
             );
           }
           if (state is ForgotPasswordSuccess) {
-            Navigator.pop(context);
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('A reset link has been sent to ${_emailController.text}'),
+                backgroundColor: AppColors.success,
+                behavior: SnackBarBehavior.floating,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                margin: const EdgeInsets.all(16),
+              ),
+            );
+            context.router.pop();
           }
         },
-        child: Padding(
-          padding: EdgeInsets.all(16.0),
-          child: Column(
-            children: [
-              TextField(
-                controller: _emailController,
-                decoration: InputDecoration(labelText: 'Email'),
+        child: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [AppColors.secondary, AppColors.background],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              stops: [0.2, 0.8],
+            ),
+          ),
+          child: SafeArea(
+            child: SingleChildScrollView(
+              padding: EdgeInsets.symmetric(
+                horizontal: size.width * 0.08,
+                vertical: 20,
               ),
-              ElevatedButton(
-                onPressed: () {
-                  if (_emailController.text.isNotEmpty && EmailValidator.validate(_emailController.text)) {
-                    context.read<AuthBloc>().add(ForgotPasswordRequested(_emailController.text));
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("Adresse email invalide")),
-                    );
-                  }
-                },
-                child: const Text('Envoyer le lien'),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: size.height - MediaQuery.of(context).padding.vertical,
+                ),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      IconButton(
+                        icon: Icon(Icons.arrow_back, color: Colors.white),
+                        onPressed: () => context.router.pop(),
+                      ).animate().fadeIn(duration: 200.ms),
+
+                      // Animation Lottie
+                      Center(
+                        child: Lottie.asset(
+                          'assets/animations/forget.json',
+                          width: size.width * 0.7,
+                          height: size.width * 0.7,
+                          fit: BoxFit.contain,
+                        )                   ),
+
+                      const SizedBox(height: 20),
+
+                      // Header
+                      _buildHeader(),
+
+                      const SizedBox(height: 32),
+
+                      // Email Field
+                      _buildEmailField(),
+
+                      const SizedBox(height: 24),
+
+                      // Submit Button
+                      _buildSubmitButton(context),
+
+                      const SizedBox(height: 40),
+                    ],
+                  ),
+                ),
               ),
-            ],
+            ),
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildHeader() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Reset Password',
+          style: AppTextStyles.headlineLarge?.copyWith(
+            color: Colors.white,
+            fontWeight: FontWeight.w800,
+            fontSize: 32,
+            letterSpacing: 0.5,
+          ),
+        ).animate().fadeIn(duration: 500.ms).slideY(begin: -0.2),
+
+        const SizedBox(height: 8),
+
+        Text(
+          'Enter your email to receive a reset link',
+          style: AppTextStyles.bodyMedium?.copyWith(
+            color: Colors.white.withOpacity(0.9),
+            fontSize: 16,
+          ),
+        ).animate().fadeIn(delay: 200.ms),
+      ],
+    );
+  }
+
+  Widget _buildEmailField() {
+    return TextFormField(
+      controller: _emailController,
+      keyboardType: TextInputType.emailAddress,
+      style: TextStyle(color: Colors.white),
+      decoration: InputDecoration(
+        labelText: 'Email',
+        labelStyle: TextStyle(color: Colors.white.withOpacity(0.7)),
+        prefixIcon: Icon(Icons.email_outlined, color: Colors.white.withOpacity(0.7)),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.white),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: AppColors.error),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: AppColors.error),
+        ),
+      ),
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Please enter your email';
+        }
+        if (!EmailValidator.validate(value)) {
+          return 'Invalid email';
+        }
+        return null;
+      },
+    ).animate().fadeIn(delay: 300.ms).slideY(begin: 0.2);
+  }
+
+  Widget _buildSubmitButton(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton(
+        onPressed: () {
+          if (_formKey.currentState?.validate() ?? false) {
+            context.read<AuthBloc>().add(
+              ForgotPasswordRequested(_emailController.text.trim()),
+            );
+          }
+        },
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.primary,
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        child: Text(
+          'Send reset link',
+          style: AppTextStyles.button.copyWith(
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ).animate().fadeIn(delay: 400.ms).scale(begin: const Offset(0.95, 0.95)),
     );
   }
 }

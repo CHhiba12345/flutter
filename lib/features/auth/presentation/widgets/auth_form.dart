@@ -52,7 +52,7 @@ class AuthForm extends StatelessWidget {
         keyboardType: TextInputType.emailAddress,
         decoration: InputDecoration(
           labelText: 'Email',
-          labelStyle: TextStyle(color: AppColors.textSecondary),
+          labelStyle: TextStyle(color: Colors.grey),
           prefixIcon: Icon(Icons.email_outlined, color: AppColors.primary, size: 20),
           border: InputBorder.none,
           contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -82,12 +82,12 @@ class AuthForm extends StatelessWidget {
         obscureText: obscurePassword,
         decoration: InputDecoration(
           labelText: 'Password',
-          labelStyle: TextStyle(color: AppColors.textSecondary),
+          labelStyle: TextStyle(color: Colors.grey),
           prefixIcon: Icon(Icons.lock_outline, color: AppColors.primary),
           suffixIcon: IconButton(
             icon: Icon(
               obscurePassword ? Icons.visibility_off : Icons.visibility,
-              color: AppColors.textSecondary,
+              color: AppColors.primary,
             ),
             onPressed: togglePasswordVisibility,
           ),
@@ -107,7 +107,7 @@ class AuthForm extends StatelessWidget {
       child: TextButton(
         onPressed: () {
           // Utilisation du context pour naviguer vers la page de mot de passe oublié
-          context.router.push(const ForgotPasswordRoute());
+          context.router.push(ForgotPasswordRoute());
         },
         child: Text(
           'Forgot Password?',

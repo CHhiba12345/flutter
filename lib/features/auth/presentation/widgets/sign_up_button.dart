@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../../core/constants/app_color_sign_in.dart';
+import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../blocs/auth_state.dart';
 
@@ -17,7 +17,7 @@ class SignUpButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
         child: SizedBox(
-        width: 120,
+        width: 300,
         height: 60,
       child: ElevatedButton(
         onPressed: state is AuthLoading ? null : onPressed,

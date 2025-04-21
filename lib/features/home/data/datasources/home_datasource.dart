@@ -4,7 +4,7 @@ import '../../domain/entities/product.dart';
 import '../models/product_model.dart';
 
 class HomeDataSource {
-  static const String _baseUrl = "https://65a5-197-18-42-245.ngrok-free.app/products";
+  static const String _baseUrl = "http://164.132.53.159:3002/products";
 
   final String jwtToken;
 

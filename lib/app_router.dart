@@ -1,13 +1,19 @@
 import 'package:auto_route/auto_route.dart';
+import 'package:eye_volve/features/auth/presentation/pages/onboarding_Page.dart';
 import 'package:eye_volve/features/auth/presentation/pages/splash_page.dart';
-import 'package:flutter/cupertino.dart';
 import 'features/auth/presentation/pages/ForgotPasswordPage.dart';
 import 'features/auth/presentation/pages/ResetPasswordPage.dart';
+import 'features/auth/presentation/pages/onbo_page.dart';
+import 'features/auth/presentation/pages/onboard_page.dart';
 import 'features/auth/presentation/pages/sign_in_page.dart';
 import 'features/auth/presentation/pages/sign_up_page.dart';
 import 'features/favorites/presentation/pages/favorites_page.dart';
 import 'features/history/presentation/pages/history_page.dart';
 import 'features/home/presentation/pages/home_page.dart';
+import 'features/profile/presentation/pages/profile_page.dart';
+import 'features/ticket/presentation/pages/ticket_page.dart';
+import 'main_layout_page.dart';
+import 'package:flutter/material.dart'; // Assurez-vous que cet import est présent
 
 
 part 'app_router.gr.dart';
@@ -16,34 +22,34 @@ part 'app_router.gr.dart';
 class AppRouter extends _$AppRouter {
   @override
   List<AutoRoute> get routes => [
+    // Route initiale vers Splash
     AutoRoute(page: SplashRoute.page, initial: true),
-    AutoRoute(page: HomeRoute.page),
+
+    // Routes d'authentification
     AutoRoute(page: SignInRoute.page),
-    AutoRoute(page: HistoryRoute.page),
-   ///////////////////
-    CustomRoute(
-      page: FavoritesRoute.page,
-      transitionsBuilder: TransitionsBuilders.fadeIn,
-      durationInMilliseconds: 800,
-      path: '/favorites/:uid', // Ajoutez un paramètre uid dans le chemin
-    ),
-
-    // Nouvelle route pour le mot de passe oublié
+    AutoRoute(page: SignUpRoute.page),
     AutoRoute(page: ForgotPasswordRoute.page),
-
-    // Route pour la réinitialisation avec gestion des paramètres
     CustomRoute(
       page: ResetPasswordRoute.page,
+      path: '/reset-password',
       transitionsBuilder: TransitionsBuilders.fadeIn,
       durationInMilliseconds: 800,
-      path: '/reset-password', // Chemin personnalisé pour les liens profonds
     ),
+    AutoRoute(page: OnboardingRoute.page),
+    AutoRoute(page: OnboardRoute.page),
+    AutoRoute(page: OnboRoute.page),
 
-    // Route existante pour l'inscription
-    CustomRoute(
-      page: SignUpRoute.page,
-      transitionsBuilder: TransitionsBuilders.fadeIn,
-      durationInMilliseconds: 800,
+    // Route principale avec sous-routes
+    AutoRoute(
+      path: '/main',
+      page: MainLayoutRoute.page,
+      children: [
+        AutoRoute(path: 'home', page: HomeRoute.page, initial: true),
+        AutoRoute(path: 'history', page: HistoryRoute.page),
+        AutoRoute(path: 'favorites', page: FavoritesRoute.page),
+        AutoRoute(path: 'profile', page: ProfileRoute.page),
+        AutoRoute(path: 'ticket', page: TicketRoute.page),
+      ],
     ),
   ];
 }

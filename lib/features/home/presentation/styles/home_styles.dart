@@ -8,7 +8,6 @@ class HomeStyles {
     return InputDecoration(
       hintText: AppConstants.searchHint,
       prefixIcon: const Icon(Icons.search_rounded, color: AppTheme.secondaryText),
-      suffixIcon: const Icon(Icons.filter_list, color: AppTheme.secondaryText),
       filled: true,
       fillColor: AppTheme.secondaryBackground,
       border: AppConstants.searchInputBorder,

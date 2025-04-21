@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:auto_route/auto_route.dart';
-import 'package:lottie/lottie.dart';
+import 'package:flutter_animate/flutter_animate.dart';
+
 import '../../../../app_router.dart';
 import '../blocs/auth_bloc.dart';
 import '../blocs/auth_event.dart';
@@ -34,7 +35,7 @@ class _SignInPageState extends State<SignInPage> {
         listener: (context, state) {
           if (state is AuthSuccess) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Connexion réussie !')),
+              SnackBar(content: Text('Hi ${_emailController.text}!')),
             );
             context.router.replaceAll([const HomeRoute()]);
           } else if (state is AuthError) {
@@ -45,76 +46,143 @@ class _SignInPageState extends State<SignInPage> {
         },
         builder: (context, state) {
           return Container(
-            height: size.height,
             decoration: const BoxDecoration(
               gradient: LinearGradient(
-                colors: [AppColors.background, AppColors.secondary],
+                colors: [AppColors.secondary, AppColors.background], // Inversion des couleurs
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
+                stops: [0.2, 0.8],
               ),
             ),
-            child: SingleChildScrollView(
-              padding: EdgeInsets.symmetric(
-                horizontal: size.width * 0.1,
-                vertical: 50,
-              ),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Center(
-                      child: Card(
-                        elevation: 9,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(60),
+            child: SafeArea(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.symmetric(
+                  horizontal: size.width * 0.08,
+                  vertical: 20,
+                ),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    minHeight: size.height - MediaQuery.of(context).padding.vertical,
+                  ),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 40),
+
+                        // Header avec animations
+                        _buildHeader(),
+
+                        const SizedBox(height: 32),
+
+                        // Formulaire sans Card
+                        _buildFormContent(state, context),
+
+                        const SizedBox(height: 24),
+
+                        // Section de connexion sociale
+                        SocialLoginSection(
+                          onGooglePressed: () =>
+                              context.read<AuthBloc>().add(SignInWithGoogleEvent()),
+                          onFacebookPressed: () =>
+                              context.read<AuthBloc>().add(SignInWithFacebookEvent()),
                         ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(60),
-                            child: Lottie.asset(
-                              AppAssets.lottieAnimation,
-                              height: 120,
-                              width: 120,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                        ),
-                      ),
+
+                        const SizedBox(height: 24),
+
+                        // Lien vers l'inscription
+                        _buildSignUpRedirect(context),
+
+                        const SizedBox(height: 40),
+                      ],
                     ),
-                    const SizedBox(height: 5),
-                    Text(
-                      'Sign in to continue',
-                      style: AppTextStyles.bodyMedium,
-                    ),
-                    const SizedBox(height: 10),
-                    AuthForm(
-                      emailController: _emailController,
-                      passwordController: _passwordController,
-                      obscurePassword: _obscurePassword,
-                      togglePasswordVisibility: _togglePasswordVisibility,
-                      formKey: _formKey,
-                    ),
-                    const SizedBox(height: 10),
-                    SignInButton(
-                      state: state,
-                      onPressed: _submitForm,
-                    ),
-                    const SizedBox(height: 20),
-                    SocialLoginSection(
-                      onGooglePressed: () => context.read<AuthBloc>().add(SignInWithGoogleEvent()),
-                      onFacebookPressed: () => context.read<AuthBloc>().add(SignInWithFacebookEvent()),
-                    ),
-                    const SizedBox(height: 20),
-                    _buildSignUpRedirect(context),
-                  ],
+                  ),
                 ),
               ),
             ),
           );
         },
       ),
+    );
+  }
+
+  Widget _buildHeader() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Welcome Back',
+          style: AppTextStyles.headlineLarge?.copyWith(
+            color: Colors.white, // Changé pour meilleur contraste
+            fontWeight: FontWeight.w800,
+            fontSize: 32,
+            letterSpacing: 0.5,
+          ),
+        ).animate().fadeIn(duration: 500.ms).slideY(begin: -0.2),
+
+        const SizedBox(height: 8),
+
+        Text(
+          'Sign in to continue',
+          style: AppTextStyles.bodyMedium?.copyWith(
+            color: Colors.white.withOpacity(0.9), // Opacité augmentée
+            fontSize: 16,
+          ),
+        ).animate().fadeIn(delay: 200.ms),
+      ],
+    );
+  }
+
+  Widget _buildFormContent(AuthState state, BuildContext context) {
+    return Column(
+      children: [
+        AuthForm(
+          emailController: _emailController,
+          passwordController: _passwordController,
+          obscurePassword: _obscurePassword,
+          togglePasswordVisibility: _togglePasswordVisibility,
+          formKey: _formKey,
+        ),
+        const SizedBox(height: 24),
+        SignInButton(
+          state: state,
+          onPressed: _submitForm,
+        ).animate().fadeIn(delay: 300.ms),
+      ],
+    ).animate().fadeIn(delay: 100.ms).slideY(begin: 0.2);
+  }
+
+  Widget _buildSignUpRedirect(BuildContext context) {
+    return Center(
+      child: Text.rich(
+        TextSpan(
+          text: "Don't have an account? ",
+          style: AppTextStyles.bodyMedium.copyWith(
+            color: Colors.white.withOpacity(0.8),
+          ),
+          children: [
+            WidgetSpan(
+              child: InkWell(
+                onTap: () => context.router.push(const SignUpRoute()),
+                splashColor: Colors.white.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(4),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: Text(
+                    'Sign Up',
+                    style: AppTextStyles.button.copyWith(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w600,
+                      decoration: TextDecoration.underline,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ).animate().fadeIn(delay: 400.ms),
     );
   }
 
@@ -129,24 +197,5 @@ class _SignInPageState extends State<SignInPage> {
         ),
       );
     }
-  }
-
-  Widget _buildSignUpRedirect(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text(
-          "Don't have an account? ",
-          style: AppTextStyles.bodyMedium,
-        ),
-        TextButton(
-          onPressed: () => context.router.push(SignUpRoute()),
-          child: Text(
-            'Sign Up',
-            style: AppTextStyles.button,
-          ),
-        ),
-      ],
-    );
   }
 }

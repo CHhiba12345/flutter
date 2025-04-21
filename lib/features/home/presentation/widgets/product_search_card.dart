@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:eye_volve/features/favorites/presentation/bloc/favorite_bloc.dart';
 import 'package:eye_volve/features/home/domain/entities/product.dart';
+import 'package:lottie/lottie.dart';
 import '../../../favorites/presentation/bloc/favorite_event.dart';
 import '../../../favorites/presentation/bloc/favorite_state.dart';
 import '../styles/constant.dart';
@@ -29,16 +30,35 @@ class ProductSearchCard extends StatelessWidget {
   Widget _buildPlaceholder() {
     return Padding(
       padding: AppConstants.defaultPadding,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.search_rounded, size: 64, color: Color(0xFFE12258)),
-          const Padding(
-            padding: EdgeInsets.only(top: 16),
-            child: Text('Scan or search for a product'),
-          ),
-          const Text('Nutritional information will appear here'),
-        ],
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              width: 320,
+              height: 220,
+              child: Lottie.asset('assets/animations/search.json'), // Assure-toi que le fichier est bien ajouté dans assets
+            ),
+            const SizedBox(height: 24),
+            const Text(
+              'No product selected',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
+              ),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Scan or search for a product to see\nnutritional information here.',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.black54,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

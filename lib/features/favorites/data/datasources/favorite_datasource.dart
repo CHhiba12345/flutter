@@ -7,7 +7,7 @@ import 'package:rxdart/rxdart.dart';
 
 class FavoriteDataSource {
   final String jwtToken;
-  static const String baseUrl= "https://65a5-197-18-42-245.ngrok-free.app";
+  static const String baseUrl= "http://164.132.53.159:3002";
 
   FavoriteDataSource({required this.jwtToken});
 

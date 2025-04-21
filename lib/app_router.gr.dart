@@ -22,9 +22,11 @@ abstract class _$AppRouter extends RootStackRouter {
       );
     },
     ForgotPasswordRoute.name: (routeData) {
+      final args = routeData.argsAs<ForgotPasswordRouteArgs>(
+          orElse: () => const ForgotPasswordRouteArgs());
       return AutoRoutePage<dynamic>(
         routeData: routeData,
-        child: ForgotPasswordPage(),
+        child: ForgotPasswordPage(key: args.key),
       );
     },
     HistoryRoute.name: (routeData) {
@@ -37,6 +39,36 @@ abstract class _$AppRouter extends RootStackRouter {
       return AutoRoutePage<dynamic>(
         routeData: routeData,
         child: const HomePage(),
+      );
+    },
+    MainLayoutRoute.name: (routeData) {
+      return AutoRoutePage<dynamic>(
+        routeData: routeData,
+        child: const MainLayoutPage(),
+      );
+    },
+    OnboRoute.name: (routeData) {
+      return AutoRoutePage<dynamic>(
+        routeData: routeData,
+        child: const OnboPage(),
+      );
+    },
+    OnboardRoute.name: (routeData) {
+      return AutoRoutePage<dynamic>(
+        routeData: routeData,
+        child: const OnboardPage(),
+      );
+    },
+    OnboardingRoute.name: (routeData) {
+      return AutoRoutePage<dynamic>(
+        routeData: routeData,
+        child: const OnboardingPage(),
+      );
+    },
+    ProfileRoute.name: (routeData) {
+      return AutoRoutePage<dynamic>(
+        routeData: routeData,
+        child: ProfilePage(),
       );
     },
     ResetPasswordRoute.name: (routeData) {
@@ -70,6 +102,12 @@ abstract class _$AppRouter extends RootStackRouter {
         child: const SplashPage(),
       );
     },
+    TicketRoute.name: (routeData) {
+      return AutoRoutePage<dynamic>(
+        routeData: routeData,
+        child: TicketPage(),
+      );
+    },
   };
 }
 
@@ -89,16 +127,31 @@ class FavoritesRoute extends PageRouteInfo<void> {
 
 /// generated route for
 /// [ForgotPasswordPage]
-class ForgotPasswordRoute extends PageRouteInfo<void> {
-  const ForgotPasswordRoute({List<PageRouteInfo>? children})
-      : super(
+class ForgotPasswordRoute extends PageRouteInfo<ForgotPasswordRouteArgs> {
+  ForgotPasswordRoute({
+    Key? key,
+    List<PageRouteInfo>? children,
+  }) : super(
           ForgotPasswordRoute.name,
+          args: ForgotPasswordRouteArgs(key: key),
           initialChildren: children,
         );
 
   static const String name = 'ForgotPasswordRoute';
 
-  static const PageInfo<void> page = PageInfo<void>(name);
+  static const PageInfo<ForgotPasswordRouteArgs> page =
+      PageInfo<ForgotPasswordRouteArgs>(name);
+}
+
+class ForgotPasswordRouteArgs {
+  const ForgotPasswordRouteArgs({this.key});
+
+  final Key? key;
+
+  @override
+  String toString() {
+    return 'ForgotPasswordRouteArgs{key: $key}';
+  }
 }
 
 /// generated route for
@@ -125,6 +178,76 @@ class HomeRoute extends PageRouteInfo<void> {
         );
 
   static const String name = 'HomeRoute';
+
+  static const PageInfo<void> page = PageInfo<void>(name);
+}
+
+/// generated route for
+/// [MainLayoutPage]
+class MainLayoutRoute extends PageRouteInfo<void> {
+  const MainLayoutRoute({List<PageRouteInfo>? children})
+      : super(
+          MainLayoutRoute.name,
+          initialChildren: children,
+        );
+
+  static const String name = 'MainLayoutRoute';
+
+  static const PageInfo<void> page = PageInfo<void>(name);
+}
+
+/// generated route for
+/// [OnboPage]
+class OnboRoute extends PageRouteInfo<void> {
+  const OnboRoute({List<PageRouteInfo>? children})
+      : super(
+          OnboRoute.name,
+          initialChildren: children,
+        );
+
+  static const String name = 'OnboRoute';
+
+  static const PageInfo<void> page = PageInfo<void>(name);
+}
+
+/// generated route for
+/// [OnboardPage]
+class OnboardRoute extends PageRouteInfo<void> {
+  const OnboardRoute({List<PageRouteInfo>? children})
+      : super(
+          OnboardRoute.name,
+          initialChildren: children,
+        );
+
+  static const String name = 'OnboardRoute';
+
+  static const PageInfo<void> page = PageInfo<void>(name);
+}
+
+/// generated route for
+/// [OnboardingPage]
+class OnboardingRoute extends PageRouteInfo<void> {
+  const OnboardingRoute({List<PageRouteInfo>? children})
+      : super(
+          OnboardingRoute.name,
+          initialChildren: children,
+        );
+
+  static const String name = 'OnboardingRoute';
+
+  static const PageInfo<void> page = PageInfo<void>(name);
+}
+
+/// generated route for
+/// [ProfilePage]
+class ProfileRoute extends PageRouteInfo<void> {
+  const ProfileRoute({List<PageRouteInfo>? children})
+      : super(
+          ProfileRoute.name,
+          initialChildren: children,
+        );
+
+  static const String name = 'ProfileRoute';
 
   static const PageInfo<void> page = PageInfo<void>(name);
 }
@@ -206,6 +329,20 @@ class SplashRoute extends PageRouteInfo<void> {
         );
 
   static const String name = 'SplashRoute';
+
+  static const PageInfo<void> page = PageInfo<void>(name);
+}
+
+/// generated route for
+/// [TicketPage]
+class TicketRoute extends PageRouteInfo<void> {
+  const TicketRoute({List<PageRouteInfo>? children})
+      : super(
+          TicketRoute.name,
+          initialChildren: children,
+        );
+
+  static const String name = 'TicketRoute';
 
   static const PageInfo<void> page = PageInfo<void>(name);
 }

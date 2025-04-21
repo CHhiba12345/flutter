@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/constants/app_color_sign_in.dart';
 
+import '../../../../core/constants/app_colors.dart';
 
 class SignUpForm extends StatelessWidget {
   final TextEditingController firstNameController;
@@ -48,122 +48,67 @@ class SignUpForm extends StatelessWidget {
   }
 
   Widget _buildFirstNameField() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(32),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.shadow.withOpacity(0.3),
-            spreadRadius: 5,
-            blurRadius: 8,
-            offset: Offset(0, 4),
-          ),
-        ],
-      ),
-      child: TextFormField(
-        controller: firstNameController,
-        decoration: InputDecoration(
-          labelText: 'First Name',
-          labelStyle: TextStyle(color: Colors.grey), // Couleur du label en noir
-          prefixIcon: const Icon(Icons.person_outline, color: AppColors.primary),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(22),
-            borderSide: BorderSide.none, // Supprime la bordure
-          ),
-          filled: true,
-          fillColor: Colors.white,
+    return TextFormField(
+      controller: firstNameController,
+      decoration: InputDecoration(
+        labelText: 'First Name',
+        labelStyle: const TextStyle(color: Colors.grey),
+        prefixIcon: const Icon(Icons.person_outline, color: AppColors.primary),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(22),
+          borderSide: BorderSide.none,
         ),
-        validator: (value) => _validateName(value, 'First'),
+        filled: true,
+        fillColor: Colors.white,
       ),
+      validator: (value) => _validateName(value, 'First'),
     );
   }
 
   Widget _buildLastNameField() {
-    return Container(
-        decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(32),
-    boxShadow: [
-    BoxShadow(
-      color: AppColors.shadow.withOpacity(0.3),
-    spreadRadius: 5,
-    blurRadius: 8,
-    offset: Offset(0, 4),
-    ),
-    ],
-    ),
-    child: TextFormField(
+    return TextFormField(
       controller: lastNameController,
       decoration: InputDecoration(
         labelText: 'Last Name',
-        labelStyle: TextStyle(color: Colors.grey),
+        labelStyle: const TextStyle(color: Colors.grey),
         prefixIcon: const Icon(Icons.person_outline, color: AppColors.primary),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(22),
-          borderSide: BorderSide.none, // Supprime la bordure
+          borderSide: BorderSide.none,
         ),
         filled: true,
         fillColor: Colors.white,
       ),
       validator: (value) => _validateName(value, 'Last'),
-    ),
     );
   }
 
   Widget _buildEmailField() {
-    return Container(
-        decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(32),
-    boxShadow: [
-    BoxShadow(
-      color: AppColors.shadow.withOpacity(0.3),
-    spreadRadius: 5,
-    blurRadius: 8,
-    offset: Offset(0, 4),
-    ),
-    ],
-    ),
-    child: TextFormField(
+    return TextFormField(
       controller: emailController,
       keyboardType: TextInputType.emailAddress,
       decoration: InputDecoration(
         labelText: 'Email',
-        labelStyle: TextStyle(color: Colors.grey),
+        labelStyle: const TextStyle(color: Colors.grey),
         prefixIcon: const Icon(Icons.email_outlined, color: AppColors.primary),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(22),
-          borderSide: BorderSide.none, // Supprime la bordure
+          borderSide: BorderSide.none,
         ),
         filled: true,
         fillColor: Colors.white,
       ),
       validator: (value) => _validateEmail(value),
-    ),
     );
   }
 
   Widget _buildPasswordField() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(32),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.shadow.withOpacity(0.3),
-            spreadRadius: 5,
-            blurRadius: 8,
-            offset: Offset(0, 4),
-          ),
-        ],
-      ),
-      child: TextFormField(
+    return TextFormField(
       controller: passwordController,
       obscureText: obscurePassword,
       decoration: InputDecoration(
         labelText: 'Password',
-        labelStyle: TextStyle(color: Colors.grey),
+        labelStyle: const TextStyle(color: Colors.grey),
         prefixIcon: const Icon(Icons.lock_outline, color: AppColors.primary),
         suffixIcon: IconButton(
           icon: Icon(
@@ -174,36 +119,22 @@ class SignUpForm extends StatelessWidget {
         ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(22),
-          borderSide: BorderSide.none, // Supprime la bordure
+          borderSide: BorderSide.none,
         ),
         filled: true,
         fillColor: Colors.white,
       ),
       validator: (value) => _validatePassword(value),
-      ),
     );
   }
 
   Widget _buildConfirmPasswordField() {
-    return Container(
-        decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(32),
-    boxShadow: [
-    BoxShadow(
-      color: AppColors.shadow.withOpacity(0.3),
-    spreadRadius: 5,
-    blurRadius: 8,
-    offset: Offset(0, 4),
-    ),
-    ],
-    ),
-    child: TextFormField(
+    return TextFormField(
       controller: confirmPasswordController,
       obscureText: obscureConfirmPassword,
       decoration: InputDecoration(
         labelText: 'Confirm Password',
-        labelStyle: TextStyle(color: Colors.grey),
+        labelStyle: const TextStyle(color: Colors.grey),
         prefixIcon: const Icon(Icons.lock_outline, color: AppColors.primary),
         suffixIcon: IconButton(
           icon: Icon(
@@ -214,13 +145,12 @@ class SignUpForm extends StatelessWidget {
         ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(22),
-          borderSide: BorderSide.none, // Supprime la bordure
+          borderSide: BorderSide.none,
         ),
         filled: true,
         fillColor: Colors.white,
       ),
       validator: _validateConfirmPassword,
-    ),
     );
   }
 

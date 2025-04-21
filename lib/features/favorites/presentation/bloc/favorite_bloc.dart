@@ -24,14 +24,18 @@ class FavoriteBloc extends Bloc<FavoriteEvent, FavoriteState> {
   Future<void> _handleToggleFavorite(ToggleFavoriteEvent event, Emitter<FavoriteState> emit) async {
     emit(FavoriteLoading());
     try {
+      print('on call toggelfavorite bloc');
       if (event.isFavorite) {
+
         await addToFavorites.execute(uid: event.uid, productId: event.productId);
       } else {
         await removeFromFavorites.execute(uid: event.uid, productId: event.productId);
       }
       emit(FavoriteSuccess());
+      print('fav succ===bloc');
     } catch (e) {
       emit(FavoriteError(e.toString()));
+      print('erreur bloc ');
     }
   }
   Future<String> getCurrentUserId() async {

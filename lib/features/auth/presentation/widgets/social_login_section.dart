@@ -16,22 +16,54 @@ class SocialLoginSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Text(
-          'Or continue with',
-          style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary),
+        Row(
+          children: [
+            const Expanded(
+              child: Divider(
+                color: Colors.white38,
+                thickness: 1,
+                endIndent: 8,
+              ),
+            ),
+            Text(
+              'Or continue with',
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: AppColors.backgroundLight,
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const Expanded(
+              child: Divider(
+                color: Colors.white38,
+                thickness: 1,
+                indent: 8,
+              ),
+            ),
+          ],
         ),
-        const SizedBox(height: 34),
+        const SizedBox(height: 24),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             _buildSocialButton(
-              icon: Icons.g_mobiledata,
+              icon: Icons.g_mobiledata_rounded,
+              label: 'Google',
               onPressed: onGooglePressed,
+              backgroundColor: Colors.white,
+              borderColor: Colors.white,
+              iconColor: Colors.black,
+              textColor: Colors.black,
             ),
-            const SizedBox(width: 30),
+            const SizedBox(width: 16),
             _buildSocialButton(
               icon: Icons.facebook,
+              label: 'Facebook',
               onPressed: onFacebookPressed,
+              backgroundColor: Color(0xFF1877F2),
+              borderColor: Color(0xFF1877F2),
+              iconColor: Colors.white,
+              textColor: Colors.white,
             ),
           ],
         ),
@@ -39,25 +71,44 @@ class SocialLoginSection extends StatelessWidget {
     );
   }
 
-  Widget _buildSocialButton({required IconData icon, required VoidCallback onPressed}) {
-    return InkWell(
-      onTap: onPressed,
-      borderRadius: BorderRadius.circular(22),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(32),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.purple.withOpacity(0.1),
-              spreadRadius: 5,
-              blurRadius: 11,
-              offset: const Offset(0, 6),
-            ),
-          ],
+  Widget _buildSocialButton({
+    required IconData icon,
+    required String label,
+    required VoidCallback onPressed,
+    required Color backgroundColor,
+    required Color borderColor,
+    required Color iconColor,
+    required Color textColor,
+  }) {
+    return ElevatedButton.icon(
+      onPressed: onPressed,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: backgroundColor,
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(
+            color: borderColor,
+            width: 1.5,
+          ),
         ),
-        child: Icon(icon, size: 28, color: AppColors.primary),
+        elevation: 0,
+        shadowColor: Colors.black.withOpacity(0.1),
+        minimumSize: const Size(100, 50),
+      ),
+      icon: Icon(
+        icon,
+        size: 20,
+        color: iconColor,
+      ),
+      label: Text(
+        label,
+        style: TextStyle(
+          color: textColor,
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0.5,
+        ),
       ),
     );
   }

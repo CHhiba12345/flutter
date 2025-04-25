@@ -4,6 +4,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:auto_route/auto_route.dart';
 import '../../../../app_router.dart';
 
+@RoutePage()
 class OnboardingPage extends StatefulWidget {
   const OnboardingPage({Key? key}) : super(key: key);
 
@@ -22,7 +23,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
       "description":
       "Quickly scan a barcode or search manually to get detailed info: ingredients, allergens, additives, Nutri-Score, and more. Make smarter choices in seconds.",
       "lottieAsset": "assets/animations/s.json",
-      "bgColors": [Color(0xFFDCD2C5), Color(0xFF6BFFEE), Color(0xFF38468E)],
+      "bgColors": [Color(0xFF3E6839), Color(0xFF3E6839), Color(0xFF5D705D)],
     },
     {
       "title": "Customize Based on Your Preferences",
@@ -30,7 +31,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
       "description":
       "Set your dietary preferences in seconds. Whether you have allergies (milk, gluten, peanuts…) or follow a specific diet (vegetarian, vegan…), the app will automatically alert you.",
       "lottieAsset": "assets/animations/s2.json",
-      "bgColors": [Color(0xFFDCD2C5), Color(0xFF6BFFEE), Color(0xFF38468E)],
+      "bgColors": [Color(0xFF3E6839), Color(0xFF3E6839), Color(0xFF5D705D)],
     },
     {
       "title": "Analyze Your Grocery Receipts",
@@ -39,7 +40,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
       "Take a photo of your receipt and let the app analyze all purchased products. Get a full overview of the nutritional quality of your purchases.",
       "lottieAsset": "assets/animations/sss.json",
       "buttonText": "Get Started",
-      "bgColors": [Color(0xFFDCD2C5), Color(0xFF6BFFEE), Color(0xFF38468E)],
+      "bgColors": [Color(0xFF3E6839), Color(0xFF3E6839), Color(0xFF5D705D)],
     },
   ];
 
@@ -59,8 +60,8 @@ class _OnboardingPageState extends State<OnboardingPage> {
             PageView.builder(
               controller: _pageController,
               itemCount: sections.length,
-              physics: const ClampingScrollPhysics(), // 🔁 Scroll plus fluide
-              pageSnapping: true, // ✅ Pour que le changement de page soit net
+              physics: const ClampingScrollPhysics(),
+              pageSnapping: true,
               onPageChanged: (index) {
                 setState(() {
                   _currentPage = index;
@@ -69,7 +70,6 @@ class _OnboardingPageState extends State<OnboardingPage> {
               itemBuilder: (context, index) {
                 final section = sections[index];
                 final bgColors = section["bgColors"] as List<Color>;
-
                 return LayoutBuilder(
                   builder: (context, constraints) {
                     return Container(
@@ -201,8 +201,8 @@ class _OnboardingPageState extends State<OnboardingPage> {
                 onPressed: _skipOnboarding,
                 style: TextButton.styleFrom(
                   foregroundColor: Colors.white,
-                  padding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16, vertical: 8),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20),
                   ),

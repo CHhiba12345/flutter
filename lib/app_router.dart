@@ -3,13 +3,12 @@ import 'package:eye_volve/features/auth/presentation/pages/onboarding_Page.dart'
 import 'package:eye_volve/features/auth/presentation/pages/splash_page.dart';
 import 'features/auth/presentation/pages/ForgotPasswordPage.dart';
 import 'features/auth/presentation/pages/ResetPasswordPage.dart';
-import 'features/auth/presentation/pages/onbo_page.dart';
-import 'features/auth/presentation/pages/onboard_page.dart';
 import 'features/auth/presentation/pages/sign_in_page.dart';
 import 'features/auth/presentation/pages/sign_up_page.dart';
 import 'features/favorites/presentation/pages/favorites_page.dart';
 import 'features/history/presentation/pages/history_page.dart';
 import 'features/home/presentation/pages/home_page.dart';
+import 'features/profile/presentation/pages/allergens_page.dart';
 import 'features/profile/presentation/pages/profile_page.dart';
 import 'features/ticket/presentation/pages/ticket_page.dart';
 import 'main_layout_page.dart';
@@ -36,9 +35,8 @@ class AppRouter extends _$AppRouter {
       durationInMilliseconds: 800,
     ),
     AutoRoute(page: OnboardingRoute.page),
-    AutoRoute(page: OnboardRoute.page),
-    AutoRoute(page: OnboRoute.page),
-
+    AutoRoute(page: AllergensRoute.page),
+    //Allergens
     // Route principale avec sous-routes
     AutoRoute(
       path: '/main',

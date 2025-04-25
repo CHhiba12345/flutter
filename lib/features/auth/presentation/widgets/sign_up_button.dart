@@ -22,7 +22,7 @@ class SignUpButton extends StatelessWidget {
       child: ElevatedButton(
         onPressed: state is AuthLoading ? null : onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primary,
+          backgroundColor: AppColors.background,
           padding: const EdgeInsets.symmetric(vertical: 16),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(22),
@@ -32,7 +32,7 @@ class SignUpButton extends StatelessWidget {
             ? const CircularProgressIndicator(color: Colors.white)
             : Text(
           'Sign Up',
-          style: AppTextStyles.button.copyWith(color: Colors.white),
+          style: AppTextStyles.button.copyWith(color: Colors.black),
         ),
       ),
         )

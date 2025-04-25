@@ -111,7 +111,7 @@ class AuthForm extends StatelessWidget {
         },
         child: Text(
           'Forgot Password?',
-          style: AppTextStyles.bodyMedium.copyWith(color: AppColors.primary),
+          style: AppTextStyles.bodyMedium.copyWith(color: AppColors.background),
         ),
       ),
     );

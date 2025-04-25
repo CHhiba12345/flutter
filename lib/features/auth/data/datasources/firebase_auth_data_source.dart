@@ -28,7 +28,7 @@ class FirebaseAuthDataSource {
 
       final displayName = user.displayName?.split(' ') ?? [];
       return AppUser(
-        id: user.uid,
+        uid: user.uid,
         email: userEmail,
         jwt: token,
         firstName: displayName.isNotEmpty ? displayName[0] : '',
@@ -67,7 +67,7 @@ class FirebaseAuthDataSource {
       await storeTokenLocally(token);
 
       return AppUser(
-        id: user.uid,
+        uid: user.uid,
         email: email,
         jwt: token,
         firstName: firstName,
@@ -101,7 +101,7 @@ class FirebaseAuthDataSource {
 
       final displayName = user.displayName?.split(' ') ?? [];
       return AppUser(
-        id: user.uid,
+        uid: user.uid,
         email: userEmail,
         jwt: token,
         firstName: displayName.isNotEmpty ? displayName[0] : '',
@@ -132,7 +132,7 @@ class FirebaseAuthDataSource {
 
       final displayName = user.displayName?.split(' ') ?? [];
       return AppUser(
-        id: user.uid,
+        uid: user.uid,
         email: userEmail,
         jwt: token,
         firstName: displayName.isNotEmpty ? displayName[0] : '',

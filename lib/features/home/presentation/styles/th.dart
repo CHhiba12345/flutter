@@ -26,6 +26,6 @@ class AppTheme {
   );
 
   static const Color secondaryBackground = Color(0xFFEBEAF6);
-  static const Color primaryDark = Color(0xFF2242E1);
-  static const Color secondaryText = Color(0xFFA2ABB4);
+  static const Color primaryDark = Color(0xFF48AF37);
+  static const Color secondaryText = Color(0xFF48AF37);
 }

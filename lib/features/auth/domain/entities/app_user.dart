@@ -1,12 +1,12 @@
 class AppUser {
-  final String id;
+  final String uid;
   final String email;
   final String? jwt;
   final String firstName;
   final String lastName;
 
   AppUser({
-    required this.id,
+    required this.uid,
     required this.email,
     this.jwt,
     required this.firstName,

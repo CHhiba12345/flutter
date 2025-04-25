@@ -15,6 +15,12 @@ abstract class _$AppRouter extends RootStackRouter {
 
   @override
   final Map<String, PageFactory> pagesMap = {
+    AllergensRoute.name: (routeData) {
+      return AutoRoutePage<dynamic>(
+        routeData: routeData,
+        child: const AllergensPage(),
+      );
+    },
     FavoritesRoute.name: (routeData) {
       return AutoRoutePage<dynamic>(
         routeData: routeData,
@@ -45,18 +51,6 @@ abstract class _$AppRouter extends RootStackRouter {
       return AutoRoutePage<dynamic>(
         routeData: routeData,
         child: const MainLayoutPage(),
-      );
-    },
-    OnboRoute.name: (routeData) {
-      return AutoRoutePage<dynamic>(
-        routeData: routeData,
-        child: const OnboPage(),
-      );
-    },
-    OnboardRoute.name: (routeData) {
-      return AutoRoutePage<dynamic>(
-        routeData: routeData,
-        child: const OnboardPage(),
       );
     },
     OnboardingRoute.name: (routeData) {
@@ -109,6 +103,20 @@ abstract class _$AppRouter extends RootStackRouter {
       );
     },
   };
+}
+
+/// generated route for
+/// [AllergensPage]
+class AllergensRoute extends PageRouteInfo<void> {
+  const AllergensRoute({List<PageRouteInfo>? children})
+      : super(
+          AllergensRoute.name,
+          initialChildren: children,
+        );
+
+  static const String name = 'AllergensRoute';
+
+  static const PageInfo<void> page = PageInfo<void>(name);
 }
 
 /// generated route for
@@ -192,34 +200,6 @@ class MainLayoutRoute extends PageRouteInfo<void> {
         );
 
   static const String name = 'MainLayoutRoute';
-
-  static const PageInfo<void> page = PageInfo<void>(name);
-}
-
-/// generated route for
-/// [OnboPage]
-class OnboRoute extends PageRouteInfo<void> {
-  const OnboRoute({List<PageRouteInfo>? children})
-      : super(
-          OnboRoute.name,
-          initialChildren: children,
-        );
-
-  static const String name = 'OnboRoute';
-
-  static const PageInfo<void> page = PageInfo<void>(name);
-}
-
-/// generated route for
-/// [OnboardPage]
-class OnboardRoute extends PageRouteInfo<void> {
-  const OnboardRoute({List<PageRouteInfo>? children})
-      : super(
-          OnboardRoute.name,
-          initialChildren: children,
-        );
-
-  static const String name = 'OnboardRoute';
 
   static const PageInfo<void> page = PageInfo<void>(name);
 }

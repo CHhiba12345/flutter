@@ -49,7 +49,7 @@ class _SignUpPageState extends State<SignUpPage> {
       body: BlocConsumer<AuthBloc, AuthState>(
         listener: (context, state) {
           if (state is AuthSuccess) {
-            context.router.replaceAll([const HomeRoute()]);
+            context.router.replaceAll([AllergensRoute()]);
           } else if (state is AuthError) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -70,15 +70,11 @@ class _SignUpPageState extends State<SignUpPage> {
         builder: (context, state) {
           return Container(
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  AppColors.secondary,
-                  AppColors.background,
-                ],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                stops: const [0.2, 0.8],
-              ),
+
+                color: AppColors.secondary,
+
+
+
             ),
             child: SafeArea(
               child: SingleChildScrollView(
@@ -190,7 +186,7 @@ class _SignUpPageState extends State<SignUpPage> {
                 child: Text(
                   'Sign In',
                   style: AppTextStyles.button.copyWith(
-                    color: AppColors.primary,
+                    color: AppColors.background,
                     fontWeight: FontWeight.w600,
                     decoration: TextDecoration.none,
                   ),

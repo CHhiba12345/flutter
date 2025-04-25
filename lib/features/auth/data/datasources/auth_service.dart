@@ -12,6 +12,42 @@ class AuthService {
     final String baseUrl = "http://164.132.53.159:3001";
     final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
 
+
+    //////////////////////////
+    // Ajoutez cette méthode pour vérifier la connexion persistante
+    Future<bool> isUserLoggedIn() async {
+        final token = await getToken();
+        if (token == null) return false;
+
+        try {
+            final isValid = !JwtDecoder.isExpired(token);
+            if (!isValid) await _storage.delete(key: 'firebase_token');
+            return isValid;
+        } catch (e) {
+            return false;
+        }
+    }
+    //////////////////////////////////////////////////////////////
+
+
+
+    Future<void> printCurrentUserInfo() async {
+        final token = await getCurrentUserToken();
+        if (token == null) {
+            print('Aucun token trouvé - utilisateur non connecté');
+            return;
+        }
+
+        try {
+            final decodedToken = JwtDecoder.decode(token);
+            final uid = decodedToken['user_id'] ?? decodedToken['sub'] ?? 'Non trouvé';
+            print('🔐 Token JWT décodé - UID: $uid');
+            //print('Token complet: $decodedToken');
+        } catch (e) {
+            print('Erreur de décodage du token: $e');
+        }
+    }
+    ///////////////////////////////////////////////////////////
     Future<void> storeToken(String token) async {
         await _storage.write(key: 'firebase_token', value: token);
     }
@@ -86,6 +122,8 @@ class AuthService {
             await storeToken(token);
 
             print("Token JWT mis à jour et stocké localement.");
+            ////////////////
+            await printCurrentUserInfo();
         } catch (e) {
             print("Erreur lors de la mise à jour du token : $e");
             throw Exception("Erreur lors de la mise à jour du token : $e");

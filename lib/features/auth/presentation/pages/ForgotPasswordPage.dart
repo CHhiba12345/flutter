@@ -59,6 +59,7 @@ class ForgotPasswordPage extends StatelessWidget {
               colors: [AppColors.secondary, AppColors.background],
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
+
               stops: [0.2, 0.8],
             ),
           ),

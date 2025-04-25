@@ -47,12 +47,8 @@ class _SignInPageState extends State<SignInPage> {
         builder: (context, state) {
           return Container(
             decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                colors: [AppColors.secondary, AppColors.background], // Inversion des couleurs
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                stops: [0.2, 0.8],
-              ),
+              color: AppColors.secondary,
+
             ),
             child: SafeArea(
               child: SingleChildScrollView(
@@ -172,7 +168,7 @@ class _SignInPageState extends State<SignInPage> {
                   child: Text(
                     'Sign Up',
                     style: AppTextStyles.button.copyWith(
-                      color: AppColors.primary,
+                      color: AppColors.background,
                       fontWeight: FontWeight.w600,
                       decoration: TextDecoration.underline,
                     ),

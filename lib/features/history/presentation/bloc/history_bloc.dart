@@ -17,52 +17,65 @@ class HistoryBloc extends Bloc<HistoryEvent, HistoryState> {
     required this.recordHistory,
     required this.deleteHistory,
   }) : super(HistoryInitial()) {
+    // Move all event registrations here in the constructor
+    on<LoadHistoryEvent>(_onLoadHistory);
+    on<RecordScanEvent>(_onRecordScan);
+    on<RecordViewEvent>(_onRecordView);
+    on<DeleteHistoryEvent>(_onDeleteHistory);
+  }
 
+  Future<void> _onLoadHistory(
+      LoadHistoryEvent event,
+      Emitter<HistoryState> emit
+      ) async {
+    emit(HistoryLoading());
+    try {
+      final histories = await getHistoryUseCase.execute();
+      emit(HistoryLoaded(histories));
+    } on FormatException catch (e) {
+      emit(HistoryError('Format de données invalide : ${e.message}'));
+    } on Exception catch (e) {
+      emit(HistoryError('Erreur : ${e.toString()}'));
+    }
+  }
 
+  Future<void> _onRecordScan(
+      RecordScanEvent event,
+      Emitter<HistoryState> emit
+      ) async {
+    try {
+      await recordHistory.recordScan(productId: event.productId);
+      add(LoadHistoryEvent());
+    } catch (e) {
+      emit(HistoryError('Failed to record scan: ${e.toString()}'));
+    }
+  }
 
-    on<LoadHistoryEvent>((event, emit) async {
-      emit(HistoryLoading());
-      try {
-        final histories = await getHistoryUseCase.execute();
-        print("=========");
-        emit(HistoryLoaded(histories));
-      } on FormatException catch (e) {
-        emit(HistoryError('Format de données invalide : ${e.message}'));
-      } on Exception catch (e) {
-        emit(HistoryError('Erreur : ${e.toString()}'));
-      }catch(e){
-        print("************** $e");
-      }
-    });
+  Future<void> _onRecordView(
+      RecordViewEvent event,
+      Emitter<HistoryState> emit
+      ) async {
+    try {
+      await recordHistory.recordView(productId: event.productId);
+      add(LoadHistoryEvent());
+    } catch (e) {
+      emit(HistoryError('Failed to record view: ${e.toString()}'));
+    }
+  }
 
-    on<RecordScanEvent>((event, emit) async {
-      try {
-        await recordHistory.recordScan(productId: event.productId);
-        add(LoadHistoryEvent());
-      } catch (e) {
-        emit(HistoryError('Failed to record scan: ${e.toString()}'));
-      }
-    });
-
-    on<RecordViewEvent>((event, emit) async {
-      try {
-        await recordHistory.recordView(productId: event.productId);
-        add(LoadHistoryEvent());
-      } catch (e) {
-        emit(HistoryError('Failed to record view: ${e.toString()}'));
-      }
-    });
-    on<DeleteHistoryEvent>((event, emit) async {
-      if (event.historyId.isEmpty) {
-        emit(HistoryError('ID invalide pour la suppression'));
-        return;
-      }
-      try {
-        await deleteHistory.execute(event.historyId); // Supprime l'entrée
-        add(LoadHistoryEvent()); // Recharge l'historique après suppression
-      } catch (e) {
-        emit(HistoryError('Échec de la suppression : ${e.toString()}'));
-      }
-    });
+  Future<void> _onDeleteHistory(
+      DeleteHistoryEvent event,
+      Emitter<HistoryState> emit
+      ) async {
+    if (event.historyId.isEmpty) {
+      emit(HistoryError('ID invalide pour la suppression'));
+      return;
+    }
+    try {
+      await deleteHistory.execute(event.historyId);
+      add(LoadHistoryEvent());
+    } catch (e) {
+      emit(HistoryError('Échec de la suppression : ${e.toString()}'));
+    }
   }
 }

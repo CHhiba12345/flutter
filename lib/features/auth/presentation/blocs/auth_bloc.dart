@@ -31,6 +31,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     required this.resetPasswordUseCase,
     required this.authRepository,
   }) : super(AuthInitial()) {
+
     on<SignInWithEmailAndPasswordEvent>(_handleSignInWithEmailAndPassword);
     on<SignUpWithEmailAndPasswordEvent>(_handleSignUpWithEmailAndPassword);
     on<SignInWithGoogleEvent>(_handleSignInWithGoogle);

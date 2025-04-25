@@ -3,9 +3,11 @@ import 'package:barcode_scan2/barcode_scan2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:http/http.dart' as http;
 import '../../../../app_router.dart';
 import '../../../auth/data/datasources/auth_service.dart';
 import '../../../favorites/data/datasources/favorite_datasource.dart';
+import '../../../favorites/data/models/favorite_model.dart';
 import '../../../favorites/data/repositories/favorite_repository_impl.dart';
 import '../../../favorites/domain/usecases/add_to_favorites.dart';
 import '../../../favorites/domain/usecases/get_favorites.dart';
@@ -15,6 +17,15 @@ import '../../../favorites/presentation/bloc/favorite_event.dart';
 import '../../../favorites/presentation/bloc/favorite_state.dart';
 import '../../../history/data/datasources/history_datasource.dart';
 import '../../../history/data/repositories/history_repository_impl.dart';
+import '../../../history/domain/usecases/delete_history_usecase.dart';
+import '../../../history/domain/usecases/get_history_usecase.dart';
+import '../../../history/presentation/bloc/history_bloc.dart';
+import '../../../history/presentation/bloc/history_event.dart';
+import '../../../profile/data/datasources/profile_datasource.dart';
+import '../../../profile/data/repositories/profile_repository_impl.dart';
+import '../../../profile/domain/usecases/clear_user_allergens.dart';
+import '../../../profile/domain/usecases/get_user_allergens.dart';
+import '../../../profile/domain/usecases/set_user_allergens.dart';
 import '../../data/datasources/home_datasource.dart';
 import '../../data/repositories/home_repository_impl.dart';
 import '../../domain/entities/product.dart';
@@ -26,6 +37,7 @@ import '../styles/constant.dart';
 import '../styles/home_styles.dart';
 import '../widgets/home_bottom_nav.dart';
 import '../widgets/product_search_card.dart';
+import '../../../profile/presentation/bloc/profile_bloc.dart';
 
 @RoutePage()
 class HomePage extends StatelessWidget {
@@ -34,31 +46,54 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
-        providers: [
+      providers: [
         BlocProvider(
-        create: (context) => HomeBloc(
-      scanProduct: ScanProduct(HomeRepositoryImpl(
-          homeDataSource: HomeDataSource(jwtToken: ''))),
-      recordHistory: RecordHistory(
-          repository: HistoryRepositoryImpl(
-              dataSource: HistoryDataSource(jwtToken: ''))),
-      toggleFavorite: ToggleFavoriteUseCase(FavoriteRepositoryImpl(
-          dataSource: FavoriteDataSource(jwtToken: ''))),
-    ),
-    ),
-    BlocProvider(
-    create: (context) => FavoriteBloc(
-    addToFavorites: AddToFavorites(FavoriteRepositoryImpl(
-    dataSource: FavoriteDataSource(jwtToken: ''))),
-    getFavorites: GetFavorites(FavoriteRepositoryImpl(
-    dataSource: FavoriteDataSource(jwtToken: ''))),
-    removeFromFavorites: RemoveFromFavorites(FavoriteRepositoryImpl(
-    dataSource: FavoriteDataSource(jwtToken: ''))),
-    )..add(LoadFavoritesEvent(uid: 'current_user_uid')),
-    )
-    ],
+          create: (context) => HomeBloc(
+            scanProduct: ScanProduct(HomeRepositoryImpl(homeDataSource: HomeDataSource())),
+            recordHistory: RecordHistory(repository: HistoryRepositoryImpl(dataSource: HistoryDataSource())),
+            toggleFavorite: ToggleFavoriteUseCase(FavoriteRepositoryImpl(dataSource: FavoriteDataSource())),
+          ),
+        ),
+        BlocProvider(
+          create: (context) => FavoriteBloc(
+            addToFavorites: AddToFavorites(FavoriteRepositoryImpl(dataSource: FavoriteDataSource())),
+            getFavorites: GetFavorites(FavoriteRepositoryImpl(dataSource: FavoriteDataSource())),
+            removeFromFavorites: RemoveFromFavorites(FavoriteRepositoryImpl(dataSource: FavoriteDataSource())),
+          )..add(LoadFavoritesEvent(uid: 'current_user_uid')),
+        ),
 
-    child: const _HomeContent(),
+        BlocProvider(
+          create: (context) => HistoryBloc(
+            getHistoryUseCase: GetHistoryUseCase(repository: HistoryRepositoryImpl(dataSource: HistoryDataSource())),
+            recordHistory: RecordHistory(repository: HistoryRepositoryImpl(dataSource: HistoryDataSource())),
+            deleteHistory: DeleteHistoryUseCase(repository: HistoryRepositoryImpl(dataSource: HistoryDataSource())),
+          )..add(LoadHistoryEvent()),
+        ),
+        BlocProvider(
+          create: (context) => ProfileBloc(
+            getUserAllergens: GetUserAllergens(ProfileRepositoryImpl(
+              dataSource: ProfileDataSourceImpl(
+                client: http.Client(),
+                authService: AuthService(),
+              ),
+            )),
+            setUserAllergens: SetUserAllergens(ProfileRepositoryImpl(
+              dataSource: ProfileDataSourceImpl(
+                client: http.Client(),
+                authService: AuthService(),
+              ),
+            )),
+            clearUserAllergens: ClearUserAllergens(ProfileRepositoryImpl(
+              dataSource: ProfileDataSourceImpl(
+                client: http.Client(),
+                authService: AuthService(),
+              ),
+            )),
+            authService: AuthService(),
+          ),
+        ),
+      ],
+      child: const _HomeContent(),
     );
   }
 }
@@ -74,9 +109,7 @@ class _HomeContent extends StatelessWidget {
         statusBarIconBrightness: Brightness.light,
       ),
     );
-
     final double statusBarHeight = MediaQuery.of(context).padding.top;
-
     return GestureDetector(
       onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
       child: Stack(
@@ -86,16 +119,12 @@ class _HomeContent extends StatelessWidget {
             height: statusBarHeight + 80,
             decoration: const BoxDecoration(
               gradient: LinearGradient(
-                colors: [
-                  Color(0xFF13729A),
-                  Color(0xFF7FD3F8),
-                ],
+                colors: [Color(0xFF1D7A29), Color(0xFF83BC6D)],
                 begin: Alignment.centerLeft,
                 end: Alignment.centerRight,
               ),
             ),
           ),
-
           Column(
             children: [
               SizedBox(height: statusBarHeight),
@@ -118,8 +147,7 @@ class _HomeContent extends StatelessWidget {
                         Stack(
                           children: [
                             IconButton(
-                              icon: const Icon(Icons.notifications,
-                                  color: Colors.white, size: 30),
+                              icon: const Icon(Icons.notifications, color: Colors.white, size: 30),
                               onPressed: () {},
                             ),
                             Positioned(
@@ -131,12 +159,10 @@ class _HomeContent extends StatelessWidget {
                                   color: Colors.red,
                                   borderRadius: BorderRadius.circular(20),
                                 ),
-                                constraints: const BoxConstraints(
-                                    minWidth: 16, minHeight: 16),
+                                constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
                                 child: const Text(
                                   '3',
-                                  style: TextStyle(
-                                      color: Colors.white, fontSize: 10),
+                                  style: TextStyle(color: Colors.white, fontSize: 10),
                                   textAlign: TextAlign.center,
                                 ),
                               ),
@@ -144,8 +170,7 @@ class _HomeContent extends StatelessWidget {
                           ],
                         ),
                         IconButton(
-                          icon: const Icon(Icons.favorite_outlined,
-                              color: Colors.white, size: 30),
+                          icon: const Icon(Icons.favorite_outlined, color: Colors.white, size: 30),
                           onPressed: () {
                             AutoRouter.of(context).push(const FavoritesRoute());
                           },
@@ -198,8 +223,7 @@ class _SearchBarAndScan extends StatelessWidget {
           Expanded(
             child: TextField(
               decoration: HomeStyles.searchInputDecoration(context),
-              onChanged: (query) =>
-                  context.read<HomeBloc>().add(SearchProductsEvent(query: query)),
+              onChanged: (query) => context.read<HomeBloc>().add(SearchProductsEvent(query: query)),
               style: HomeStyles.searchTextStyle(context),
             ),
           ),
@@ -207,11 +231,25 @@ class _SearchBarAndScan extends StatelessWidget {
           IconButton(
             icon: HomeStyles.cameraIcon,
             onPressed: () async {
-              final barcode = await BarcodeScanner.scan();
-              if (barcode.rawContent.isNotEmpty) {
-                context
-                    .read<HomeBloc>()
-                    .add(ScanProductEvent(barcode: barcode.rawContent));
+              try {
+                final barcode = await BarcodeScanner.scan();
+                if (barcode.rawContent.isNotEmpty) {
+                  context.read<HomeBloc>().add(ScanProductEvent(barcode: barcode.rawContent));
+                }
+              } on PlatformException catch (e) {
+                if (e.code == BarcodeScanner.cameraAccessDenied) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Camera permission denied')),
+                  );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Error: ${e.message}')),
+                  );
+                }
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Error: $e')),
+                );
               }
             },
           ),
@@ -229,22 +267,33 @@ class _ProductDisplay extends StatefulWidget {
 }
 
 class _ProductDisplayState extends State<_ProductDisplay> {
-  List<String> favorites = [];
+  List<String> userAllergens = [];
 
-  bool isFavoriteProduct(String productId) {
-    return favorites.contains(productId);
+  @override
+  void initState() {
+    super.initState();
+    _loadUserAllergens();
   }
+  Future<void> _loadUserAllergens() async {
+    final authService = AuthService();
+    final uid = await authService.getCurrentUserId();
+    if (uid != null) {
+      // Force le rechargement en émettant un nouvel événement
+      context.read<ProfileBloc>().add(LoadAllergens(uid));
 
-  void toggleFavorite(String productId) {
-    setState(() {
-      if (favorites.contains(productId)) {
-        favorites.remove(productId);
-      } else {
-        favorites.add(productId);
-      }
-    });
+      // Écoute les changements d'état
+      context.read<ProfileBloc>().stream.listen((state) {
+        if (state is AllergensLoaded) {
+          if (mounted) {
+            setState(() {
+              userAllergens = state.allergens;
+              debugPrint('✅ Allergènes mis à jour dans HomePage: $userAllergens');
+            });
+          }
+        }
+      });
+    }
   }
-
   Future<String> getCurrentUserId() async {
     final authService = AuthService();
     final token = await authService.getCurrentUserToken();
@@ -255,126 +304,347 @@ class _ProductDisplayState extends State<_ProductDisplay> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<HomeBloc, HomeState>(
-      builder: (context, state) {
-        if (state is ProductLoading) {
-          return const Center(child: CircularProgressIndicator());
-        } else if (state is ProductDetailState) {
-          return _buildProductDetail(state.product);
-        } else if (state is ProductsLoaded) {
-          if (favorites.isEmpty && state.favorites.isNotEmpty) {
-            favorites = state.favorites.map((product) => product.productId).toList();
-          }
-          return _buildProductList(state.products, state.favorites.cast<Product>());
-        } else if (state is ProductError) {
-          return Center(child: Text(state.message));
-        } else {
-          return const ProductSearchCard();
+    return BlocListener<FavoriteBloc, FavoriteState>(
+      listener: (context, state) {
+        if (state is FavoriteSuccess) {
+          setState(() {});
         }
       },
+      child: BlocBuilder<HomeBloc, HomeState>(
+        builder: (context, state) {
+          if (state is ProductLoading) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (state is ProductDetailState) {
+            return _buildProductDetail(state.product);
+          } else if (state is ProductsLoaded) {
+            return _buildProductList(state.products, state.favorites);
+          } else if (state is ProductError) {
+            return Center(child: Text(state.message));
+          } else {
+            return const ProductSearchCard();
+          }
+        },
+      ),
     );
   }
 
   Widget _buildProductDetail(Product product) {
-    return Card(
-      elevation: 5,
-      margin: const EdgeInsets.all(16),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (product.imageUrl.isNotEmpty)
-              Center(
-                child: Image.network(
-                  product.imageUrl,
-                  height: 200,
-                  fit: BoxFit.contain,
-                ),
+    return BlocBuilder<FavoriteBloc, FavoriteState>(
+      builder: (context, favoriteState) {
+        bool isFavorite = false;
+        if (favoriteState is FavoritesLoaded) {
+          isFavorite = favoriteState.favorites.any((fav) => fav.productId == product.code);
+        }
+
+        // Vérifier si le produit contient des allergènes de l'utilisateur
+        bool hasAllergenAlert = false;
+        String? alertMessage;
+
+        if (userAllergens.isNotEmpty && product.ingredients?.allergens != null) {
+          final productAllergens = product.ingredients!.allergens!
+              .map((a) => a.toLowerCase())
+              .toList();
+
+          final matchingAllergens = userAllergens
+              .where((userAllergen) => productAllergens.contains(userAllergen.toLowerCase()))
+              .toList();
+
+          if (matchingAllergens.isNotEmpty) {
+            hasAllergenAlert = true;
+            alertMessage = 'Ce produit contient vos allergènes : ${matchingAllergens.join(', ')}';
+          }
+
+          debugPrint('🔍 Allergènes de l\'utilisateur: $userAllergens');
+          debugPrint('🔍 Allergènes du produit: $productAllergens');
+          debugPrint('🔍 Allergènes correspondants: $matchingAllergens');
+        }
+
+
+        return Scaffold(
+          appBar: AppBar(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            leading: Padding(
+              padding: const EdgeInsets.only(left: 8.0),
+              child: IconButton(
+                icon: const Icon(Icons.arrow_back, color: Colors.black, size: 24),
+                onPressed: () {
+                  context.read<HomeBloc>().add(BackToHomeEvent());
+                },
               ),
-            const SizedBox(height: 20),
-            Text(
-              'Name: ${product.name}',
-              style: const TextStyle(fontWeight: FontWeight.bold),
             ),
-            Text(
-              'Nutriscore: ${product.nutriscore}',
-              style: const TextStyle(fontWeight: FontWeight.bold),
+            title: Text(
+              'Détails',
+              style: TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+                fontSize: 20,
+              ),
             ),
-            Text('Marque: ${product.brand}'),
-            Text('Catégories: ${product.categories.join(', ')}'),
-            const SizedBox(height: 10),
-            const Text(
-              'Ingrédients:',
-              style: TextStyle(fontWeight: FontWeight.bold),
+            centerTitle: true,
+            toolbarHeight: 30,
+          ),
+          body: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Product Image
+                  Container(
+                    height: 120,
+                    margin: const EdgeInsets.only(bottom: 20),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      color: Colors.grey[200],
+                    ),
+                    child: product.imageUrl?.isNotEmpty == true
+                        ? ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.network(
+                        product.imageUrl!,
+                        fit: BoxFit.contain,
+                        width: double.infinity,
+                        errorBuilder: (context, error, stackTrace) => const Icon(Icons.broken_image, size: 50),
+                      ),
+                    )
+                        : const Center(child: Icon(Icons.image, size: 50)),
+                  ),
+                  // Product name and favorite button
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          product.name,
+                          style: const TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        icon: Icon(
+                          isFavorite ? Icons.favorite : Icons.favorite_border,
+                          color: isFavorite ? Colors.red : Colors.grey,
+                          size: 28,
+                        ),
+                        onPressed: () async {
+                          final userId = await getCurrentUserId();
+                          context.read<FavoriteBloc>().add(
+                            ToggleFavoriteEvent(
+                              uid: userId,
+                              productId: product.code,
+                              isFavorite: !isFavorite,
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                  // Allergen Alert
+                  if (hasAllergenAlert)
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      margin: const EdgeInsets.only(bottom: 16),
+                      decoration: BoxDecoration(
+                        color: Colors.red[50],
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.red),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.warning, color: Colors.red),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              alertMessage!,
+                              style: const TextStyle(color: Colors.red),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  // Basic info
+                  _buildInfoCard(
+                    children: [
+                      if (product.nutriscore != null) _buildInfoRow('Nutriscore', product.nutriscore!.toUpperCase()),
+                      if (product.brand != null) _buildInfoRow('Marque', product.brand!),
+                      if (product.categories != null) _buildInfoRow('Catégories', product.categories!),
+                      _buildInfoRow('Statut Halal', product.halalStatus == true ? 'Oui' : 'Non'),
+                    ],
+                  ),
+                  // Ingredients
+                  if (product.ingredients?.text != null) ...[
+                    _buildSectionTitle('Ingrédients'),
+                    _buildInfoCard(
+                      children: [
+                        Text(
+                          product.ingredients!.text!,
+                          style: const TextStyle(fontSize: 15),
+                        ),
+                      ],
+                    ),
+                  ],
+                  // Allergens
+                  if (product.ingredients?.allergens?.isNotEmpty == true) ...[
+                    _buildSectionTitle('Allergènes'),
+                    _buildInfoCard(
+                      children: [
+                        Text(
+                          product.ingredients!.allergens!.join(', '),
+                          style: const TextStyle(fontSize: 15),
+                        ),
+                      ],
+                    ),
+                  ],
+                  // Nutrition facts
+                  if (product.nutrition?.facts != null) ...[
+                    _buildSectionTitle('Valeurs nutritionnelles'),
+                    _buildInfoCard(
+                      children: [
+                        if (product.nutrition!.facts!.energyKcal != null)
+                          _buildInfoRow('Énergie', '${product.nutrition!.facts!.energyKcal} kcal'),
+                        if (product.nutrition!.facts!.fat != null)
+                          _buildInfoRow('Matières grasses', '${product.nutrition!.facts!.fat} g'),
+                        if (product.nutrition!.facts!.carbohydrates != null)
+                          _buildInfoRow('Glucides', '${product.nutrition!.facts!.carbohydrates} g'),
+                        if (product.nutrition!.facts!.proteins != null)
+                          _buildInfoRow('Protéines', '${product.nutrition!.facts!.proteins} g'),
+                        if (product.nutrition!.facts!.salt != null)
+                          _buildInfoRow('Sel', '${product.nutrition!.facts!.salt} g'),
+                      ],
+                    ),
+                  ],
+                  // Nova group
+                  if (product.processing?.novaGroup != null) ...[
+                    _buildSectionTitle('Niveau de transformation'),
+                    _buildInfoCard(
+                      children: [
+                        _buildInfoRow('NOVA', 'Groupe ${product.processing!.novaGroup}'),
+                      ],
+                    ),
+                  ],
+                  // Ecoscore
+                  if (product.environment?.ecoscore != null) ...[
+                    _buildSectionTitle('Impact environnemental'),
+                    _buildInfoCard(
+                      children: [
+                        _buildInfoRow('Ecoscore', product.environment!.ecoscore!.toUpperCase()),
+                      ],
+                    ),
+                  ],
+                  const SizedBox(height: 20),
+                ],
+              ),
             ),
-            Text(product.ingredients.join(', ')),
-            const SizedBox(height: 10),
-            const Text(
-              'Allergènes:',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            Text(product.allergens.isNotEmpty
-                ? product.allergens.join(', ')
-                : 'Non spécifié'),
-            const SizedBox(height: 10),
-            Text('Statut Halal: ${product.halalStatus ? 'Oui' : 'Non'}'),
-          ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 16.0, bottom: 8.0),
+      child: Text(
+        title,
+        style: const TextStyle(
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
         ),
       ),
     );
   }
 
-  Widget _buildProductList(List<Product> products, List<Product> initialFavorites) {
-    return ListView.builder(
-      itemCount: products.length,
-      itemBuilder: (context, index) {
-        Product product = products[index];
-        bool isFavorite = favorites.contains(product.code);
-        return Card(
-          margin: const EdgeInsets.all(10),
-          child: ListTile(
-            leading: product.imageUrl.isNotEmpty
-                ? Image.network(
-              product.imageUrl,
-              width: 50,
-              height: 50,
-              errorBuilder: (context, error, stackTrace) =>
-              const Icon(Icons.error),
-            )
-                : const Icon(Icons.image),
-            title: Text(product.name),
-            subtitle: Text(product.brand),
-            trailing: BlocConsumer<FavoriteBloc, FavoriteState>(
-              listener: (context, favoriteState) {
-                if (favoriteState is FavoriteSuccess) {
-                  toggleFavorite(product.code);
-                }
-              },
-              builder: (context, favoriteState) {
-                return IconButton(
+  Widget _buildInfoCard({required List<Widget> children}) {
+    return Card(
+      elevation: 1,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: children,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '$label : ',
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 15,
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: const TextStyle(fontSize: 15),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProductList(List<Product> products, List<FavoriteModel> favorites) {
+    return BlocBuilder<FavoriteBloc, FavoriteState>(
+      builder: (context, favoriteState) {
+        final favoriteIds = favoriteState is FavoritesLoaded
+            ? favoriteState.favorites.map((f) => f.productId).toSet()
+            : <String>{};
+        return ListView.builder(
+          itemCount: products.length,
+          itemBuilder: (context, index) {
+            final product = products[index];
+            final isFavorite = favoriteIds.contains(product.code);
+            return Card(
+              margin: const EdgeInsets.all(10),
+              child: ListTile(
+                leading: product.imageUrl?.isNotEmpty == true
+                    ? Image.network(
+                  product.imageUrl!,
+                  width: 50,
+                  height: 50,
+                  errorBuilder: (context, error, stackTrace) => const Icon(Icons.broken_image),
+                )
+                    : const Icon(Icons.image),
+                title: Text(product.name),
+                subtitle: Text(product.brand ?? ''),
+                trailing: IconButton(
                   icon: Icon(
                     isFavorite ? Icons.favorite : Icons.favorite_border,
                     color: isFavorite ? Colors.red : null,
                   ),
                   onPressed: () async {
                     final userId = await getCurrentUserId();
-                    context.read<FavoriteBloc>().add(ToggleFavoriteEvent(
-                      uid: userId,
-                      productId: product.code,
-                      isFavorite: !isFavorite,
-                    ));
+                    context.read<FavoriteBloc>().add(
+                      ToggleFavoriteEvent(
+                        uid: userId,
+                        productId: product.code,
+                        isFavorite: !isFavorite,
+                      ),
+                    );
                   },
-                );
-              },
-            ),
-            onTap: () => context.read<HomeBloc>().add(
-              ViewProductEvent(product: product, fromSearch: true),
-            ),
-          ),
+                ),
+                onTap: () {
+                  context.read<HomeBloc>().add(
+                    ViewProductEvent(product: product, fromSearch: true),
+                  );
+                },
+              ),
+            );
+          },
         );
       },
     );

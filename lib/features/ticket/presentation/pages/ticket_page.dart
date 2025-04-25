@@ -40,10 +40,7 @@ class _TicketPageState extends State<TicketPage> {
             height: statusBarHeight + 80,
             decoration: const BoxDecoration(
               gradient: LinearGradient(
-                colors: [
-                  Color(0xFF13729A),
-                  Color(0xFF7FD3F8),
-                ],
+                colors: [Color(0xFF1D7A29), Color(0xFF83BC6D)],
                 begin: Alignment.centerLeft,
                 end: Alignment.centerRight,
               ),
@@ -68,7 +65,7 @@ class _TicketPageState extends State<TicketPage> {
                       child: Icon(
                         Icons.qr_code_scanner,
                         size: 24,
-                        color: Colors.blue,
+                        color: Colors.lightGreen,
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -112,12 +109,12 @@ class _TicketPageState extends State<TicketPage> {
                         height: 150,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          border: Border.all(color: Colors.blue, width: 2),
+                          border: Border.all(color: Colors.green, width: 2),
                         ),
                         child: Icon(
                           Icons.qr_code_scanner_rounded,
                           size: 80,
-                          color: Colors.blueAccent,
+                          color: Colors.lightGreen,
                         ),
                       ),
 
@@ -127,7 +124,7 @@ class _TicketPageState extends State<TicketPage> {
                       ElevatedButton(
                         onPressed: _scanTicket,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue,
+                          backgroundColor: Colors.green,
                           padding: EdgeInsets.symmetric(vertical: 16, horizontal: 32),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20),
@@ -145,7 +142,7 @@ class _TicketPageState extends State<TicketPage> {
                       ElevatedButton(
                         onPressed: _importImage,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blueAccent,
+                          backgroundColor: Colors.lightGreen,
                           padding: EdgeInsets.symmetric(vertical: 16, horizontal: 32),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20),

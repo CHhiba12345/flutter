@@ -6,6 +6,7 @@ import 'package:eye_volve/features/auth/presentation/blocs/auth_state.dart';
 import 'package:eye_volve/app_router.dart';
 import 'package:lottie/lottie.dart';
 
+import '../../data/datasources/auth_service.dart';
 @RoutePage()
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -18,27 +19,35 @@ class _SplashPageState extends State<SplashPage> {
   @override
   void initState() {
     super.initState();
-
-    // Attendre 6 secondes avant de rediriger
-    Future.delayed(const Duration(seconds: 6), () {
-      final authState = context.read<AuthBloc>().state;
-
-      if (authState is AuthSuccess) {
-        context.router.replace(const HomeRoute()); // Redirection vers la page d'accueil
-      } else {
-        context.router.replace(OnboardingRoute()); // Redirection vers la page de connexion
-      }
-    });
+    _checkAuthStatus();
   }
 
+  Future<void> _checkAuthStatus() async {
+    final authService = AuthService();
+    final isLoggedIn = await authService.isUserLoggedIn();
+
+    // Attendre un minimum de 2 secondes pour l'animation
+    await Future.delayed(const Duration(seconds: 2));
+
+    if (mounted) {
+      if (isLoggedIn) {
+        // Mettre à jour le token et naviguer
+        await authService.updateToken();
+        context.router.replace(const MainLayoutRoute());
+      } else {
+        // Naviguer vers onboarding
+        context.router.replace(const OnboardingRoute());
+      }
+    }
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white, // Fond noir
+      backgroundColor: Colors.white,
       body: SizedBox.expand(
         child: Lottie.asset(
-          'assets/animations/splash.json', // Animation Lottie
-          fit: BoxFit.cover, // Pour remplir tout l'écran
+          'assets/animations/splash.json',
+          fit: BoxFit.cover,
         ),
       ),
     );

@@ -79,23 +79,28 @@ class HomeBottomNav extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            icon,
-            size: 26,
-            color: isActive ? AppTheme.primaryDark : Colors.black,
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+            child: Icon(
+              icon,
+              size: isActive ? 29 : 24, // Agrandir si actif
+              color: isActive ? Colors.green : Colors.black,
+            ),
           ),
-          const SizedBox(height: 4),
-          Text(
-            label,
+          const SizedBox(height: 2),
+          AnimatedDefaultTextStyle(
+            duration: const Duration(milliseconds: 200),
             style: TextStyle(
-              color: isActive ? AppTheme.primaryDark : AppTheme.secondaryText,
-              fontSize: 12,
+              color: isActive ? Colors.green : Colors.black,
+
+              fontSize: isActive ? 13 : 12,
               fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
             ),
+            child: Text(label),
           ),
         ],
       ),
     );
   }
 }
-

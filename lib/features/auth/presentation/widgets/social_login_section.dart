@@ -46,24 +46,20 @@ class SocialLoginSection extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            _buildSocialButton(
+            _buildCircularSocialButton(
               icon: Icons.g_mobiledata_rounded,
-              label: 'Google',
               onPressed: onGooglePressed,
               backgroundColor: Colors.white,
-              borderColor: Colors.white,
               iconColor: Colors.black,
-              textColor: Colors.black,
+              borderColor: Colors.white,
             ),
             const SizedBox(width: 16),
-            _buildSocialButton(
+            _buildCircularSocialButton(
               icon: Icons.facebook,
-              label: 'Facebook',
               onPressed: onFacebookPressed,
-              backgroundColor: Color(0xFF1877F2),
-              borderColor: Color(0xFF1877F2),
-              iconColor: Colors.white,
-              textColor: Colors.white,
+              backgroundColor: Color(0xFFF6FAF8),
+              iconColor: Color(0xFF1D7A29),
+              borderColor: Color(0xFFEAF4EB),
             ),
           ],
         ),
@@ -71,44 +67,30 @@ class SocialLoginSection extends StatelessWidget {
     );
   }
 
-  Widget _buildSocialButton({
+  Widget _buildCircularSocialButton({
     required IconData icon,
-    required String label,
     required VoidCallback onPressed,
     required Color backgroundColor,
-    required Color borderColor,
     required Color iconColor,
-    required Color textColor,
+    required Color borderColor,
   }) {
-    return ElevatedButton.icon(
+    return ElevatedButton(
       onPressed: onPressed,
       style: ElevatedButton.styleFrom(
         backgroundColor: backgroundColor,
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+        shape: const CircleBorder(
           side: BorderSide(
-            color: borderColor,
             width: 1.5,
           ),
         ),
+        side: BorderSide(color: borderColor, width: 1.5),
+        padding: const EdgeInsets.all(16),
         elevation: 0,
-        shadowColor: Colors.black.withOpacity(0.1),
-        minimumSize: const Size(100, 50),
       ),
-      icon: Icon(
+      child: Icon(
         icon,
-        size: 20,
+        size: 24,
         color: iconColor,
-      ),
-      label: Text(
-        label,
-        style: TextStyle(
-          color: textColor,
-          fontSize: 14,
-          fontWeight: FontWeight.w600,
-          letterSpacing: 0.5,
-        ),
       ),
     );
   }

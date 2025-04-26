@@ -19,31 +19,50 @@ class FavoriteCard extends StatelessWidget {
 
     return Card(
       child: ListTile(
-        leading: CachedNetworkImage(
-          imageUrl: favorite.imageUrl,
-          width: 50,
-          height: 50,
-          placeholder: (context, url) =>
-              Container(
-                color: Colors.grey[200],
-                child: const Icon(Icons.image),
-              ),
-          errorWidget: (context, url, error) => const Icon(Icons.error),
-        ),
-        title: Text(favorite.productName.isNotEmpty
-            ? favorite.productName
-            : 'Produit inconnu'),
+        leading: _buildProductImage(favorite.imageUrl),
+        title: Text(favorite.productName),
         subtitle: Text(formattedDate),
         trailing: IconButton(
-          icon: const Icon(Icons.delete),
-          onPressed: () {
-            context.read<FavoriteBloc>().add(ToggleFavoriteEvent(
-              uid: favorite.uid,
-              productId: favorite.productId,
-              isFavorite: false,
-            ));
-          },
+          icon: const Icon(Icons.favorite, color: Colors.red),
+          onPressed: () => _removeFavorite(context),
         ),
+      ),
+    );
+  }
+
+  Widget _buildProductImage(String imageUrl) {
+    if (imageUrl.isEmpty || !imageUrl.startsWith('http')) {
+      return Container(
+        width: 50,
+        height: 50,
+        color: Colors.grey[200],
+        child: const Icon(Icons.image),
+      );
+    }
+
+    return CachedNetworkImage(
+      imageUrl: imageUrl,
+      imageBuilder: (context, imageProvider) => Image(image: imageProvider),
+      placeholder: (context, url) => const Icon(Icons.image),
+      errorWidget: (context, url, error) => const Icon(Icons.broken_image),
+    );
+
+  }
+
+  void _removeFavorite(BuildContext context) {
+    if (favorite.productId.isEmpty || favorite.productId == 'default_id') {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('ID de produit invalide')),
+      );
+      return;
+    }
+
+    print('Suppression du favori: ${favorite.productId}');
+    context.read<FavoriteBloc>().add(
+      ToggleFavoriteEvent(
+        uid: favorite.uid,
+        productId: favorite.productId,
+        isFavorite: false,
       ),
     );
   }

@@ -212,7 +212,8 @@ class _ProfilePageState extends State<ProfilePage> {
                             ),
                           );
                           print('📤 Envoi des allergènes sélectionnés : $tempAllergies');
-
+                          // Recharge immédiatement les allergènes
+                          context.read<ProfileBloc>().add(LoadAllergens(uid));
                           setState(() {
                             _selectedAllergies = tempAllergies;
                             print('📌 Mise à jour locale des allergènes : $_selectedAllergies');
@@ -260,7 +261,7 @@ class _ProfilePageState extends State<ProfilePage> {
               height: statusBarHeight + 80,
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [Color(0xFF1D7A29), Color(0xFF83BC6D)],
+                  colors: [Color(0xFF3E6839), Color(0xFF83BC6D)],
                   begin: Alignment.centerLeft,
                   end: Alignment.centerRight,
                 ),

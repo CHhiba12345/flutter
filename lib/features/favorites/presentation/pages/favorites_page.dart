@@ -61,17 +61,21 @@ class _FavoritesContent extends StatelessWidget {
                 itemCount: state.favorites.length,
                 itemBuilder: (context, index) {
                   final product = state.favorites[index];
+
+                  // Vérifiez et corrigez l'URL de l'image si nécessaire
+                  String imageUrl = product.imageUrl;
+                  if (imageUrl.isEmpty || !imageUrl.startsWith('http')) {
+                    imageUrl = 'https://via.placeholder.com/150';
+                  }
+
                   final favorite = Favorite(
-                    id: product.productId,
+                    id: product.id,
                     uid: uid,
-                    // UID dynamique
-                    productId: product.id,
+                    productId: product.productId,
                     productName: product.productName.isNotEmpty
                         ? product.productName
                         : 'Produit inconnu',
-                    imageUrl: product.imageUrl.isNotEmpty
-                        ? product.imageUrl
-                        : 'https://via.placeholder.com/150',
+                    imageUrl: imageUrl,
                     timestamp: DateTime.now().toIso8601String(),
                   );
                   return FavoriteCard(favorite: favorite);

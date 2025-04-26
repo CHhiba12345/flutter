@@ -36,11 +36,20 @@ class ProfileDataSourceImpl implements ProfileDataSource {
     );
 
     if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      return List<String>.from(data['allergens']);
-    } else {
-      throw Exception('Failed to save allergens: ${response.statusCode}');
+      // Attendre un peu pour être sûr que le serveur a bien traité la requête
+      await Future.delayed(const Duration(milliseconds: 300));
+
+      // Recharger les données fraîches
+      final freshResponse = await client.get(
+        Uri.parse('$_baseUrl/users/$uid/allergens'),
+        headers: headers,
+      );
+
+      if (freshResponse.statusCode == 200) {
+        return List<String>.from(json.decode(freshResponse.body));
+      }
     }
+    throw Exception('Failed to save allergens');
   }
 
   @override

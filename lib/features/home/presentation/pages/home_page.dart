@@ -119,7 +119,7 @@ class _HomeContent extends StatelessWidget {
             height: statusBarHeight + 80,
             decoration: const BoxDecoration(
               gradient: LinearGradient(
-                colors: [Color(0xFF1D7A29), Color(0xFF83BC6D)],
+                colors: [Color(0xFF3E6839), Color(0xFF83BC6D)],
                 begin: Alignment.centerLeft,
                 end: Alignment.centerRight,
               ),
@@ -271,29 +271,21 @@ class _ProductDisplayState extends State<_ProductDisplay> {
 
   @override
   void initState() {
-    super.initState();
-    _loadUserAllergens();
+  super.initState();
+  _loadUserAllergens();
   }
-  Future<void> _loadUserAllergens() async {
-    final authService = AuthService();
-    final uid = await authService.getCurrentUserId();
-    if (uid != null) {
-      // Force le rechargement en émettant un nouvel événement
-      context.read<ProfileBloc>().add(LoadAllergens(uid));
 
-      // Écoute les changements d'état
-      context.read<ProfileBloc>().stream.listen((state) {
-        if (state is AllergensLoaded) {
-          if (mounted) {
-            setState(() {
-              userAllergens = state.allergens;
-              debugPrint('✅ Allergènes mis à jour dans HomePage: $userAllergens');
-            });
-          }
-        }
-      });
-    }
+  Future<void> _loadUserAllergens() async {
+  final authService = AuthService();
+  final uid = await authService.getCurrentUserId();
+  if (uid != null) {
+  // Émet l'événement pour charger les allergènes
+  context.read<ProfileBloc>().add(LoadAllergens(uid));
   }
+
+  }
+
+
   Future<String> getCurrentUserId() async {
     final authService = AuthService();
     final token = await authService.getCurrentUserToken();
@@ -304,29 +296,41 @@ class _ProductDisplayState extends State<_ProductDisplay> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<FavoriteBloc, FavoriteState>(
+    return BlocListener<ProfileBloc, ProfileState>(
       listener: (context, state) {
-        if (state is FavoriteSuccess) {
-          setState(() {});
+        if (state is AllergensLoaded) {
+          // Met à jour la liste des allergènes quand l'état change
+          setState(() {
+            userAllergens = state.allergens;
+            debugPrint('✅ Allergènes mis à jour dans HomePage: $userAllergens');
+          });
         }
       },
-      child: BlocBuilder<HomeBloc, HomeState>(
-        builder: (context, state) {
-          if (state is ProductLoading) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (state is ProductDetailState) {
-            return _buildProductDetail(state.product);
-          } else if (state is ProductsLoaded) {
-            return _buildProductList(state.products, state.favorites);
-          } else if (state is ProductError) {
-            return Center(child: Text(state.message));
-          } else {
-            return const ProductSearchCard();
+      child: BlocListener<FavoriteBloc, FavoriteState>(
+        listener: (context, state) {
+          if (state is FavoriteSuccess) {
+            setState(() {});
           }
         },
+        child: BlocBuilder<HomeBloc, HomeState>(
+          builder: (context, state) {
+            if (state is ProductLoading) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (state is ProductDetailState) {
+              return _buildProductDetail(state.product);
+            } else if (state is ProductsLoaded) {
+              return _buildProductList(state.products, state.favorites);
+            } else if (state is ProductError) {
+              return Center(child: Text(state.message));
+            } else {
+              return const ProductSearchCard();
+            }
+          },
+        ),
       ),
     );
   }
+
 
   Widget _buildProductDetail(Product product) {
     return BlocBuilder<FavoriteBloc, FavoriteState>(
@@ -335,8 +339,7 @@ class _ProductDisplayState extends State<_ProductDisplay> {
         if (favoriteState is FavoritesLoaded) {
           isFavorite = favoriteState.favorites.any((fav) => fav.productId == product.code);
         }
-
-        // Vérifier si le produit contient des allergènes de l'utilisateur
+// Vérifier si le produit contient des allergènes de l'utilisateur
         bool hasAllergenAlert = false;
         String? alertMessage;
 
@@ -351,7 +354,7 @@ class _ProductDisplayState extends State<_ProductDisplay> {
 
           if (matchingAllergens.isNotEmpty) {
             hasAllergenAlert = true;
-            alertMessage = 'Ce produit contient vos allergènes : ${matchingAllergens.join(', ')}';
+            alertMessage = 'Be careful! This product may contain your allergens 😯: ${matchingAllergens.join(', ')}';
           }
 
           debugPrint('🔍 Allergènes de l\'utilisateur: $userAllergens');

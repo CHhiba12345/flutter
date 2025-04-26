@@ -16,6 +16,11 @@ class FavoriteModel {
   });
 
   factory FavoriteModel.fromJson(Map<String, dynamic> json) {
+    String imageUrl = json['imageUrl'] ?? '';
+    if (imageUrl.isNotEmpty && !imageUrl.startsWith('http')) {
+      imageUrl = 'https://via.placeholder.com/150';
+    }
+
     return FavoriteModel(
       id: json['_id'] ?? 'default_id',
       uid: json['uid'] ?? 'default_user_uid',

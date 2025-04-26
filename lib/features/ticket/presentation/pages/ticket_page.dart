@@ -40,7 +40,7 @@ class _TicketPageState extends State<TicketPage> {
             height: statusBarHeight + 80,
             decoration: const BoxDecoration(
               gradient: LinearGradient(
-                colors: [Color(0xFF1D7A29), Color(0xFF83BC6D)],
+                colors: [Color(0xFF3E6839), Color(0xFF83BC6D)],
                 begin: Alignment.centerLeft,
                 end: Alignment.centerRight,
               ),

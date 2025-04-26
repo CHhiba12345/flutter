@@ -85,14 +85,16 @@ class HomeBottomNav extends StatelessWidget {
             child: Icon(
               icon,
               size: isActive ? 29 : 24, // Agrandir si actif
-              color: isActive ? Colors.green : Colors.black,
+              color: isActive ? Color(0xFF4E7A03) : Colors.black,
+
             ),
           ),
           const SizedBox(height: 2),
           AnimatedDefaultTextStyle(
             duration: const Duration(milliseconds: 200),
             style: TextStyle(
-              color: isActive ? Colors.green : Colors.black,
+              color: isActive ? Color(0xFF4E7A03) : Colors.black,
+
 
               fontSize: isActive ? 13 : 12,
               fontWeight: isActive ? FontWeight.bold : FontWeight.normal,

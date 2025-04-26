@@ -1,5 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter/cupertino.dart';
 import '../../../auth/data/datasources/auth_service.dart';
 import '../../domain/usecases/clear_user_allergens.dart';
 import '../../domain/usecases/get_user_allergens.dart';
@@ -58,23 +59,26 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     }
   }
 
-  Future<void> _onSetAllergens(SetAllergens event,
-      Emitter<ProfileState> emit) async {
+  Future<void> _onSetAllergens(SetAllergens event, Emitter<ProfileState> emit) async {
     emit(ProfileLoading());
-    print('📥 Enregistrement des allergènes pour l\'utilisateur ${event
-        .uid} : ${event.allergens}');
     try {
-      final updatedAllergens = await setUserAllergens(
-          event.uid, event.allergens);
-      print('✅ Allergenes enregistrés avec succès : $updatedAllergens');
-      _currentAllergens = updatedAllergens;
-      emit(AllergensUpdated(updatedAllergens));
+      // Sauvegarde les nouveaux allergènes
+      await setUserAllergens(event.uid, event.allergens);
+
+      // Optionnel : Charger les données fraîches si tu veux les garder localement
+      final freshAllergens = await getUserAllergens(event.uid);
+      _currentAllergens = freshAllergens;
+
+      // Émet l'état pour signaler que les allergènes ont été mis à jour
+      emit(AllergensUpdated(freshAllergens));
+
+
+      debugPrint('✅ Allergènes sauvegardés et rechargés: $freshAllergens');
     } catch (e) {
-      print('❌ Erreur lors de l\'enregistrement des allergènes : ${e
-          .toString()}');
       emit(ProfileError('Failed to save allergens: ${e.toString()}'));
     }
   }
+
 
   Future<void> _onClearAllergens(ClearAllergens event,
       Emitter<ProfileState> emit) async {

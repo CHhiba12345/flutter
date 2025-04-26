@@ -56,15 +56,17 @@ class _AllergensPageState extends State<AllergensPage> {
     });
 
     final authState = context.read<AuthBloc>().state;
-    if (authState is! AuthSuccess) return;
+    if (authState is! AuthSuccess) {
+      print('❌ User not authenticated');
+      return;
+    }
 
     final selected = _selectedAllergens.entries
         .where((e) => e.value)
         .map((e) => e.key.toLowerCase())
         .toList();
 
-    print('💾 Sauvegarde des allergènes pour UID: ${authState.user.uid}');
-    print('📋 Allergènes sélectionnés: $selected');
+    print('💾 Attempting to save allergens: $selected');
 
     context.read<ProfileBloc>().add(
       SetAllergens(
@@ -96,12 +98,17 @@ class _AllergensPageState extends State<AllergensPage> {
   Widget build(BuildContext context) {
     return BlocListener<ProfileBloc, ProfileState>(
       listener: (context, state) {
+        print('🏗️ ProfileBloc state changed: $state');
         if (state is AllergensLoaded) {
+          print('📦 Allergens loaded: ${state.allergens}');
           _updateAllergens(state.allergens);
         } else if (state is AllergensUpdated) {
-          // Rediriger vers la page d'accueil après sauvegarde réussie
-          context.router.replaceAll([HomeRoute()]);
+          print('✅ Allergens updated successfully, navigating to Home');
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            context.router.replaceAll([HomeRoute()]);
+          });
         } else if (state is ProfileError) {
+          print('❌ Error: ${state.message}');
           setState(() {
             _isLoading = false;
           });

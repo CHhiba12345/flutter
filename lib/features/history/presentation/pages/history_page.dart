@@ -46,10 +46,7 @@ class _HistoryPageState extends State<HistoryPage> with SingleTickerProviderStat
             height: statusBarHeight + 120,
             decoration: const BoxDecoration(
               gradient: LinearGradient(
-                colors: [
-                  Color(0xFF13729A),
-                  Color(0xFF7FD3F8),
-                ],
+                colors: [Color(0xFF3E6839), Color(0xFF83BC6D)],
                 begin: Alignment.centerLeft,
                 end: Alignment.centerRight,
               ),
@@ -94,7 +91,7 @@ class _HistoryPageState extends State<HistoryPage> with SingleTickerProviderStat
                     ),
                     insets: EdgeInsets.symmetric(horizontal: 50),
                   ),
-                  labelColor: Colors.lightBlue,
+                  labelColor: Colors.lightGreen,
                   unselectedLabelColor: const Color(0xFF708E98),
                   tabs: const [
                     Tab(text: 'History'),

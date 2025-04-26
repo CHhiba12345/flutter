@@ -27,21 +27,25 @@ class FavoriteBloc extends Bloc<FavoriteEvent, FavoriteState> {
     final currentState = state;
     List<FavoriteModel> updatedFavorites = [];
 
+    print("[ToggleFavorite] Event reçu : isFavorite=${event.isFavorite}, uid=${event.uid}, productId=${event.productId}");
+
     if (currentState is FavoritesLoaded) {
       // Copie des favoris actuels
       updatedFavorites = List.from(currentState.favorites);
 
       // Mise à jour optimiste
       if (event.isFavorite) {
+        print("[ToggleFavorite] Ajout optimiste du favori");
         updatedFavorites.add(FavoriteModel(
           id: 'temp_${event.productId}',
           uid: event.uid,
           productId: event.productId,
-          productName: '', // Ces champs seront mis à jour après la réponse du serveur
+          productName: '',
           imageUrl: '',
           timestamp: DateTime.now().toIso8601String(),
         ));
       } else {
+        print("[ToggleFavorite] Suppression optimiste du favori");
         updatedFavorites.removeWhere((f) => f.productId == event.productId);
       }
 
@@ -49,25 +53,30 @@ class FavoriteBloc extends Bloc<FavoriteEvent, FavoriteState> {
     }
 
     try {
-      // Appel au serveur
       if (event.isFavorite) {
+        print("[ToggleFavorite] Appel serveur pour ajouter au favori");
         await addToFavorites.execute(uid: event.uid, productId: event.productId);
       } else {
+        print("[ToggleFavorite] Appel serveur pour SUPPRIMER des favoris");
         await removeFromFavorites.execute(uid: event.uid, productId: event.productId);
       }
 
-      // Recharger les vrais favoris après confirmation du serveur
+      print("[ToggleFavorite] Rechargement des favoris depuis le serveur...");
       final favorites = await getFavorites.execute(event.uid);
-      emit(FavoritesLoaded(await favorites));
 
+      print("[ToggleFavorite] Favoris rechargés: $favorites");
+
+      emit(FavoritesLoaded(await favorites));
     } catch (e) {
-      // En cas d'erreur, revenir à l'état précédent
+      print("[ToggleFavorite] ERREUR : $e");
+
       if (currentState is FavoritesLoaded) {
         emit(FavoritesLoaded(currentState.favorites));
       }
       emit(FavoriteError(e.toString()));
     }
   }
+
   Future<String> getCurrentUserId() async {
     final authService = AuthService();
     final token = await authService.getCurrentUserToken();

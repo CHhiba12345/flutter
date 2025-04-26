@@ -61,62 +61,62 @@ class _ProfilePageState extends State<ProfilePage> {
       ),
       // Autres sections...
 
-    ProfileSection(
-    title: 'SUPPORT',
-    items: [
-    ProfileItem(
-    title: 'FAQs',
-    icon: Icons.help_outline,
-    color: Colors.teal,
-    ),
-    ProfileItem(
-    title: 'Feedback',
-    icon: Icons.feedback_outlined,
-    color: Colors.orange,
-    ),
-    ProfileItem(
-    title: 'Rate Us',
-    icon: Icons.star_border,
-    color: Colors.amber,
-    ),
-    ProfileItem(
-    title: 'Share App',
-    icon: Icons.share,
-    color: Colors.green,
-    ),
-    ],
-    ),
-    ProfileSection(
-    title: 'LEGAL',
-    items: [
-    ProfileItem(
-    title: 'Privacy Policy',
-    icon: Icons.lock_outline,
-    color: Colors.purple,
-    ),
-    ProfileItem(
-    title: 'Premium Terms',
-    icon: Icons.check_circle_outline,
-    color: Colors.deepPurple,
-    ),
-    ],
-    ),
-    ProfileSection(
-    title: 'ACCOUNT',
-    items: [
-    ProfileItem(
-    title: 'Sign Out',
-    icon: Icons.exit_to_app,
-    color: Colors.red,
-    onTap: _handleSignOut,
-    ),
-    ProfileItem(
-    title: 'Delete Account',
-    icon: Icons.delete,
-    color: Colors.red[300]!,
-    ),
-    ],
-    ),
+      ProfileSection(
+        title: 'SUPPORT',
+        items: [
+          ProfileItem(
+            title: 'FAQs',
+            icon: Icons.help_outline,
+            color: Colors.teal,
+          ),
+          ProfileItem(
+            title: 'Feedback',
+            icon: Icons.feedback_outlined,
+            color: Colors.orange,
+          ),
+          ProfileItem(
+            title: 'Rate Us',
+            icon: Icons.star_border,
+            color: Colors.amber,
+          ),
+          ProfileItem(
+            title: 'Share App',
+            icon: Icons.share,
+            color: Colors.green,
+          ),
+        ],
+      ),
+      ProfileSection(
+        title: 'LEGAL',
+        items: [
+          ProfileItem(
+            title: 'Privacy Policy',
+            icon: Icons.lock_outline,
+            color: Colors.purple,
+          ),
+          ProfileItem(
+            title: 'Premium Terms',
+            icon: Icons.check_circle_outline,
+            color: Colors.deepPurple,
+          ),
+        ],
+      ),
+      ProfileSection(
+        title: 'ACCOUNT',
+        items: [
+          ProfileItem(
+            title: 'Sign Out',
+            icon: Icons.exit_to_app,
+            color: Colors.red,
+            onTap: _handleSignOut,
+          ),
+          ProfileItem(
+            title: 'Delete Account',
+            icon: Icons.delete,
+            color: Colors.red[300]!,
+          ),
+        ],
+      ),
     ];
   }
 

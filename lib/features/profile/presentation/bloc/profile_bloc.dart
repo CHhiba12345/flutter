@@ -71,7 +71,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
 
       // Émet l'état pour signaler que les allergènes ont été mis à jour
       emit(AllergensUpdated(freshAllergens));
-
+      emit(AllergensLoaded(freshAllergens));
 
       debugPrint('✅ Allergènes sauvegardés et rechargés: $freshAllergens');
     } catch (e) {

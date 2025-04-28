@@ -1,34 +1,46 @@
-import 'package:auto_route/auto_route.dart';
+import 'package:auto_route/annotations.dart';
+import 'package:eye_volve/features/favorites/presentation/pages/favorites_page.dart';
+import 'package:eye_volve/features/home/presentation/widgets/home_bottom_nav.dart';
+import 'package:eye_volve/features/ticket/presentation/pages/ticket_page.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import '../../../../app_router.dart';
-import 'features/home/presentation/widgets/home_bottom_nav.dart';
 
+import 'features/history/presentation/pages/history_page.dart';
+import 'features/home/presentation/pages/home_page.dart';
+import 'features/profile/presentation/pages/profile_page.dart';
 
 @RoutePage(name: 'MainLayoutRoute')
-class MainLayoutPage extends StatelessWidget {
-  const MainLayoutPage({super.key});
+class MainLayoutPage extends StatefulWidget {
+  @override
+  _MainLayoutState createState() => _MainLayoutState();
+}
+
+class _MainLayoutState extends State<MainLayoutPage> {
+  int _currentIndex = 0;
+  final PageController _pageController = PageController();
 
   @override
   Widget build(BuildContext context) {
-    return AutoTabsRouter(
-      routes: [
-        HomeRoute(),
-        HistoryRoute(),
-        ProfileRoute(),
-        TicketRoute(),
-        FavoritesRoute(),
-
-      ],
-      builder: (context, child) {
-        final tabsRouter = context.tabsRouter; // Récupère le TabsRouter
-        return Scaffold(
-          body: child, // Affiche la page active
-          bottomNavigationBar: HomeBottomNav(
-            currentIndex: tabsRouter.activeIndex,
-            onTap: (index) => tabsRouter.setActiveIndex(index),
-          ),
-        );
-      },
+    return Scaffold(
+      body: PageView(
+        controller: _pageController,
+        physics: NeverScrollableScrollPhysics(), // Disable swipe
+        children: [
+          HomePage(),
+          HistoryPage(),
+          ProfilePage(),
+          TicketPage(),
+          FavoritesPage()
+        ],
+      ),
+      bottomNavigationBar: HomeBottomNav(
+        currentIndex: _currentIndex,
+        onTap: (index) {
+          setState(() => _currentIndex = index);
+          _pageController.jumpToPage(index);
+// Additional logic when tab changes
+        },
+      ),
     );
   }
 }

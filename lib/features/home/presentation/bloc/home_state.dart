@@ -23,6 +23,7 @@ class ProductsLoaded extends HomeState {
   List<Object> get props => [products, favorites];
 }
 
+
 class ProductDetailState extends HomeState {
   final Product product;
   const ProductDetailState({required this.product});

@@ -50,7 +50,7 @@ abstract class _$AppRouter extends RootStackRouter {
     MainLayoutRoute.name: (routeData) {
       return AutoRoutePage<dynamic>(
         routeData: routeData,
-        child: const MainLayoutPage(),
+        child: MainLayoutPage(),
       );
     },
     OnboardingRoute.name: (routeData) {

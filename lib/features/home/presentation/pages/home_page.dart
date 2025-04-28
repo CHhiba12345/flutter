@@ -110,6 +110,9 @@ class _HomeContent extends StatelessWidget {
       ),
     );
     final double statusBarHeight = MediaQuery.of(context).padding.top;
+    // Charger les allergènes dès que la page est affichée
+      context.read<ProfileBloc>().add(InitializeAllergens());
+
     return GestureDetector(
       onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
       child: Stack(
@@ -271,29 +274,24 @@ class _ProductDisplayState extends State<_ProductDisplay> {
 
   @override
   void initState() {
-    super.initState();
+    super.didChangeDependencies();
     _loadUserAllergens();
   }
   Future<void> _loadUserAllergens() async {
     final authService = AuthService();
-    final uid = await authService.getCurrentUserId();
-    if (uid != null) {
-      // Force le rechargement en émettant un nouvel événement
-      context.read<ProfileBloc>().add(LoadAllergens(uid));
-
-      // Écoute les changements d'état
-      context.read<ProfileBloc>().stream.listen((state) {
-        if (state is AllergensLoaded) {
-          if (mounted) {
-            setState(() {
-              userAllergens = state.allergens;
-              debugPrint('✅ Allergènes mis à jour dans HomePage: $userAllergens');
-            });
-          }
-        }
-      });
+    final token = await authService.getCurrentUserToken();
+    if (token != null) {
+      final userId = await authService.getUserIdFromToken(token);
+      if (userId != null) {
+        context.read<ProfileBloc>().add(InitializeAllergens());
+      }
     }
   }
+
+
+
+
+
   Future<String> getCurrentUserId() async {
     final authService = AuthService();
     final token = await authService.getCurrentUserToken();
@@ -304,12 +302,32 @@ class _ProductDisplayState extends State<_ProductDisplay> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<FavoriteBloc, FavoriteState>(
-      listener: (context, state) {
-        if (state is FavoriteSuccess) {
-          setState(() {});
-        }
-      },
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<FavoriteBloc, FavoriteState>(
+          listener: (context, state) {
+            if (state is FavoriteSuccess) {
+              setState(() {});
+            }
+          },
+        ),
+        BlocListener<ProfileBloc, ProfileState>(
+          listener: (context, state) {
+            if (state is AllergensLoaded || state is AllergensUpdated ) {
+              final allergens = state is AllergensLoaded
+                  ? state.allergens
+                  : (state as AllergensUpdated).allergens;
+
+              if (mounted) {
+                setState(() {
+                  userAllergens = allergens;
+                  debugPrint('✅ Allergènes mis à jour dans HomePage: $userAllergens');
+                });
+              }
+            }
+          },
+        )
+      ],
       child: BlocBuilder<HomeBloc, HomeState>(
         builder: (context, state) {
           if (state is ProductLoading) {

@@ -35,6 +35,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
         print('🔍 UID récupéré: $uid');
         if (uid != null) {
           add(LoadAllergens(uid));
+          print("this is after the load of allergens");
         } else {
           print('❌ UID non disponible');
         }
@@ -78,6 +79,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       emit(ProfileError('Failed to save allergens: ${e.toString()}'));
     }
   }
+
 
 
   Future<void> _onClearAllergens(ClearAllergens event,

@@ -30,7 +30,6 @@ class _MainLayoutState extends State<MainLayoutPage> {
           HistoryPage(),
           ProfilePage(),
           TicketPage(),
-          FavoritesPage()
         ],
       ),
       bottomNavigationBar: HomeBottomNav(

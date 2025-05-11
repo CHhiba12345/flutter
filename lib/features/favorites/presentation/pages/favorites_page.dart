@@ -2,6 +2,8 @@ import 'package:auto_route/annotations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
+import 'package:lottie/lottie.dart'; // <-- Import Lottie
+
 import '../../../auth/data/datasources/auth_service.dart';
 import '../../domain/entities/favorite.dart';
 import '../../domain/repositories/favorite_repository.dart';
@@ -12,6 +14,7 @@ import '../bloc/favorite_bloc.dart';
 import '../bloc/favorite_event.dart';
 import '../bloc/favorite_state.dart';
 import '../widgets/favorite_card.dart';
+
 @RoutePage()
 class FavoritesPage extends StatelessWidget {
   const FavoritesPage({super.key});
@@ -42,14 +45,11 @@ class _FavoritesContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) =>
-      FavoriteBloc(
+      create: (context) => FavoriteBloc(
         addToFavorites: AddToFavorites(context.read<FavoriteRepository>()),
-        removeFromFavorites: RemoveFromFavorites(
-            context.read<FavoriteRepository>()),
+        removeFromFavorites: RemoveFromFavorites(context.read<FavoriteRepository>()),
         getFavorites: GetFavorites(context.read<FavoriteRepository>()),
-      )
-        ..add(LoadFavoritesEvent(uid: uid)),
+      )..add(LoadFavoritesEvent(uid: uid)),
       child: Scaffold(
         appBar: AppBar(title: const Text('Mes Favoris')),
         body: BlocBuilder<FavoriteBloc, FavoriteState>(
@@ -57,12 +57,32 @@ class _FavoritesContent extends StatelessWidget {
             if (state is FavoriteLoading) {
               return const Center(child: CircularProgressIndicator());
             } else if (state is FavoritesLoaded) {
+              if (state.favorites.isEmpty) {
+                // ✅ Affichage de l'animation quand la liste est vide
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Lottie.asset(
+                        'assets/animations/empty_favorite.json',
+                        width: 300,
+                        height: 300,
+                      ),
+                      const SizedBox(height: 20),
+                      const Text(
+                        'No favorites yet',
+                        style: TextStyle(fontSize: 16),
+                      ),
+                    ],
+                  ),
+                );
+              }
+
               return ListView.builder(
                 itemCount: state.favorites.length,
                 itemBuilder: (context, index) {
                   final product = state.favorites[index];
 
-                  // Vérifiez et corrigez l'URL de l'image si nécessaire
                   String imageUrl = product.imageUrl;
                   if (imageUrl.isEmpty || !imageUrl.startsWith('http')) {
                     imageUrl = 'https://via.placeholder.com/150';
@@ -78,12 +98,14 @@ class _FavoritesContent extends StatelessWidget {
                     imageUrl: imageUrl,
                     timestamp: DateTime.now().toIso8601String(),
                   );
+
                   return FavoriteCard(favorite: favorite);
                 },
               );
             } else if (state is FavoriteError) {
               return Center(
-                  child: Text(state.errorMessage ?? 'Une erreur est survenue'));
+                child: Text(state.errorMessage ?? 'Une erreur est survenue'),
+              );
             } else {
               return const Center(child: Text('Aucun favori trouvé'));
             }

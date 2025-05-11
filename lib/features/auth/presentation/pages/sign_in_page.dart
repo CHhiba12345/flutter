@@ -34,9 +34,6 @@ class _SignInPageState extends State<SignInPage> {
       body: BlocConsumer<AuthBloc, AuthState>(
         listener: (context, state) {
           if (state is AuthSuccess) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Hi ${_emailController.text}!')),
-            );
             context.router.replaceAll([const HomeRoute()]);
           } else if (state is AuthError) {
             ScaffoldMessenger.of(context).showSnackBar(

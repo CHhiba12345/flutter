@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-
-
 import '../../../../core/constants/app_colors.dart';
 
-class SignUpForm extends StatelessWidget {
+class SignUpForm extends StatefulWidget {
   final TextEditingController firstNameController;
   final TextEditingController lastNameController;
   final TextEditingController emailController;
@@ -30,6 +28,37 @@ class SignUpForm extends StatelessWidget {
   }) : super(key: key);
 
   @override
+  _SignUpFormState createState() => _SignUpFormState();
+}
+
+class _SignUpFormState extends State<SignUpForm> {
+  final FocusNode _firstNameFocus = FocusNode();
+  final FocusNode _lastNameFocus = FocusNode();
+  final FocusNode _emailFocus = FocusNode();
+  final FocusNode _passwordFocus = FocusNode();
+  final FocusNode _confirmPasswordFocus = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    _firstNameFocus.addListener(() => setState(() {}));
+    _lastNameFocus.addListener(() => setState(() {}));
+    _emailFocus.addListener(() => setState(() {}));
+    _passwordFocus.addListener(() => setState(() {}));
+    _confirmPasswordFocus.addListener(() => setState(() {}));
+  }
+
+  @override
+  void dispose() {
+    _firstNameFocus.dispose();
+    _lastNameFocus.dispose();
+    _emailFocus.dispose();
+    _passwordFocus.dispose();
+    _confirmPasswordFocus.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Column(
       children: [
@@ -49,10 +78,10 @@ class SignUpForm extends StatelessWidget {
 
   Widget _buildFirstNameField() {
     return TextFormField(
-      controller: firstNameController,
+      controller: widget.firstNameController,
+      focusNode: _firstNameFocus,
       decoration: InputDecoration(
-        labelText: 'First Name',
-        labelStyle: const TextStyle(color: Colors.grey),
+        hintText: _firstNameFocus.hasFocus ? null : 'First Name',
         prefixIcon: const Icon(Icons.person_outline, color: AppColors.primary),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(22),
@@ -67,10 +96,10 @@ class SignUpForm extends StatelessWidget {
 
   Widget _buildLastNameField() {
     return TextFormField(
-      controller: lastNameController,
+      controller: widget.lastNameController,
+      focusNode: _lastNameFocus,
       decoration: InputDecoration(
-        labelText: 'Last Name',
-        labelStyle: const TextStyle(color: Colors.grey),
+        hintText: _lastNameFocus.hasFocus ? null : 'Last Name',
         prefixIcon: const Icon(Icons.person_outline, color: AppColors.primary),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(22),
@@ -85,11 +114,11 @@ class SignUpForm extends StatelessWidget {
 
   Widget _buildEmailField() {
     return TextFormField(
-      controller: emailController,
+      controller: widget.emailController,
+      focusNode: _emailFocus,
       keyboardType: TextInputType.emailAddress,
       decoration: InputDecoration(
-        labelText: 'Email',
-        labelStyle: const TextStyle(color: Colors.grey),
+        hintText: _emailFocus.hasFocus ? null : 'Email',
         prefixIcon: const Icon(Icons.email_outlined, color: AppColors.primary),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(22),
@@ -104,18 +133,18 @@ class SignUpForm extends StatelessWidget {
 
   Widget _buildPasswordField() {
     return TextFormField(
-      controller: passwordController,
-      obscureText: obscurePassword,
+      controller: widget.passwordController,
+      focusNode: _passwordFocus,
+      obscureText: widget.obscurePassword,
       decoration: InputDecoration(
-        labelText: 'Password',
-        labelStyle: const TextStyle(color: Colors.grey),
+        hintText: _passwordFocus.hasFocus ? null : 'Password',
         prefixIcon: const Icon(Icons.lock_outline, color: AppColors.primary),
         suffixIcon: IconButton(
           icon: Icon(
-            obscurePassword ? Icons.visibility_off : Icons.visibility,
+            widget.obscurePassword ? Icons.visibility_off : Icons.visibility,
             color: AppColors.primary,
           ),
-          onPressed: togglePasswordVisibility,
+          onPressed: widget.togglePasswordVisibility,
         ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(22),
@@ -130,18 +159,18 @@ class SignUpForm extends StatelessWidget {
 
   Widget _buildConfirmPasswordField() {
     return TextFormField(
-      controller: confirmPasswordController,
-      obscureText: obscureConfirmPassword,
+      controller: widget.confirmPasswordController,
+      focusNode: _confirmPasswordFocus,
+      obscureText: widget.obscureConfirmPassword,
       decoration: InputDecoration(
-        labelText: 'Confirm Password',
-        labelStyle: const TextStyle(color: Colors.grey),
+        hintText: _confirmPasswordFocus.hasFocus ? null : 'Confirm Password',
         prefixIcon: const Icon(Icons.lock_outline, color: AppColors.primary),
         suffixIcon: IconButton(
           icon: Icon(
-            obscureConfirmPassword ? Icons.visibility_off : Icons.visibility,
+            widget.obscureConfirmPassword ? Icons.visibility_off : Icons.visibility,
             color: AppColors.primary,
           ),
-          onPressed: toggleConfirmPasswordVisibility,
+          onPressed: widget.toggleConfirmPasswordVisibility,
         ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(22),
@@ -176,7 +205,7 @@ class SignUpForm extends StatelessWidget {
 
   String? _validateConfirmPassword(String? value) {
     if (value == null || value.isEmpty) return 'Please confirm your password';
-    if (value != passwordController.text) return 'Passwords do not match';
+    if (value != widget.passwordController.text) return 'Passwords do not match';
     return null;
   }
 }

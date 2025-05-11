@@ -1,12 +1,17 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
+
 import '../../../../app_router.dart';
 import '../../../auth/data/datasources/auth_service.dart';
 import '../../../auth/presentation/blocs/auth_bloc.dart';
 import '../../../auth/presentation/blocs/auth_event.dart';
-import '../../../auth/presentation/blocs/auth_state.dart';
 import '../bloc/profile_bloc.dart';
+import 'edit_profile_page.dart'; // Importez la nouvelle page
 
 @RoutePage()
 class ProfilePage extends StatefulWidget {
@@ -20,85 +25,131 @@ class _ProfilePageState extends State<ProfilePage> {
   List<String> _selectedAllergies = [];
   List<ProfileSection> profileSections = [];
 
+  late TextEditingController _firstNameController;
+  late TextEditingController _lastNameController;
+
+  final picker = ImagePicker();
+  File? _profileImage;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  String? _localImagePath;
+
   @override
   void initState() {
     super.initState();
-    profileSections = _initializeProfileSections();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    _firstNameController = TextEditingController();
+    _lastNameController = TextEditingController();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       context.read<ProfileBloc>().add(InitializeAllergens());
+      await loadUserData();
+      await _loadLocalImage();
     });
+
+    profileSections = _initializeProfileSections();
+  }
+
+  Future<void> loadUserData() async {
+    final user = _auth.currentUser;
+    if (user != null) {
+      setState(() {
+        final nameParts = (user.displayName ?? 'User Name').split(' ');
+
+        if (nameParts.length >= 2) {
+          _firstNameController.text = nameParts[0];
+          _lastNameController.text = nameParts.sublist(1).join(' ');
+        } else if (user.email != null) {
+          final emailPart = user.email!.split('@').first.capitalize();
+          _firstNameController.text = emailPart;
+          _lastNameController.text = '';
+        }
+      });
+    }
+  }
+
+  Future<void> _loadLocalImage() async {
+    try {
+      final directory = await getApplicationDocumentsDirectory();
+      final uid = FirebaseAuth.instance.currentUser?.uid;
+      final imageFile = File('${directory.path}/profile_image_$uid.jpg');
+
+      if (await imageFile.exists()) {
+        setState(() {
+          _profileImage = imageFile;
+          _localImagePath = imageFile.path;
+        });
+      }
+    } catch (e) {
+      print('Error loading local image: $e');
+    }
+  }
+
+  Future<void> pickImage() async {
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      try {
+        final directory = await getApplicationDocumentsDirectory();
+        final uid = FirebaseAuth.instance.currentUser?.uid ?? 'default';
+        final imageFile = File('${directory.path}/profile_image_$uid.jpg');
+
+        if (await imageFile.exists()) {
+          await imageFile.delete();
+        }
+
+        final bytes = await File(pickedFile.path).readAsBytes();
+        await imageFile.writeAsBytes(bytes);
+
+        setState(() {
+          _profileImage = imageFile;
+          _localImagePath = imageFile.path;
+        });
+
+        imageCache.clear();
+        imageCache.clearLiveImages();
+      } catch (e) {
+        print('Error saving image locally: $e');
+      }
+    }
   }
 
   List<ProfileSection> _initializeProfileSections() {
     return [
       ProfileSection(
-        title: 'APP PREFERENCES',
+        title: 'PROFILE',
         items: [
           ProfileItem(
-            title: 'Language',
-            icon: Icons.language_outlined,
+            title: 'Edit Profile',
+            icon: Icons.edit,
             color: Colors.blue,
-            hasDropdown: true,
+            onTap: () => _navigateToEditProfile(context),
           ),
-          ProfileItem(
-            title: 'Dark Mode',
-            icon: Icons.dark_mode_outlined,
-            color: Colors.indigo,
-            hasToggle: true,
-          ),
+        ],
+      ),
+      ProfileSection(
+        title: 'APP PREFERENCES',
+        items: [
+          ProfileItem(title: 'Language', icon: Icons.language_outlined, color: Colors.blue, hasDropdown: true),
         ],
       ),
       ProfileSection(
         title: 'HEALTH',
         items: [
-          ProfileItem(
-            title: 'My Allergies',
-            icon: Icons.health_and_safety,
-            color: Colors.red,
-            hasAllergyEditor: true,
-          ),
+          ProfileItem(title: 'My Allergies', icon: Icons.health_and_safety, color: Colors.red, hasAllergyEditor: true),
         ],
       ),
-      // Autres sections...
-
       ProfileSection(
         title: 'SUPPORT',
         items: [
-          ProfileItem(
-            title: 'FAQs',
-            icon: Icons.help_outline,
-            color: Colors.teal,
-          ),
-          ProfileItem(
-            title: 'Feedback',
-            icon: Icons.feedback_outlined,
-            color: Colors.orange,
-          ),
-          ProfileItem(
-            title: 'Rate Us',
-            icon: Icons.star_border,
-            color: Colors.amber,
-          ),
-          ProfileItem(
-            title: 'Share App',
-            icon: Icons.share,
-            color: Colors.green,
-          ),
+          ProfileItem(title: 'FAQs', icon: Icons.help_outline, color: Colors.teal),
+          ProfileItem(title: 'Feedback', icon: Icons.feedback_outlined, color: Colors.orange),
+          ProfileItem(title: 'Rate Us', icon: Icons.star_border, color: Colors.amber),
+          ProfileItem(title: 'Share App', icon: Icons.share, color: Colors.green),
         ],
       ),
       ProfileSection(
         title: 'LEGAL',
         items: [
-          ProfileItem(
-            title: 'Privacy Policy',
-            icon: Icons.lock_outline,
-            color: Colors.purple,
-          ),
-          ProfileItem(
-            title: 'Premium Terms',
-            icon: Icons.check_circle_outline,
-            color: Colors.deepPurple,
-          ),
+          ProfileItem(title: 'Privacy Policy', icon: Icons.lock_outline, color: Colors.purple),
+          ProfileItem(title: 'Premium Terms', icon: Icons.check_circle_outline, color: Colors.deepPurple),
         ],
       ),
       ProfileSection(
@@ -120,34 +171,54 @@ class _ProfilePageState extends State<ProfilePage> {
     ];
   }
 
+  Future<void> _navigateToEditProfile(BuildContext context) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => EditProfilePage(
+          firstName: _firstNameController.text,
+          lastName: _lastNameController.text,
+          profileImage: _profileImage,
+        ),
+      ),
+    );
+
+    if (result != null && mounted) {
+      setState(() {
+        _firstNameController.text = result['firstName'] ?? _firstNameController.text;
+        _lastNameController.text = result['lastName'] ?? _lastNameController.text;
+        if (result['imagePath'] != null) {
+          _profileImage = File(result['imagePath']);
+          _localImagePath = result['imagePath'];
+        }
+      });
+      await loadUserData();
+    }
+  }
+
   void _handleSignOut() {
     showDialog(
       context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Confirmation'),
-          content: Text('Are you sure you want to sign out?'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text('No'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                context.read<AuthBloc>().add(SignOutEvent());
-                context.router.replaceAll([const SignInRoute()]);
-              },
-              child: Text('Yes'),
-            ),
-          ],
-        );
-      },
+      builder: (context) => AlertDialog(
+        title: Text("Confirm Sign Out"),
+        content: Text("Are you sure you want to sign out?"),
+        actions: [
+          TextButton(onPressed: Navigator.of(context).pop, child: Text("No")),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              context.read<AuthBloc>().add(SignOutEvent());
+              context.router.replaceAll([const SignInRoute()]);
+            },
+            child: Text("Yes"),
+          ),
+        ],
+      ),
     );
   }
 
   void _showAllergySelectionDialog(BuildContext context) {
-    final commonAllergies = [
+    List<String> commonAllergies = [
       'Milk', 'Fish', 'Tree Nuts', 'Peanuts', 'Shellfish',
       'Crustacean Shellfish', 'Molluscan Shellfish', 'Wheat',
       'Eggs', 'Soy', 'Gluten', 'Lactose'
@@ -158,14 +229,9 @@ class _ProfilePageState extends State<ProfilePage> {
       builder: (context) {
         return BlocBuilder<ProfileBloc, ProfileState>(
           builder: (context, state) {
-            List<String> tempAllergies = [];
-            if (state is AllergensLoaded) {
-              tempAllergies = state.allergens.map((e) => e.capitalize()).toList();
-              print('✅ Allergènes chargés dans la boîte de dialogue : $tempAllergies');
-            } else {
-              tempAllergies = List.from(_selectedAllergies);
-              print('ℹ️ Utilisation des allergènes sélectionnés précédemment : $tempAllergies');
-            }
+            List<String> tempAllergies = state is AllergensLoaded
+                ? state.allergens.map((e) => e.capitalize()).toList()
+                : List.from(_selectedAllergies);
 
             return StatefulBuilder(
               builder: (context, setState) {
@@ -179,13 +245,9 @@ class _ProfilePageState extends State<ProfilePage> {
                           value: tempAllergies.contains(allergy),
                           onChanged: (selected) {
                             setState(() {
-                              if (selected == true) {
-                                tempAllergies.add(allergy);
-                                print('➕ Allergène ajouté : $allergy');
-                              } else {
-                                tempAllergies.remove(allergy);
-                                print('➖ Allergène retiré : $allergy');
-                              }
+                              selected == true
+                                  ? tempAllergies.add(allergy)
+                                  : tempAllergies.remove(allergy);
                             });
                           },
                         );
@@ -194,16 +256,12 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                   actions: [
                     TextButton(
-                      onPressed: () {
-                        print('❌ Sélection annulée');
-                        Navigator.pop(context);
-                      },
+                      onPressed: () => Navigator.pop(context),
                       child: Text('CANCEL'),
                     ),
                     TextButton(
                       onPressed: () async {
-                        final authService = AuthService();
-                        final uid = await authService.getCurrentUserId();
+                        final uid = await AuthService().getCurrentUserId();
                         if (uid != null) {
                           context.read<ProfileBloc>().add(
                             SetAllergens(
@@ -211,18 +269,10 @@ class _ProfilePageState extends State<ProfilePage> {
                               allergens: tempAllergies.map((a) => a.toLowerCase()).toList(),
                             ),
                           );
-                          print('📤 Envoi des allergènes sélectionnés : $tempAllergies');
-                          // Recharge immédiatement les allergènes
                           context.read<ProfileBloc>().add(LoadAllergens(uid));
-                          setState(() {
-                            _selectedAllergies = tempAllergies;
-                            print('📌 Mise à jour locale des allergènes : $_selectedAllergies');
-                          });
-                        } else {
-                          print('⚠️ UID introuvable, impossible d\'enregistrer');
+                          setState(() => _selectedAllergies = tempAllergies);
                         }
                         Navigator.pop(context);
-                        print('✅ Boîte de dialogue fermée après sauvegarde');
                       },
                       child: Text('SAVE'),
                     ),
@@ -234,7 +284,13 @@ class _ProfilePageState extends State<ProfilePage> {
         );
       },
     );
+  }
 
+  @override
+  void dispose() {
+    _firstNameController.dispose();
+    _lastNameController.dispose();
+    super.dispose();
   }
 
   @override
@@ -248,7 +304,6 @@ class _ProfilePageState extends State<ProfilePage> {
             if (state is AllergensLoaded) {
               setState(() {
                 _selectedAllergies = state.allergens.map((e) => e.capitalize()).toList();
-                print('🎯 Allergènes chargés depuis ProfileBloc: $_selectedAllergies');
               });
             }
           },
@@ -275,17 +330,43 @@ class _ProfilePageState extends State<ProfilePage> {
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Row(
                     children: [
-                      const CircleAvatar(
-                        radius: 20,
-                        child: Icon(Icons.person),
+                      GestureDetector(
+                        onTap: pickImage,
+                        child: CircleAvatar(
+                          key: ValueKey(_localImagePath),
+                          radius: 30,
+                          backgroundColor: Colors.white.withOpacity(0.4),
+                          backgroundImage: _profileImage != null
+                              ? FileImage(_profileImage!)
+                              : null,
+                          child: _profileImage == null
+                              ? Icon(Icons.person, size: 35, color: Colors.white)
+                              : null,
+                        ),
                       ),
                       const SizedBox(width: 12),
-                      Text(
-                        'User Name',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              _firstNameController.text,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            if (_lastNameController.text.isNotEmpty)
+                              Text(
+                                _lastNameController.text,
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                ),
+                              ),
+                          ],
                         ),
                       ),
                     ],
@@ -350,9 +431,10 @@ class _ProfilePageState extends State<ProfilePage> {
                           )
                               : null,
                           trailing: _buildTrailingWidget(item),
-                          onTap: item.onTap ?? (item.hasAllergyEditor ?? false
-                              ? () => _showAllergySelectionDialog(context)
-                              : null),
+                          onTap: item.onTap ??
+                              (item.hasAllergyEditor ?? false
+                                  ? () => _showAllergySelectionDialog(context)
+                                  : null),
                         ),
                         if (item != section.items.last)
                           Divider(height: 1, indent: 16),
@@ -395,17 +477,13 @@ class _ProfilePageState extends State<ProfilePage> {
         onChanged: (value) => setState(() => _darkModeEnabled = value),
       );
     }
-    return const Icon(
-      Icons.arrow_forward_ios,
-      size: 16,
-      color: Colors.grey,
-    );
+    return const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey);
   }
 }
+
 class ProfileSection {
   final String title;
   final List<ProfileItem> items;
-
   ProfileSection({required this.title, required this.items});
 }
 
@@ -431,7 +509,7 @@ class ProfileItem {
 
 extension StringExtension on String {
   String capitalize() {
-    if (isEmpty) return '';
-    return "${this[0].toUpperCase()}${substring(1).toLowerCase()}";
+    if (isEmpty) return this;
+    return this[0].toUpperCase() + substring(1).toLowerCase();
   }
 }

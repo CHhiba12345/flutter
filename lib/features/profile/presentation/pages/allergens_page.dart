@@ -78,12 +78,9 @@ class _AllergensPageState extends State<AllergensPage> {
 
   void _updateAllergens(List<String> allergens) {
     setState(() {
-      // Réinitialiser toutes les sélections
       for (var key in _selectedAllergens.keys) {
         _selectedAllergens[key] = false;
       }
-
-      // Appliquer les allergènes de l'utilisateur
       for (var allergen in allergens) {
         final key = allergen.capitalize();
         if (_selectedAllergens.containsKey(key)) {
@@ -118,18 +115,39 @@ class _AllergensPageState extends State<AllergensPage> {
         }
       },
       child: Scaffold(
+        backgroundColor: AppColors.secondary, // 👈 Fond de la page en blanc
         appBar: AppBar(
-          title: Text('Food Allergens'),
-          automaticallyImplyLeading: false, // Empêche le bouton retour
+          centerTitle: true, // ✅ centrer le titre
+          title: Text(
+            'Food Allergens',
+            style: TextStyle(
+              color: Colors.white,     // ✅ texte blanc
+              fontWeight: FontWeight.bold, // ✅ texte en gras
+            ),
+          ),
+          automaticallyImplyLeading: false,
+          backgroundColor: AppColors.secondary,
+          iconTheme: IconThemeData(color: Colors.white),
         ),
+
+
+
         body: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'Select ingredients you are allergic to',
-                style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+              Center(
+                child: Text(
+                  'Select ingredients you are allergic to',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.background,
+                    letterSpacing: 0.2,
+                  ),
+                ),
               ),
               SizedBox(height: 20),
               Expanded(
@@ -153,7 +171,7 @@ class _AllergensPageState extends State<AllergensPage> {
               ElevatedButton(
                 onPressed: _isLoading ? null : () => _saveAllergens(context),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.secondary,
+                  backgroundColor: AppColors.background,
                   minimumSize: Size(double.infinity, 50),
                 ),
                 child: _isLoading
@@ -165,19 +183,18 @@ class _AllergensPageState extends State<AllergensPage> {
                     strokeWidth: 2,
                   ),
                 )
-
                     : Text(
                   'Continue',
                   style: TextStyle(
                     fontSize: 18,
-                    color: AppColors.background, // place la couleur ici
+                    color: AppColors.secondary,
                   ),
-                )
-
+                ),
               ),
             ],
           ),
         ),
+
       ),
     );
   }
@@ -210,11 +227,10 @@ class _AllergensPageState extends State<AllergensPage> {
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w900,
-                  color: AppColors.textPrimary, // Couleur identique au texte du bouton
+                  color: AppColors.textPrimary,
                 ),
                 textAlign: TextAlign.center,
               ),
-
             ],
           ),
         ),

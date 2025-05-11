@@ -10,6 +10,7 @@ import 'features/history/presentation/pages/history_page.dart';
 import 'features/home/presentation/pages/home_page.dart';
 import 'features/profile/presentation/pages/allergens_page.dart';
 import 'features/profile/presentation/pages/profile_page.dart';
+import 'features/ticket/presentation/pages/ticket_analysis_page.dart';
 import 'features/ticket/presentation/pages/ticket_page.dart';
 import 'main_layout_page.dart';
 import 'package:flutter/material.dart'; // Assurez-vous que cet import est présent
@@ -37,6 +38,7 @@ class AppRouter extends _$AppRouter {
     AutoRoute(page: OnboardingRoute.page),
     AutoRoute(page: AllergensRoute.page),
     AutoRoute(page: FavoritesRoute.page),
+    AutoRoute(page:TicketAnalysisRoute.page),
     //Allergens
     // Route principale avec sous-routes
     AutoRoute(

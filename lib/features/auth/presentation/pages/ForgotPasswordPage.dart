@@ -56,7 +56,7 @@ class ForgotPasswordPage extends StatelessWidget {
         child: Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
-              colors: [AppColors.secondary, AppColors.background],
+              colors: [AppColors.background, AppColors.secondary],
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
 
@@ -157,11 +157,11 @@ class ForgotPasswordPage extends StatelessWidget {
         prefixIcon: Icon(Icons.email_outlined, color: Colors.white.withOpacity(0.7)),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.white.withOpacity(0.3)),
+          borderSide: BorderSide(color: Colors.cyan.withOpacity(1.0)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.white),
+          borderSide: BorderSide(color: Colors.cyan),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),

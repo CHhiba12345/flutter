@@ -1,6 +1,7 @@
 import 'package:auto_route/annotations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:lottie/lottie.dart'; // <-- ajout pour Lottie
 import '../../domain/usecases/delete_history_usecase.dart';
 import '../../domain/usecases/get_history_usecase.dart';
 import '../../domain/usecases/record_history.dart';
@@ -25,7 +26,6 @@ class _HistoryPageState extends State<HistoryPage> with SingleTickerProviderStat
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
-    // Load history when the page is first shown
     context.read<HistoryBloc>().add(const LoadHistoryEvent());
   }
 
@@ -60,10 +60,10 @@ class _HistoryPageState extends State<HistoryPage> with SingleTickerProviderStat
                 height: 80,
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Row(
-                  children: [
-                    const Icon(Icons.history, color: Colors.white, size: 30),
-                    const SizedBox(width: 12),
-                    const Text(
+                  children: const [
+                    Icon(Icons.history, color: Colors.white, size: 30),
+                    SizedBox(width: 12),
+                    Text(
                       'History',
                       style: TextStyle(
                         color: Colors.white,
@@ -92,7 +92,7 @@ class _HistoryPageState extends State<HistoryPage> with SingleTickerProviderStat
                     insets: EdgeInsets.symmetric(horizontal: 50),
                   ),
                   labelColor: Colors.lightGreen,
-                  unselectedLabelColor: const Color(0xFF708E98),
+                  unselectedLabelColor: Color(0xFF708E98),
                   tabs: const [
                     Tab(text: 'History'),
                     Tab(text: 'Analyse'),
@@ -114,6 +114,26 @@ class _HistoryPageState extends State<HistoryPage> with SingleTickerProviderStat
                           } else if (state is HistoryError) {
                             return Center(child: Text(state.message));
                           } else if (state is HistoryLoaded) {
+                            if (state.histories.isEmpty) {
+                              return Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Lottie.asset(
+                                      'assets/animations/empty_history.json',
+                                      width: 200,
+                                      height: 200,
+                                    ),
+                                    const SizedBox(height: 16),
+                                    const Text(
+                                      'No history available',
+                                      style: TextStyle(fontSize: 16),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }
+
                             return RefreshIndicator(
                               onRefresh: () async {
                                 context.read<HistoryBloc>().add(const LoadHistoryEvent());
@@ -138,12 +158,13 @@ class _HistoryPageState extends State<HistoryPage> with SingleTickerProviderStat
                           }
                         },
                       ),
+
                       // Analyse Tab
                       const Center(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.warning, size: 50, color: Colors.orange),
+                            Icon(Icons.warning, size: 50, color: Colors.red),
                             SizedBox(height: 16),
                             Text(
                               'Not valid at the moment',

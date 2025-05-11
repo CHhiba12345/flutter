@@ -1,9 +1,7 @@
-import 'dart:io';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:email_validator/email_validator.dart';
-import '../../../../core/errors/auth_exception.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 

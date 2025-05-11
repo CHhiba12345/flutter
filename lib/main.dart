@@ -55,7 +55,16 @@ import 'features/profile/domain/usecases/clear_user_allergens.dart';
 import 'features/profile/domain/usecases/get_user_allergens.dart';
 import 'features/profile/domain/usecases/set_user_allergens.dart';
 import 'features/profile/presentation/bloc/profile_bloc.dart';
+import 'features/ticket/data/datasources/receipt_scanner_service.dart';
+import 'features/ticket/domain/usecases/get_price_comparisons_usecase.dart';
 import 'firebase_options.dart';
+
+////////////////////
+import 'features/ticket/data/datasources/ticket_datasource.dart';
+import 'features/ticket/data/repositories/ticket_repository_impl.dart';
+import 'features/ticket/domain/repositories/ticket_repository.dart';
+import 'features/ticket/domain/usecases/send_ticket_usecase.dart';
+import 'features/ticket/presentation/bloc/ticket_bloc.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -107,6 +116,16 @@ void main() async {
   // Récupération de l'ID utilisateur connecté
   final userId = await authService.getCurrentUserId() ?? '';
 
+  // Dépendances Ticket
+  final ticketDataSource = TicketDataSource(authService);
+  final ticketRepository = TicketRepositoryImpl(
+    dataSource: ticketDataSource,
+    authService: authService,
+  );
+  final sendTicketUseCase = SendTicketUseCase(repository: ticketRepository);
+  final getPriceComparisonsUseCase = GetPriceComparisonsUseCase(repository: ticketRepository);
+  final scannerService = ReceiptScannerService();
+
   runApp(
     MyApp(
       authRepository: authRepository,
@@ -123,10 +142,13 @@ void main() async {
       deleteHistoryUseCase: deleteHistoryUseCase,
       toggleFavoriteUseCase: toggleFavoriteUseCase,
       favoriteRepository: favoriteRepository,
-      initialUid: userId, // Passez l'ID utilisateur dynamique
+      initialUid: userId,
       getUserAllergensUseCase: getUserAllergensUseCase,
       setUserAllergensUseCase: setUserAllergensUseCase,
       clearUserAllergensUseCase: clearUserAllergensUseCase,
+      sendTicketUseCase: sendTicketUseCase,
+      scannerService: scannerService,
+      getPriceComparisonsUseCase: getPriceComparisonsUseCase,
     ),
   );
 }
@@ -146,12 +168,13 @@ class MyApp extends StatelessWidget {
   final DeleteHistoryUseCase deleteHistoryUseCase;
   final ToggleFavoriteUseCase toggleFavoriteUseCase;
   final FavoriteRepository favoriteRepository;
-
   final GetUserAllergens getUserAllergensUseCase;
   final SetUserAllergens setUserAllergensUseCase;
   final ClearUserAllergens clearUserAllergensUseCase;
-
-  final String initialUid; // Ajout de l'ID utilisateur
+  final SendTicketUseCase sendTicketUseCase;
+  final GetPriceComparisonsUseCase getPriceComparisonsUseCase;
+  final String initialUid;
+  final ReceiptScannerService scannerService;
   final _appRouter = AppRouter();
 
   MyApp({
@@ -170,17 +193,19 @@ class MyApp extends StatelessWidget {
     required this.deleteHistoryUseCase,
     required this.toggleFavoriteUseCase,
     required this.favoriteRepository,
-    required this.initialUid, // Ajout du paramètre
+    required this.initialUid,
     required this.getUserAllergensUseCase,
     required this.setUserAllergensUseCase,
     required this.clearUserAllergensUseCase,
+    required this.sendTicketUseCase,
+    required this.scannerService,
+    required this.getPriceComparisonsUseCase,
   });
 
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        // Bloc Auth
         BlocProvider(
           create: (context) => AuthBloc(
             signInWithEmailAndPassword: signInWithEmailAndPassword,
@@ -193,8 +218,6 @@ class MyApp extends StatelessWidget {
             authRepository: authRepository,
           ),
         ),
-
-        // Bloc Home
         BlocProvider(
           create: (context) => HomeBloc(
             scanProduct: scanProductUseCase,
@@ -202,8 +225,6 @@ class MyApp extends StatelessWidget {
             toggleFavorite: toggleFavoriteUseCase,
           ),
         ),
-
-        // Bloc History
         BlocProvider(
           create: (context) => HistoryBloc(
             getHistoryUseCase: GetHistoryUseCase(repository: historyRepository),
@@ -211,8 +232,6 @@ class MyApp extends StatelessWidget {
             deleteHistory: deleteHistoryUseCase,
           )..add(const LoadHistoryEvent()),
         ),
-
-        // Bloc Favorites
         BlocProvider(
           create: (context) => FavoriteBloc(
             addToFavorites: AddToFavorites(favoriteRepository),
@@ -220,19 +239,25 @@ class MyApp extends StatelessWidget {
             removeFromFavorites: RemoveFromFavorites(favoriteRepository),
           )..add(LoadFavoritesEvent(uid: initialUid)),
         ),
-
-        // Bloc Profile
         BlocProvider(
           create: (context) => ProfileBloc(
             getUserAllergens: getUserAllergensUseCase,
             setUserAllergens: setUserAllergensUseCase,
-            clearUserAllergens: clearUserAllergensUseCase, authService: AuthService(),
+            clearUserAllergens: clearUserAllergensUseCase,
+            authService: AuthService(),
+          ),
+        ),
+        BlocProvider(
+          create: (context) => TicketBloc(
+            sendTicketUseCase: sendTicketUseCase,
+            scannerService: scannerService,
+            getPriceComparisonsUseCase: getPriceComparisonsUseCase,
           ),
         ),
       ],
       child: MultiProvider(
         providers: [
-          Provider<FavoriteRepository>(create: (_) => favoriteRepository), // Ajout du provider
+          Provider<FavoriteRepository>(create: (_) => favoriteRepository),
         ],
         child: MaterialApp.router(
           debugShowCheckedModeBanner: false,

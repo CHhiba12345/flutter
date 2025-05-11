@@ -124,7 +124,7 @@ class _SignUpPageState extends State<SignUpPage> {
       children: [
         Text(
           'Create Account',
-          style: AppTextStyles.headlineLarge?.copyWith(
+          style: AppTextStyles.headlineLarge.copyWith(
             color: Color(0xFFD5D5D5),
             fontWeight: FontWeight.bold,
             fontSize: 32,

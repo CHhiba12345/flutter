@@ -1,8 +1,8 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/intl.dart';
 import 'package:lottie/lottie.dart';
+import 'package:path/path.dart';
 import '../bloc/ticket_bloc.dart';
 import '../bloc/ticket_event.dart';
 import '../bloc/ticket_state.dart';
@@ -19,8 +19,8 @@ class TicketAnalysisPage extends StatelessWidget {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(state.message),
-              behavior: SnackBarBehavior.floating,
               backgroundColor: Colors.red[400],
+              behavior: SnackBarBehavior.floating,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
               ),
@@ -31,7 +31,7 @@ class TicketAnalysisPage extends StatelessWidget {
       child: Scaffold(
         appBar: AppBar(
           title: const Text(
-            'Analysis results',
+            'Analyse des résultats',
             style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 20,
@@ -59,9 +59,19 @@ class TicketAnalysisPage extends StatelessWidget {
             if (state is TicketLoading) {
               return _buildLoadingState();
             }
-            if (state is TicketAnalysisSuccess) {
-              return _buildAnalysisSuccess(context, state);
+
+            // ✅ Toujours afficher l'analyse si disponible, même pendant ou après une comparaison
+            if (state is TicketAnalysisSuccess || state is PriceComparisonsLoaded) {
+              final analysisState = (state is TicketAnalysisSuccess)
+                  ? state
+                  : TicketAnalysisSuccess(
+                analysis: (state as PriceComparisonsLoaded).currentAnalysis ?? {},
+                receiptData: state.currentReceiptData ?? {},
+                priceComparisons: state.comparisons,
+              );
+              return _buildAnalysisSuccess(context, analysisState);
             }
+
             return _buildEmptyState();
           },
         ),
@@ -108,8 +118,7 @@ class TicketAnalysisPage extends StatelessWidget {
                     height: 60,
                     child: CircularProgressIndicator(
                       strokeWidth: 4,
-                      valueColor:
-                      AlwaysStoppedAnimation<Color>(Color(0xFF2C5C2D)),
+                      valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF2C5C2D)),
                     ),
                   ),
                 ),
@@ -129,7 +138,7 @@ class TicketAnalysisPage extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 40),
             child: Text(
-              'We analyze the products in your ticket to provide you with the best recommendations',
+              'Nous analysons les produits de votre ticket pour vous donner les meilleures recommandations.',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 14,
@@ -154,7 +163,7 @@ class TicketAnalysisPage extends StatelessWidget {
           ),
           const SizedBox(height: 20),
           const Text(
-            'No data available',
+            'Aucune donnée disponible',
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w600,
@@ -163,7 +172,7 @@ class TicketAnalysisPage extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           const Text(
-            'Scan a ticket to see the analysis',
+            'Veuillez scanner un ticket pour voir l’analyse',
             style: TextStyle(
               fontSize: 14,
               color: Colors.grey,
@@ -174,10 +183,8 @@ class TicketAnalysisPage extends StatelessWidget {
     );
   }
 
-  Widget _buildAnalysisSuccess(
-      BuildContext context, TicketAnalysisSuccess state) {
+  Widget _buildAnalysisSuccess(BuildContext context, TicketAnalysisSuccess state) {
     final receiptData = state.receiptData;
-
     return CustomScrollView(
       physics: const BouncingScrollPhysics(),
       slivers: [
@@ -246,7 +253,7 @@ class TicketAnalysisPage extends StatelessWidget {
                     ),
                     const SizedBox(width: 8),
                     const Text(
-                      'Product Analysis',
+                      'Analyse des produits',
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
@@ -257,10 +264,7 @@ class TicketAnalysisPage extends StatelessWidget {
                     Chip(
                       label: const Text(
                         'produits',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.white,
-                        ),
+                        style: TextStyle(fontSize: 12, color: Colors.white),
                       ),
                       backgroundColor: const Color(0xFF2C5C2D),
                     ),
@@ -276,7 +280,7 @@ class TicketAnalysisPage extends StatelessWidget {
             delegate: SliverChildBuilderDelegate(
                   (context, index) {
                 final product = state.analysis['products'][index];
-                return _buildProductCard(product, index, context);
+                return _buildProductCard(product, context);
               },
               childCount: (state.analysis['products'] as List).length,
             ),
@@ -363,7 +367,7 @@ class TicketAnalysisPage extends StatelessWidget {
     );
   }
 
-  Widget _buildProductCard(Map<String, dynamic> product, int index, BuildContext context) {
+  Widget _buildProductCard(Map<String, dynamic> product, BuildContext context) {
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
       elevation: 2,
@@ -385,15 +389,13 @@ class TicketAnalysisPage extends StatelessWidget {
                     width: 50,
                     height: 50,
                     decoration: BoxDecoration(
-                      color: _getProcessingColor(
-                          product['processing_level'])
+                      color: _getProcessingColor(product['processing_level'])
                           .withOpacity(0.2),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     alignment: Alignment.center,
                     child: Text(
-                      _getProcessingEmoji(
-                          product['processing_level']),
+                      _getProcessingEmoji(product['processing_level']),
                       style: const TextStyle(fontSize: 24),
                     ),
                   ),
@@ -466,24 +468,21 @@ class TicketAnalysisPage extends StatelessWidget {
                 icon: Icons.lightbulb_outline_rounded,
                 iconColor: const Color(0xFFFFC107),
                 title: 'Conseil',
-                content: product['advice'] ??
-                    'Pas d\'analyse disponible',
+                content: product['advice'] ?? 'Pas d\'analyse disponible',
               ),
               const SizedBox(height: 12),
               _buildInfoTile(
                 icon: Icons.thumb_up_rounded,
                 iconColor: const Color(0xFF4CAF50),
                 title: 'Recommandation',
-                content: product['consumption_recommendation'] ??
-                    'Non spécifié',
+                content:
+                product['consumption_recommendation'] ?? 'Non spécifié',
               ),
               const SizedBox(height: 12),
-              // Nouveau bouton pour voir les prix dans d'autres magasins
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () {
-                    // Action pour voir les prix dans d'autres magasins
                     _showOtherStoresPrices(context, product);
                   },
                   style: ElevatedButton.styleFrom(
@@ -521,34 +520,56 @@ class TicketAnalysisPage extends StatelessWidget {
     );
   }
 
-  // Dans lib/features/ticket/presentation/pages/ticket_analysis_page.dart
-  void _showOtherStoresPrices(BuildContext context, Map<String, dynamic> product) {
+  void _showOtherStoresPrices(
+      BuildContext context, Map<String, dynamic> product) {
     final productName = product['product_name'];
-    final currentPrice = (product['price'] as num?)?.toDouble() ?? 0.0; // Assurez-vous que ce champ existe dans vos données
+    final currentPrice = product['price']?.toDouble() ?? 0.0;
+
+    if (productName == null || productName.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Nom du produit invalide')),
+      );
+      return;
+    }
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => BlocProvider.value(
-        value: BlocProvider.of<TicketBloc>(context),
-        child: BlocBuilder<TicketBloc, TicketState>(
-          builder: (context, state) {
-            if (state is PriceComparisonsLoaded) {
-              return _buildPriceComparisonSheet(
-                context,
-                productName,
-                currentPrice,
-                state.comparisons,
-              );
-            }
-            return _buildLoadingSheet();
-          },
+      builder: (context) => Container(
+        height: MediaQuery.of(context).size.height * 0.7,
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
+        ),
+        child: BlocProvider.value(
+          value: BlocProvider.of<TicketBloc>(context),
+          child: BlocConsumer<TicketBloc, TicketState>(
+            listener: (context, state) {
+              if (state is TicketError) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(state.message)),
+                );
+              }
+            },
+            builder: (context, state) {
+              if (state is PriceComparisonsLoaded) {
+                final comparisons = state.comparisons ?? [];
+                return _buildPriceComparisonSheet(
+                  context,
+                  productName,
+                  currentPrice,
+                  comparisons,
+                );
+              }
+              return _buildLoadingSheet();
+            },
+          ),
         ),
       ),
     );
 
-    // Déclencher le chargement des données
+    // 🔁 Déclencher l’événement après avoir construit la modale
     BlocProvider.of<TicketBloc>(context).add(
       GetPriceComparisonsEvent(productName: productName),
     );
@@ -557,9 +578,9 @@ class TicketAnalysisPage extends StatelessWidget {
   Widget _buildLoadingSheet() {
     return Container(
       height: 200,
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: Colors.white,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(25)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
       ),
       child: const Center(
         child: CircularProgressIndicator(),
@@ -573,9 +594,10 @@ class TicketAnalysisPage extends StatelessWidget {
       double currentPrice,
       List<Map<String, dynamic>> comparisons,
       ) {
-    final validComparisons = comparisons.where((store) => store['price'] != null).toList();
+    final validComparisons = (comparisons ?? [])
+        .where((s) => s['price'] != null)
+        .toList();
 
-    // Trouver le meilleur magasin avec le prix le plus bas
     Map<String, dynamic>? bestStore;
     for (var store in validComparisons) {
       if (bestStore == null || store['price'] < bestStore['price']) {
@@ -583,23 +605,10 @@ class TicketAnalysisPage extends StatelessWidget {
       }
     }
 
-    // Trier les autres magasins (exclure le meilleur)
-    final otherStores = validComparisons.where((store) => store != bestStore).toList();
+    final otherStores =
+    validComparisons.where((s) => s != bestStore).toList();
 
     return Container(
-      height: MediaQuery.of(context).size.height * 0.7,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(25)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.2),
-            blurRadius: 10,
-            spreadRadius: 0,
-            offset: const Offset(0, -5),
-          )
-        ],
-      ),
       padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -621,11 +630,10 @@ class TicketAnalysisPage extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          if (bestStore != null) ...[
+          if (bestStore != null)
             Row(
               children: [
-                const Text('🟢 ',
-                    style: TextStyle(fontSize: 18)),
+                const Text('🟢 ', style: TextStyle(fontSize: 18)),
                 Expanded(
                   child: Text(
                     'Le meilleur prix est chez ${bestStore['store']} : ${bestStore['price'].toStringAsFixed(2)} DT',
@@ -638,22 +646,17 @@ class TicketAnalysisPage extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 16),
-          ],
+          const SizedBox(height: 16),
           Expanded(
             child: ListView.separated(
               itemCount: otherStores.length,
-              separatorBuilder: (context, index) => Divider(height: 1, color: Colors.grey[200]),
+              separatorBuilder: (_, __) =>
+                  Divider(height: 1, color: Colors.grey[200]),
               itemBuilder: (context, index) {
                 final store = otherStores[index];
                 return ListTile(
                   leading: const Text('🔵', style: TextStyle(fontSize: 20)),
-                  title: Text(
-                    store['store'],
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
+                  title: Text(store['store']),
                   trailing: Text(
                     '${store['price']?.toStringAsFixed(2)} DT',
                     style: const TextStyle(
@@ -669,10 +672,9 @@ class TicketAnalysisPage extends StatelessWidget {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: () => Navigator.pop(context),
+              onPressed: Navigator.of(context).pop,
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF2C5C2D),
-                foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -686,6 +688,36 @@ class TicketAnalysisPage extends StatelessWidget {
     );
   }
 
+  Widget _buildNoComparisonsSheet(String productName) {
+    return Padding(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.search_off, size: 60, color: Colors.grey[400]),
+          const SizedBox(height: 20),
+          Text(
+            'Aucune comparaison trouvée',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            'Aucun prix trouvé pour "$productName" dans d’autres magasins',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 16),
+          ),
+          const SizedBox(height: 30),
+          ElevatedButton(
+            onPressed: Navigator.of(context as BuildContext).pop,
+            child: const Text('Fermer'),
+          ),
+        ],
+      ),
+    );
+  }
 
   Widget _buildInfoTile({
     required IconData icon,
@@ -786,7 +818,7 @@ class TicketAnalysisPage extends StatelessWidget {
     );
   }
 
-  Color _getProcessingColor(String level) {
+  Color _getProcessingColor(String? level) {
     switch (level) {
       case 'naturel':
         return const Color(0xFF4CAF50);
@@ -799,7 +831,7 @@ class TicketAnalysisPage extends StatelessWidget {
     }
   }
 
-  String _getProcessingEmoji(String level) {
+  String _getProcessingEmoji(String? level) {
     switch (level) {
       case 'naturel':
         return '🌿';

@@ -63,25 +63,45 @@ class TicketDataSource {
       );
 
       if (response.statusCode == 200) {
-        final List<dynamic> data = jsonDecode(response.body);
-        return data.map((receipt) {
-          final product = receipt['products'].firstWhere(
-                (p) => p['productName'] == productName,
-            orElse: () => null,
-          );
-          return {
-            'store': receipt['storeName'],
-            'price': product?['unitPrice'],
-            'date': receipt['receiptDate'],
-          };
-        }).toList();
+        final data = jsonDecode(response.body);
+
+        // Si la réponse est une liste
+        if (data is List) {
+          return data.map((receipt) {
+            final product = (receipt['products'] as List).firstWhere(
+                  (p) => p['productName'] == productName,
+              orElse: () => null,
+            );
+
+            if (product == null) return null;
+
+            return {
+              'store': receipt['storeName'] ?? 'Magasin inconnu',
+              'price': product['unitPrice']?.toDouble(),
+              'date': receipt['receiptDate'] ?? 'Date inconnue',
+            };
+          }).where((item) => item != null && item['price'] != null).toList().cast<Map<String, dynamic>>();
+        }
+
+        // Si la réponse est un objet avec comparedProducts
+        if (data is Map && data.containsKey('comparedProducts')) {
+          final comparedProducts = data['comparedProducts'] as List;
+          return comparedProducts.map((product) {
+            return {
+              'store': product['currentStore'] ?? 'Magasin inconnu',
+              'price': product['currentPrice']?.toDouble(),
+              'date': 'Date non disponible',
+            };
+          }).where((item) => item['price'] != null).toList();
+        }
       }
-      throw Exception('Failed to load price comparisons');
+
+      // Retourne une liste vide si aucun cas ne correspond
+      return [];
+
     } catch (e) {
       print('❌ [TicketDataSource] Error getting comparisons: $e');
-      throw e;
+      return []; // Retourne une liste vide en cas d'erreur
     }
   }
-
-
 }

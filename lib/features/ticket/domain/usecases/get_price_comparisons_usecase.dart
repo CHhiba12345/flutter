@@ -7,6 +7,11 @@ class GetPriceComparisonsUseCase {
   GetPriceComparisonsUseCase({required this.repository});
 
   Future<List<Map<String, dynamic>>> execute(String productName) async {
-    return await repository.getProductPriceComparisons(productName);
+    try {
+      final comparisons = await repository.getProductPriceComparisons(productName);
+      return comparisons ?? []; // Garantit de toujours retourner une liste
+    } catch (e) {
+      return []; // Retourne une liste vide en cas d'erreur
+    }
   }
 }

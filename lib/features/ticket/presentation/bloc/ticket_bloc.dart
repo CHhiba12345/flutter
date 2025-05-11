@@ -20,33 +20,22 @@ class TicketBloc extends Bloc<TicketEvent, TicketState> {
     on<GetPriceComparisonsEvent>(_onGetPriceComparisons);
   }
 
-  Future<void> _onScanTicket(ScanTicketEvent event,
-      Emitter<TicketState> emit,) async {
+  Future<void> _onScanTicket(ScanTicketEvent event, Emitter<TicketState> emit) async {
     emit(TicketLoading());
     try {
-      debugPrint('🔵 Starting receipt scan and analysis');
-
-      // 1. Scan et analyse du ticket
       final analysis = await scannerService.scanAndAnalyzeReceipt();
-      debugPrint('✅ Received analysis from Gemini');
+      final ticket = Ticket.fromJson(analysis['receipt_data']);
 
-      // 2. Envoi des données brutes au backend (enveloppé dans un try/catch séparé)
-      try {
-        final ticket = Ticket.fromJson(analysis['receipt_data']);
-        await sendTicketUseCase.execute(ticket);
-        debugPrint('📡 Ticket data sent to backend');
-      } catch (e) {
-        debugPrint('⚠️ Failed to send to backend (but continuing): $e');
-        // On continue même si l'envoi échoue
-      }
+      await sendTicketUseCase.execute(ticket);
 
-      // 3. Affichage de l'analyse dans tous les cas
+      // Initialisez avec une liste vide si vous ne pouvez pas obtenir les comparaisons
       emit(TicketAnalysisSuccess(
         analysis: analysis['nutrition_analysis'],
-        receiptData: analysis['receipt_data'], // Ajout des données brutes pour affichage
+        receiptData: analysis['receipt_data'],
+        priceComparisons: [], // Liste vide par défaut
       ));
+
     } catch (e) {
-      debugPrint('❌ Error: $e');
       emit(TicketError('Failed to scan receipt: ${e.toString()}'));
     }
   }
@@ -54,18 +43,28 @@ class TicketBloc extends Bloc<TicketEvent, TicketState> {
       GetPriceComparisonsEvent event,
       Emitter<TicketState> emit,
       ) async {
+    if (state is! TicketAnalysisSuccess) return;
+
+    final currentState = state as TicketAnalysisSuccess;
+    emit(TicketLoading()); // Affiche un indicateur de chargement
+
     try {
       final comparisons = await getPriceComparisonsUseCase.execute(event.productName);
 
-      // Si l'état actuel est TicketAnalysisSuccess, on le conserve avec les nouvelles comparaisons
-      if (state is TicketAnalysisSuccess) {
-        final currentState = state as TicketAnalysisSuccess;
-        emit(currentState.copyWith(comparisons: comparisons));
-      } else {
-        emit(PriceComparisonsLoaded(comparisons: comparisons));
+      if (comparisons.isEmpty) {
+        emit(TicketError('Aucune comparaison disponible pour ce produit'));
+        await Future.delayed(Duration(milliseconds: 500)); // Petit délai pour le message
       }
+
+      emit(PriceComparisonsLoaded(
+        comparisons: comparisons,
+        currentAnalysis: currentState.analysis,
+        currentReceiptData: currentState.receiptData,
+      ));
+
     } catch (e) {
-      emit(TicketError('Failed to load price comparisons: ${e.toString()}'));
+      emit(TicketError('Erreur lors de la récupération des comparaisons'));
+      emit(currentState); // Revenir à l'état précédent
     }
   }
 }

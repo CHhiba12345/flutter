@@ -11,25 +11,14 @@ class TicketSentSuccess extends TicketState {}
 
 class TicketAnalysisSuccess extends TicketState {
   final Map<String, dynamic> analysis;
-  final Map<String, dynamic> receiptData; // Ajout des données brutes
-  final List<Map<String, dynamic>>? comparisons;
+  final Map<String, dynamic> receiptData;
+  final List<dynamic> priceComparisons; // Nouveau champ
 
   TicketAnalysisSuccess({
     required this.analysis,
     required this.receiptData,
-    this.comparisons,
+    this.priceComparisons = const [],
   });
-  TicketAnalysisSuccess copyWith({
-    Map<String, dynamic>? analysis,
-    Map<String, dynamic>? receiptData,
-    List<Map<String, dynamic>>? comparisons,
-  }) {
-    return TicketAnalysisSuccess(
-      analysis: analysis ?? this.analysis,
-      receiptData: receiptData ?? this.receiptData,
-      comparisons: comparisons ?? this.comparisons,
-    );
-  }
 }
 
 class TicketError extends TicketState {
@@ -39,6 +28,12 @@ class TicketError extends TicketState {
 }
 class PriceComparisonsLoaded extends TicketState {
   final List<Map<String, dynamic>> comparisons;
+  final Map<String, dynamic> currentAnalysis;
+  final Map<String, dynamic> currentReceiptData;
 
-  PriceComparisonsLoaded({required this.comparisons});
+  PriceComparisonsLoaded({
+    required this.comparisons,
+    required this.currentAnalysis,
+    required this.currentReceiptData,
+  });
 }

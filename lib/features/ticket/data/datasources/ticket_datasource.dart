@@ -74,47 +74,78 @@ class TicketDataSource {
 
         // Format Swagger (liste simple)
         if (data is List) {
-          print('🔄 Processing Swagger format response');
-          return data.map((item) {
-            return {
-              'store': item['storeName'] ?? 'Magasin inconnu',
-              'price': item['unitPrice']?.toDouble(),
-              'date': item['receiptDate'] ?? 'Date inconnue',
-              'isCurrent': item['storeName'] == 'MG PROXI SIDI HASSINE',
-            };
-          }).where((item) => item['price'] != null).toList();
+          final results = <Map<String, dynamic>>[];
+
+          for (var item in data) {
+            final store = item['storeName'] ?? 'Magasin inconnu';
+            final price = item['unitPrice']?.toDouble();
+
+            if (price == null) continue;
+
+            results.add({
+              'store': store,
+              'price': price,
+              'date': _formatDate(item['receiptDate']),
+              'isBest': false,
+              'isCurrent': store == 'MG PROXI SIDI HASSINE',
+            });
+          }
+
+          // Supprime les doublons
+          final seenStores = <String>{};
+          final filtered = results.where((item) => seenStores.add(item['store'])).toList();
+
+          // Trie par prix croissant
+          filtered.sort((a, b) => (a['price'] as double).compareTo(b['price'] as double));
+
+          return filtered;
         }
 
-        // Format normal (comparedProducts)
+        // Format objet avec comparedProducts
         if (data is Map && data.containsKey('comparedProducts')) {
-          print('🔄 Processing comparedProducts format');
-          final List<Map<String, dynamic>> results = [];
-          for (final product in data['comparedProducts']) {
-            // Ajouter le meilleur prix
-            if (product['bestStore'] != null) {
+          final comparedProducts = data['comparedProducts'] as List;
+          final results = <Map<String, dynamic>>[];
+
+          for (var product in comparedProducts) {
+            final bestStore = product['bestStore'];
+            final bestPrice = product['bestPrice']?.toDouble();
+
+            if (bestStore != null && bestPrice != null) {
               results.add({
-                'store': product['bestStore'],
-                'price': product['bestPrice']?.toDouble(),
-                'date': product['otherOptions']?[0]?['lastUpdated'],
+                'store': bestStore,
+                'price': bestPrice,
+                'date': 'Meilleur prix',
                 'isBest': true,
-                'isCurrent': false,
+                'isCurrent': bestStore == 'MG PROXI SIDI HASSINE',
               });
             }
 
-            // Ajouter les autres options
-            if (product['otherOptions'] is List) {
-              for (final option in product['otherOptions']) {
+            final options = product['otherOptions'] as List?;
+            if (options != null) {
+              for (var option in options) {
+                final store = option['store'];
+                final price = option['price']?.toDouble();
+                final date = option['lastUpdated'];
+
+                if (price == null) continue;
+
                 results.add({
-                  'store': option['store'],
-                  'price': option['price']?.toDouble(),
-                  'date': option['lastUpdated'],
+                  'store': store,
+                  'price': price,
+                  'date': date != null ? _formatDate(date) : 'Date inconnue',
                   'isBest': false,
-                  'isCurrent': option['store'] == 'MG PROXI SIDI HASSINE',
+                  'isCurrent': store == 'MG PROXI SIDI HASSINE',
                 });
               }
             }
           }
-          return results;
+
+          // Supprime les doublons + Tri
+          final seenStores = <String>{};
+          final filtered = results.where((item) => seenStores.add(item['store'])).toList();
+          filtered.sort((a, b) => (a['price'] as double).compareTo(b['price'] as double));
+
+          return filtered;
         }
 
         print('⚠️ Unknown response format');
@@ -126,6 +157,15 @@ class TicketDataSource {
     } catch (e) {
       print('❌ [TicketDataSource] Error getting comparisons: $e');
       return [];
+    }
+  }
+
+  String _formatDate(String isoDate) {
+    try {
+      final date = DateTime.parse(isoDate);
+      return "${date.day}/${date.month}/${date.year}";
+    } catch (_) {
+      return 'Date invalide';
     }
   }
 }

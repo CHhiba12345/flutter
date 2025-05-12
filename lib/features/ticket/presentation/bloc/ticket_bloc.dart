@@ -53,7 +53,9 @@ class TicketBloc extends Bloc<TicketEvent, TicketState> {
 
       if (comparisons.isEmpty) {
         emit(TicketError('Aucune comparaison disponible pour ce produit'));
-        await Future.delayed(Duration(milliseconds: 500)); // Petit délai pour le message
+        await Future.delayed(const Duration(milliseconds: 500));
+        emit(currentState); // Retour à l'état précédent
+        return;
       }
 
       emit(PriceComparisonsLoaded(

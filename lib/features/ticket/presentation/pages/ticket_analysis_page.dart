@@ -594,25 +594,25 @@ class TicketAnalysisPage extends StatelessWidget {
       double currentPrice,
       List<Map<String, dynamic>> comparisons,
       ) {
-    final validComparisons = (comparisons ?? [])
-        .where((s) => s['price'] != null)
-        .toList();
+    // Filtrer et trier les comparaisons
+    final validComparisons = comparisons
+        .where((c) => c['price'] != null)
+        .toList()
+      ..sort((a, b) => (a['price'] as double).compareTo(b['price'] as double));
 
-    Map<String, dynamic>? bestStore;
-    for (var store in validComparisons) {
-      if (bestStore == null || store['price'] < bestStore['price']) {
-        bestStore = store;
-      }
+    if (validComparisons.isEmpty) {
+      return _buildNoComparisonsSheet(context, productName);
     }
 
-    final otherStores =
-    validComparisons.where((s) => s != bestStore).toList();
+    // Trouver le meilleur prix (déjà trié donc premier élément)
+    final bestPrice = validComparisons.first;
 
     return Container(
       padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // En-tête
           Container(
             width: 40,
             height: 5,
@@ -630,40 +630,76 @@ class TicketAnalysisPage extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          if (bestStore != null)
-            Row(
-              children: [
-                const Text('🟢 ', style: TextStyle(fontSize: 18)),
-                Expanded(
-                  child: Text(
-                    'Le meilleur prix est chez ${bestStore['store']} : ${bestStore['price'].toStringAsFixed(2)} DT',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.green,
+
+          // Meilleur prix
+          if (bestPrice != null)
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.green[50],
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.star, color: Colors.green),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Meilleur prix trouvé',
+                          style: TextStyle(
+                            color: Colors.green[800],
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          '${bestPrice['store']} - ${bestPrice['price'].toStringAsFixed(2)} DT',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        if (bestPrice['date'] != null)
+                          Text(
+                            'Mis à jour: ${bestPrice['date']}',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                      ],
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           const SizedBox(height: 16),
+
+          // Liste des autres prix
           Expanded(
             child: ListView.separated(
-              itemCount: otherStores.length,
-              separatorBuilder: (_, __) =>
-                  Divider(height: 1, color: Colors.grey[200]),
+              itemCount: validComparisons.length,
+              separatorBuilder: (_, __) => Divider(height: 1, color: Colors.grey[200]),
               itemBuilder: (context, index) {
-                final store = otherStores[index];
+                final comparison = validComparisons[index];
                 return ListTile(
-                  leading: const Text('🔵', style: TextStyle(fontSize: 20)),
-                  title: Text(store['store']),
+                  leading: comparison['isBest'] == true
+                      ? const Icon(Icons.star, color: Colors.green)
+                      : const Icon(Icons.store, color: Colors.blue),
+                  title: Text(comparison['store'] ?? 'Magasin inconnu'),
                   trailing: Text(
-                    '${store['price']?.toStringAsFixed(2)} DT',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
+                    '${comparison['price']?.toStringAsFixed(2)} DT',
+                    style: TextStyle(
+                      fontWeight: comparison['isBest'] == true
+                          ? FontWeight.bold
+                          : FontWeight.normal,
                     ),
                   ),
+                  subtitle: comparison['date'] != null
+                      ? Text('${comparison['date']}')
+                      : null,
                 );
               },
             ),
@@ -688,7 +724,7 @@ class TicketAnalysisPage extends StatelessWidget {
     );
   }
 
-  Widget _buildNoComparisonsSheet(String productName) {
+  Widget _buildNoComparisonsSheet(BuildContext context, String productName) {
     return Padding(
       padding: const EdgeInsets.all(20),
       child: Column(
@@ -711,7 +747,9 @@ class TicketAnalysisPage extends StatelessWidget {
           ),
           const SizedBox(height: 30),
           ElevatedButton(
-            onPressed: Navigator.of(context as BuildContext).pop,
+            onPressed: Navigator
+                .of(context)
+                .pop,
             child: const Text('Fermer'),
           ),
         ],

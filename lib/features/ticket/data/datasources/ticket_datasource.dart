@@ -7,6 +7,7 @@ import '../models/tiket_model.dart';
 
 class TicketDataSource {
   static const String baseUrl = 'http://164.132.53.159:3000';
+  //static const String baseUrl = 'https://3e01-41-225-2-138.ngrok-free.app';
   final AuthService _authService;
 
   TicketDataSource(this._authService);
@@ -57,51 +58,74 @@ class TicketDataSource {
   Future<List<Map<String, dynamic>>> getProductPriceComparisons(String productName) async {
     try {
       final headers = await _getHeaders();
+      print('🔎 Fetching comparisons for: $productName');
+      print('🔎 Headers: $headers');
+
       final response = await http.get(
-        Uri.parse('$baseUrl/products/$productName/prices'),
+        Uri.parse('$baseUrl/products/${Uri.encodeComponent(productName)}/prices'),
         headers: headers,
       );
+
+      print('✅ [TicketDataSource] Comparison status: ${response.statusCode}');
+      debugPrint('📡 Response body: ${response.body}');
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
 
-        // Si la réponse est une liste
+        // Format Swagger (liste simple)
         if (data is List) {
-          return data.map((receipt) {
-            final product = (receipt['products'] as List).firstWhere(
-                  (p) => p['productName'] == productName,
-              orElse: () => null,
-            );
-
-            if (product == null) return null;
-
+          print('🔄 Processing Swagger format response');
+          return data.map((item) {
             return {
-              'store': receipt['storeName'] ?? 'Magasin inconnu',
-              'price': product['unitPrice']?.toDouble(),
-              'date': receipt['receiptDate'] ?? 'Date inconnue',
-            };
-          }).where((item) => item != null && item['price'] != null).toList().cast<Map<String, dynamic>>();
-        }
-
-        // Si la réponse est un objet avec comparedProducts
-        if (data is Map && data.containsKey('comparedProducts')) {
-          final comparedProducts = data['comparedProducts'] as List;
-          return comparedProducts.map((product) {
-            return {
-              'store': product['currentStore'] ?? 'Magasin inconnu',
-              'price': product['currentPrice']?.toDouble(),
-              'date': 'Date non disponible',
+              'store': item['storeName'] ?? 'Magasin inconnu',
+              'price': item['unitPrice']?.toDouble(),
+              'date': item['receiptDate'] ?? 'Date inconnue',
+              'isCurrent': item['storeName'] == 'MG PROXI SIDI HASSINE',
             };
           }).where((item) => item['price'] != null).toList();
         }
+
+        // Format normal (comparedProducts)
+        if (data is Map && data.containsKey('comparedProducts')) {
+          print('🔄 Processing comparedProducts format');
+          final List<Map<String, dynamic>> results = [];
+          for (final product in data['comparedProducts']) {
+            // Ajouter le meilleur prix
+            if (product['bestStore'] != null) {
+              results.add({
+                'store': product['bestStore'],
+                'price': product['bestPrice']?.toDouble(),
+                'date': product['otherOptions']?[0]?['lastUpdated'],
+                'isBest': true,
+                'isCurrent': false,
+              });
+            }
+
+            // Ajouter les autres options
+            if (product['otherOptions'] is List) {
+              for (final option in product['otherOptions']) {
+                results.add({
+                  'store': option['store'],
+                  'price': option['price']?.toDouble(),
+                  'date': option['lastUpdated'],
+                  'isBest': false,
+                  'isCurrent': option['store'] == 'MG PROXI SIDI HASSINE',
+                });
+              }
+            }
+          }
+          return results;
+        }
+
+        print('⚠️ Unknown response format');
+        return [];
+      } else {
+        print('❌ Server error: ${response.statusCode}');
+        return [];
       }
-
-      // Retourne une liste vide si aucun cas ne correspond
-      return [];
-
     } catch (e) {
       print('❌ [TicketDataSource] Error getting comparisons: $e');
-      return []; // Retourne une liste vide en cas d'erreur
+      return [];
     }
   }
 }

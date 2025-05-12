@@ -3,13 +3,13 @@ import '../../domain/entities/ticket.dart';
 class TicketModel extends Ticket {
   TicketModel({
     required String storeName,
-    required String receiptDate,
+    required DateTime receiptDate, // Changé de String à DateTime
     required List<Product> products,
     required double totalAmount,
     String? userId,
   }) : super(
     storeName: storeName,
-    receiptDate: receiptDate,
+    receiptDate: receiptDate, // Maintenant DateTime
     products: products,
     totalAmount: totalAmount,
     userId: userId,
@@ -22,7 +22,7 @@ class TicketModel extends Ticket {
 
     return TicketModel(
       storeName: json['storeName'] ?? 'Inconnu',
-      receiptDate: _parseDate(json['receiptDate']), // ✅ Bon nom + parsing
+      receiptDate: _parseDate(json['receiptDate']), // Parse en DateTime
       products: productsList,
       totalAmount: (json['totalAmount'] as num?)?.toDouble() ??
           _calculateTotalFromProducts(productsList),
@@ -30,18 +30,18 @@ class TicketModel extends Ticket {
     );
   }
 
-  static String _parseDate(dynamic value) {
+  static DateTime _parseDate(dynamic value) {
     if (value == null || value.toString().toLowerCase() == 'unknown date') {
-      return DateTime.now().toUtc().toIso8601String(); // Force UTC + Z
+      return DateTime.now().toUtc(); // Retourne DateTime directement
     }
 
     if (value is DateTime) {
-      return value.toUtc().toIso8601String(); // Toujours en UTC
+      return value.toUtc();
     }
 
     if (value is String) {
       final parsed = DateTime.tryParse(value);
-      if (parsed != null) return parsed.toUtc().toIso8601String();
+      if (parsed != null) return parsed.toUtc();
 
       final parts = value.split('/');
       if (parts.length == 3) {
@@ -50,11 +50,11 @@ class TicketModel extends Ticket {
         final year = parts[2];
         final correctedFormat = '$year-$month-$day';
         final date = DateTime.tryParse(correctedFormat);
-        if (date != null) return date.toUtc().toIso8601String();
+        if (date != null) return date.toUtc();
       }
     }
 
-    return DateTime.now().toUtc().toIso8601String(); // Fallback UTC
+    return DateTime.now().toUtc(); // Fallback DateTime
   }
 
   static double _calculateTotalFromProducts(List<Product> products) {
@@ -65,7 +65,7 @@ class TicketModel extends Ticket {
   Map<String, dynamic> toJson() {
     return {
       'storeName': storeName,
-      'receiptDate': receiptDate, // Déjà au bon format
+      'receiptDate': receiptDate.toIso8601String(), // Conversion en ISO string
       'products': products.map((product) => product.toJson()).toList(),
       'totalAmount': totalAmount,
       if (userId != null) 'userId': userId,
@@ -76,18 +76,18 @@ class TicketModel extends Ticket {
 extension ProductExtension on Product {
   Map<String, dynamic> toJson() {
     return {
-      'productName': description,
+      'productName': description, // Correspond au backend
+      'unitPrice': unitPrice ?? 0.0, // Requis dans le backend
       if (quantity != null) 'quantity': quantity,
-      if (unitPrice != null) 'unitPrice': unitPrice,
       if (totalPrice != null) 'totalPrice': totalPrice,
     };
   }
 
   static Product fromJson(Map<String, dynamic> json) {
     return Product(
-      description: json['productName'] ?? 'Produit inconnu',
+      description: json['productName'] ?? 'Produit inconnu', // Correspond au backend
       quantity: _parseDouble(json['quantity']),
-      unitPrice: _parseDouble(json['unitPrice']),
+      unitPrice: _parseDouble(json['unitPrice']) ?? 0.0, // Requis dans le backend
       totalPrice: _parseDouble(json['totalPrice']),
     );
   }

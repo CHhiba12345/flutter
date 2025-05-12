@@ -2,14 +2,14 @@ import 'package:flutter/foundation.dart';
 
 class Ticket {
   final String storeName;
-  final String receiptDate;
+  final DateTime receiptDate; // Changé de String à DateTime
   final List<Product> products;
   final double totalAmount;
   final String? userId;
 
   Ticket({
     required this.storeName,
-    required this.receiptDate,
+    required this.receiptDate, // Maintenant DateTime
     required this.products,
     required this.totalAmount,
     this.userId,
@@ -22,25 +22,26 @@ class Ticket {
 
     return Ticket(
       storeName: json['storeName'] ?? 'Unknown store',
-      receiptDate: _parseDate(json['receiptDate']),
+      receiptDate: _parseDate(json['receiptDate']), // Parse en DateTime
       products: productsList,
-      totalAmount: (json['totalAmount'] as num?)?.toDouble() ?? _calculateTotalFromProducts(productsList),
+      totalAmount: (json['totalAmount'] as num?)?.toDouble() ??
+          _calculateTotalFromProducts(productsList),
       userId: json['userId'],
     );
   }
 
-  static String _parseDate(dynamic value) {
+  static DateTime _parseDate(dynamic value) {
     if (value == null || value.toString().toLowerCase() == 'unknown date') {
-      return DateTime.now().toIso8601String(); // Date actuelle si inconnue
+      return DateTime.now(); // Retourne DateTime directement
     }
 
     if (value is DateTime) {
-      return value.toIso8601String();
+      return value;
     }
 
     if (value is String) {
       final parsed = DateTime.tryParse(value);
-      if (parsed != null) return parsed.toIso8601String();
+      if (parsed != null) return parsed;
 
       // Si le format est JJ/MM/YYYY, on convertit
       final parts = value.split('/');
@@ -50,11 +51,11 @@ class Ticket {
         final year = parts[2];
         final correctedFormat = '$year-$month-$day';
         final date = DateTime.tryParse(correctedFormat);
-        if (date != null) return date.toIso8601String();
+        if (date != null) return date;
       }
     }
 
-    return DateTime.now().toIso8601String(); // Fallback à la date actuelle
+    return DateTime.now(); // Fallback à la date actuelle
   }
 
   static double _calculateTotalFromProducts(List<Product> products) {
@@ -64,7 +65,7 @@ class Ticket {
   Map<String, dynamic> toJson() {
     return {
       'storeName': storeName,
-      'receiptDate': receiptDate,
+      'receiptDate': receiptDate.toIso8601String(), // Conversion en ISO string
       'products': products.map((product) => product.toJson()).toList(),
       'totalAmount': totalAmount,
       if (userId != null) 'userId': userId,
@@ -75,30 +76,30 @@ class Ticket {
 class Product {
   final String description;
   final double? quantity;
-  final double? unitPrice;
+  final double? unitPrice; // Requis dans le backend
   final double? totalPrice;
 
   Product({
     required this.description,
     this.quantity,
-    this.unitPrice,
+    this.unitPrice, // Doit être fourni
     this.totalPrice,
   });
 
   factory Product.fromJson(Map<String, dynamic> json) {
     return Product(
-      description: json['productName'] ?? 'Unknown product',
+      description: json['productName'] ?? 'Unknown product', // Correspond au backend
       quantity: _parseDouble(json['quantity']),
-      unitPrice: _parseDouble(json['unitPrice']) ?? 0.0,
+      unitPrice: _parseDouble(json['unitPrice']) ?? 0.0, // Requis dans le backend
       totalPrice: _parseDouble(json['totalPrice']),
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'productName': description,
+      'productName': description, // Correspond au backend
+      'unitPrice': unitPrice ?? 0.0, // Requis dans le backend
       if (quantity != null) 'quantity': quantity,
-      if (unitPrice != null) 'unitPrice': unitPrice,
       if (totalPrice != null) 'totalPrice': totalPrice,
     };
   }

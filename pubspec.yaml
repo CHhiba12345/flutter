@@ -71,6 +71,8 @@ dependencies:
   path_provider: ^2.1.5
   flutter_dotenv: ^5.2.1
   intl: ^0.20.2
+  url_launcher: ^6.3.1
+  flutter_email_sender: ^7.0.0
 
 
 dev_dependencies:
@@ -113,6 +115,10 @@ flutter:
   - assets/animations/empty_analysis.json
   - assets/animations/empty_favorite.json
   - assets/animations/empty_history.json
+  - assets/animations/fq.json
+  - assets/animations/fed.json
+  - assets/animations/pr.json
+  - assets/animations/ab.json
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

@@ -46,15 +46,17 @@ class TicketBloc extends Bloc<TicketEvent, TicketState> {
     if (state is! TicketAnalysisSuccess) return;
 
     final currentState = state as TicketAnalysisSuccess;
-    emit(TicketLoading()); // Affiche un indicateur de chargement
+    emit(TicketLoading());
 
     try {
       final comparisons = await getPriceComparisonsUseCase.execute(event.productName);
 
       if (comparisons.isEmpty) {
-        emit(TicketError('Aucune comparaison disponible pour ce produit'));
-        await Future.delayed(const Duration(milliseconds: 500));
-        emit(currentState); // Retour à l'état précédent
+        emit(TicketAnalysisSuccess(
+          analysis: currentState.analysis,
+          receiptData: currentState.receiptData,
+          priceComparisons: [],
+        ));
         return;
       }
 
@@ -63,10 +65,12 @@ class TicketBloc extends Bloc<TicketEvent, TicketState> {
         currentAnalysis: currentState.analysis,
         currentReceiptData: currentState.receiptData,
       ));
-
     } catch (e) {
-      emit(TicketError('Erreur lors de la récupération des comparaisons'));
-      emit(currentState); // Revenir à l'état précédent
+      emit(TicketAnalysisSuccess(
+        analysis: currentState.analysis,
+        receiptData: currentState.receiptData,
+        priceComparisons: [],
+      ));
     }
   }
 }

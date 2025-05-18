@@ -62,13 +62,19 @@ class TicketAnalysisPage extends StatelessWidget {
 
             // ✅ Toujours afficher l'analyse si disponible, même pendant ou après une comparaison
             if (state is TicketAnalysisSuccess || state is PriceComparisonsLoaded) {
-              final analysisState = (state is TicketAnalysisSuccess)
-                  ? state
-                  : TicketAnalysisSuccess(
-                analysis: (state as PriceComparisonsLoaded).currentAnalysis ?? {},
-                receiptData: state.currentReceiptData ?? {},
-                priceComparisons: state.comparisons,
-              );
+              late final TicketAnalysisSuccess analysisState;
+
+              if (state is TicketAnalysisSuccess) {
+                analysisState = state;
+              } else {
+                final loadedState = state as PriceComparisonsLoaded;
+                analysisState = TicketAnalysisSuccess(
+                  analysis: loadedState.currentAnalysis,
+                  receiptData: loadedState.currentReceiptData,
+                  priceComparisons: loadedState.comparisons, // ✅ Nouvelles données ici
+                );
+              }
+
               return _buildAnalysisSuccess(context, analysisState);
             }
 
@@ -570,6 +576,7 @@ class TicketAnalysisPage extends StatelessWidget {
     );
 
     // 🔁 Déclencher l’événement après avoir construit la modale
+    print("🔄 Requesting price comparison for: $productName");
     BlocProvider.of<TicketBloc>(context).add(
       GetPriceComparisonsEvent(productName: productName),
     );

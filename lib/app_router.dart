@@ -38,7 +38,9 @@ class AppRouter extends _$AppRouter {
     AutoRoute(page: OnboardingRoute.page),
     AutoRoute(page: AllergensRoute.page),
     AutoRoute(page: FavoritesRoute.page),
+    AutoRoute(page: HistoryRoute.page),
     AutoRoute(page:TicketAnalysisRoute.page),
+
     //Allergens
     // Route principale avec sous-routes
     AutoRoute(
@@ -46,9 +48,11 @@ class AppRouter extends _$AppRouter {
       page: MainLayoutRoute.page,
       children: [
         AutoRoute(path: 'home', page: HomeRoute.page, initial: true),
-        AutoRoute(path: 'history', page: HistoryRoute.page),
+
+        //AutoRoute(path: 'chatbot', page: ChatbotRoute.page),
         AutoRoute(path: 'profile', page: ProfileRoute.page),
         AutoRoute(path: 'ticket', page: TicketRoute.page),
+
       ],
     ),
   ];

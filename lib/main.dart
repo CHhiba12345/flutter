@@ -1,7 +1,10 @@
+
 import 'package:eye_volve/features/favorites/domain/usecases/remove_from_favorites.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:hive/hive.dart';
+import 'package:hive_flutter/adapters.dart';
 import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
 import 'app_router.dart';
@@ -21,6 +24,8 @@ import 'features/auth/domain/usecases/reset_password_use_case.dart';
 import 'features/auth/presentation/blocs/auth_bloc.dart';
 
 // Importations des dépendances Home
+import 'features/auth/presentation/blocs/auth_state.dart';
+
 import 'features/favorites/presentation/bloc/favorite_event.dart';
 import 'features/history/presentation/bloc/history_event.dart';
 import 'features/home/data/datasources/home_datasource.dart';
@@ -70,6 +75,19 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
+
+// Initialiser Hive
+  //await Hive.initFlutter();
+
+  // Enregistrer les adaptateurs
+ // Hive.registerAdapter(ChatMessageAdapter());
+
+  // Ouvrir toutes les boîtes nécessaires
+  //final chatBox = await Hive.openBox<ChatMessage>('chat_messages');
+  //final sessionBox = await Hive.openBox<String>('user_sessions'); // Boîte pour les sessions
+
+  //print('🔴 Nombre initial de messages dans Hive: ${chatBox.length}');
+ // print('🟢 Boîte de sessions initialisée');
   // Initialisation des dépendances Auth
   final authService = AuthService();
   final authDataSource = FirebaseAuthDataSource();
@@ -115,6 +133,7 @@ void main() async {
 
   // Récupération de l'ID utilisateur connecté
   final userId = await authService.getCurrentUserId() ?? '';
+  print('🟢 User ID exact: $userId');
 
   // Dépendances Ticket
   final ticketDataSource = TicketDataSource(authService);
@@ -126,6 +145,17 @@ void main() async {
   final getPriceComparisonsUseCase = GetPriceComparisonsUseCase(repository: ticketRepository);
   final scannerService = ReceiptScannerService();
 
+
+  // Chatbot initialization
+  /* final chatbotDataSource = ChatBotRemoteDataSourceImpl(client: http.Client());
+  final chatbotRepository = ChatbotRepositoryImpl(
+    remoteDataSource: chatbotDataSource,
+    chatBox: chatBox,
+    sessionBox: sessionBox,
+  );
+  final sendQuestionUseCase = SendQuestionUsecase(chatbotRepository);
+  final sessionId = await chatbotRepository.getOrCreateSession(userId);
+*/
   runApp(
     MyApp(
       authRepository: authRepository,
@@ -149,6 +179,11 @@ void main() async {
       sendTicketUseCase: sendTicketUseCase,
       scannerService: scannerService,
       getPriceComparisonsUseCase: getPriceComparisonsUseCase,
+      //sendQuestionUseCase: sendQuestionUseCase,
+     // chatBox: chatBox,
+     // initialSessionId: sessionId,
+     // sessionBox: sessionBox,
+
     ),
   );
 }
@@ -175,6 +210,11 @@ class MyApp extends StatelessWidget {
   final GetPriceComparisonsUseCase getPriceComparisonsUseCase;
   final String initialUid;
   final ReceiptScannerService scannerService;
+ // final  SendQuestionUsecase sendQuestionUseCase;
+ // final Box<ChatMessage> chatBox;
+  //final String initialSessionId;
+ // final Box<String> sessionBox;
+
   final _appRouter = AppRouter();
 
   MyApp({
@@ -200,6 +240,11 @@ class MyApp extends StatelessWidget {
     required this.sendTicketUseCase,
     required this.scannerService,
     required this.getPriceComparisonsUseCase,
+    /* required this.sendQuestionUseCase,
+    required this.chatBox,
+    required this.initialSessionId,
+    required this.sessionBox, */
+
   });
 
   @override
@@ -254,6 +299,14 @@ class MyApp extends StatelessWidget {
             getPriceComparisonsUseCase: getPriceComparisonsUseCase,
           ),
         ),
+      /*  BlocProvider(
+          create: (context) => ChatbotBloc(
+            usecase: sendQuestionUseCase,
+            chatBox: chatBox,
+            currentUserId: initialUid,
+            currentSessionId: initialSessionId,// Utilisez la sessionId obtenue plus tôt
+          ),
+        ), */
       ],
       child: MultiProvider(
         providers: [

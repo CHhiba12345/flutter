@@ -150,26 +150,13 @@ class _HomeContent extends StatelessWidget {
                         Stack(
                           children: [
                             IconButton(
-                              icon: const Icon(Icons.notifications, color: Colors.white, size: 30),
-                              onPressed: () {},
+                              icon: const Icon(Icons.history, color: Colors.white, size: 30),
+                              onPressed: () {
+                                debugPrint("Navigating to History Page");
+                                AutoRouter.of(context).push(const HistoryRoute());
+                              },
                             ),
-                            Positioned(
-                              right: 6,
-                              top: 6,
-                              child: Container(
-                                padding: const EdgeInsets.all(4),
-                                decoration: BoxDecoration(
-                                  color: Colors.red,
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                                constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
-                                child: const Text(
-                                  '3',
-                                  style: TextStyle(color: Colors.white, fontSize: 10),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                            ),
+
                           ],
                         ),
                         IconButton(

@@ -180,11 +180,7 @@ class _ProfilePageState extends State<ProfilePage> {
             color: Colors.red,
             onTap: _handleSignOut,
           ),
-          ProfileItem(
-            title: 'Delete Account',
-            icon: Icons.delete,
-            color: Colors.red[300]!,
-          ),
+
         ],
       ),
     ];

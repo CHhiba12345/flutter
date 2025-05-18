@@ -23,9 +23,10 @@ class HomeBottomNav extends StatelessWidget {
         icon: Icons.home_rounded,
         label: 'Accueil',
       ),
+
       NavigationItem(
-        icon: Icons.history_rounded,
-        label: 'Historique',
+        icon: Icons.mark_chat_read_rounded,
+        label: 'Chatbot',
       ),
       NavigationItem(
         icon: Icons.person,

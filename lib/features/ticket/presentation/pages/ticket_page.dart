@@ -69,25 +69,24 @@ class TicketPage extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const CircularProgressIndicator(
-            strokeWidth: 4,
-            valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF2C5C2D)),
+          const CircularProgressIndicator.adaptive(
+            valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF2D6A4F)),
           ),
           const SizedBox(height: 24),
           Text(
-            'Scanning in progress...',
+            'Analyzing your ticket...',
             style: TextStyle(
               fontSize: 18,
-              color: Colors.grey[700],
-              fontWeight: FontWeight.w600,
+              color: Colors.grey[800],
+              fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 10),
           Text(
-            'Please wait while we process your ticket',
+            'This will only take a moment...',
             style: TextStyle(
               fontSize: 14,
-              color: Colors.grey[500],
+              color: Colors.grey[600],
             ),
           ),
         ],
@@ -100,23 +99,26 @@ class TicketPage extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       child: Row(
         children: [
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.9),
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  blurRadius: 6,
-                  offset: const Offset(0, 3),
-                )
-              ],
-            ),
-            padding: const EdgeInsets.all(10),
-            child: const Icon(
-              Icons.receipt_long,
-              color: Color(0xFF2C5C2D),
-              size: 28,
+          Hero(
+            tag: 'receiptIcon',
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 8,
+                    offset: Offset(0, 4),
+                  )
+                ],
+              ),
+              padding: const EdgeInsets.all(10),
+              child: const Icon(
+                Icons.receipt_long,
+                color: Color(0xFF1B4332),
+                size: 28,
+              ),
             ),
           ),
           const SizedBox(width: 16),
@@ -124,15 +126,16 @@ class TicketPage extends StatelessWidget {
             'Nutritional Analysis',
             style: TextStyle(
               color: Colors.white,
-              fontSize: 22,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 0.5,
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 0.8,
             ),
           ),
         ],
       ),
     );
   }
+
 
   Widget _buildInitialState(BuildContext context) {
     return Column(

@@ -26,6 +26,11 @@ import 'features/auth/presentation/blocs/auth_bloc.dart';
 // Importations des dépendances Home
 import 'features/auth/presentation/blocs/auth_state.dart';
 
+import 'features/chatbot/data/datasources/chatbot_remote_datasource.dart';
+
+import 'features/chatbot/data/repositories/chatbot_repository_impl.dart';
+import 'features/chatbot/domain/usecases/send_question_usecase.dart';
+import 'features/chatbot/presentation/bloc/chatbot_bloc.dart';
 import 'features/favorites/presentation/bloc/favorite_event.dart';
 import 'features/history/presentation/bloc/history_event.dart';
 import 'features/home/data/datasources/home_datasource.dart';
@@ -75,20 +80,6 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-
-// Initialiser Hive
-  //await Hive.initFlutter();
-
-  // Enregistrer les adaptateurs
- // Hive.registerAdapter(ChatMessageAdapter());
-
-  // Ouvrir toutes les boîtes nécessaires
-  //final chatBox = await Hive.openBox<ChatMessage>('chat_messages');
-  //final sessionBox = await Hive.openBox<String>('user_sessions'); // Boîte pour les sessions
-
-  //print('🔴 Nombre initial de messages dans Hive: ${chatBox.length}');
- // print('🟢 Boîte de sessions initialisée');
-  // Initialisation des dépendances Auth
   final authService = AuthService();
   final authDataSource = FirebaseAuthDataSource();
   final authRepository = AuthRepositoryImpl(authDataSource, authService);
@@ -147,15 +138,10 @@ void main() async {
 
 
   // Chatbot initialization
-  /* final chatbotDataSource = ChatBotRemoteDataSourceImpl(client: http.Client());
-  final chatbotRepository = ChatbotRepositoryImpl(
-    remoteDataSource: chatbotDataSource,
-    chatBox: chatBox,
-    sessionBox: sessionBox,
-  );
+  final chatbotDataSource = ChatBotRemoteDataSourceImpl(client: http.Client());
+  final chatbotRepository = ChatbotRepositoryImpl(remoteDataSource: chatbotDataSource);
   final sendQuestionUseCase = SendQuestionUsecase(chatbotRepository);
-  final sessionId = await chatbotRepository.getOrCreateSession(userId);
-*/
+
   runApp(
     MyApp(
       authRepository: authRepository,
@@ -179,10 +165,8 @@ void main() async {
       sendTicketUseCase: sendTicketUseCase,
       scannerService: scannerService,
       getPriceComparisonsUseCase: getPriceComparisonsUseCase,
-      //sendQuestionUseCase: sendQuestionUseCase,
-     // chatBox: chatBox,
-     // initialSessionId: sessionId,
-     // sessionBox: sessionBox,
+      sendQuestionUseCase: sendQuestionUseCase,
+
 
     ),
   );
@@ -210,10 +194,8 @@ class MyApp extends StatelessWidget {
   final GetPriceComparisonsUseCase getPriceComparisonsUseCase;
   final String initialUid;
   final ReceiptScannerService scannerService;
- // final  SendQuestionUsecase sendQuestionUseCase;
- // final Box<ChatMessage> chatBox;
-  //final String initialSessionId;
- // final Box<String> sessionBox;
+ final  SendQuestionUsecase sendQuestionUseCase;
+
 
   final _appRouter = AppRouter();
 
@@ -240,10 +222,8 @@ class MyApp extends StatelessWidget {
     required this.sendTicketUseCase,
     required this.scannerService,
     required this.getPriceComparisonsUseCase,
-    /* required this.sendQuestionUseCase,
-    required this.chatBox,
-    required this.initialSessionId,
-    required this.sessionBox, */
+    required this.sendQuestionUseCase,
+
 
   });
 
@@ -299,14 +279,10 @@ class MyApp extends StatelessWidget {
             getPriceComparisonsUseCase: getPriceComparisonsUseCase,
           ),
         ),
-      /*  BlocProvider(
-          create: (context) => ChatbotBloc(
-            usecase: sendQuestionUseCase,
-            chatBox: chatBox,
-            currentUserId: initialUid,
-            currentSessionId: initialSessionId,// Utilisez la sessionId obtenue plus tôt
-          ),
-        ), */
+        // Création du ChatbotBloc sans session ni historique
+        BlocProvider<ChatbotBloc>(
+          create: (context) => ChatbotBloc(usecase: sendQuestionUseCase),
+        ),
       ],
       child: MultiProvider(
         providers: [

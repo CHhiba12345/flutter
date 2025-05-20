@@ -1,4 +1,4 @@
-import 'dart:convert';
+import 'dart:convert'; // Assure-toi que c'est importé
 import 'package:http/http.dart' as http;
 import '../../../auth/data/datasources/auth_service.dart';
 import '../models/favorite_model.dart';
@@ -38,15 +38,20 @@ class FavoriteDataSource {
 
   Future<List<FavoriteModel>> getFavorites(String uid) async {
     final url = Uri.parse('$baseUrl/favorites').replace(
-        queryParameters: {'uid': uid}
-    );
+        queryParameters: {'uid': uid});
     final headers = await _getHeaders();
 
     final response = await http.get(url, headers: headers);
 
     if (response.statusCode == 200) {
-      final List<dynamic> jsonResponse = jsonDecode(response.body);
-      return jsonResponse.map((e) => FavoriteModel.fromJson(e)).toList();
+      // ✅ Utilisation de utf8.decode + jsonDecode
+      final decodedJson = jsonDecode(utf8.decode(response.bodyBytes));
+
+      if (decodedJson is List) {
+        return decodedJson.map((e) => FavoriteModel.fromJson(e)).toList();
+      } else {
+        throw Exception('Unexpected JSON structure: expected a list of favorites');
+      }
     } else {
       throw Exception('Failed to load favorites: ${response.statusCode}');
     }

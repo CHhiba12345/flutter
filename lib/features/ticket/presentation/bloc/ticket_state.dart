@@ -34,6 +34,6 @@ class PriceComparisonsLoaded extends TicketState {
   PriceComparisonsLoaded({
     required this.comparisons,
     required this.currentAnalysis,
-    required this.currentReceiptData,
+    required this.currentReceiptData, required String productName,
   });
 }

@@ -2,7 +2,6 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lottie/lottie.dart';
-import 'package:path/path.dart';
 import '../bloc/ticket_bloc.dart';
 import '../bloc/ticket_event.dart';
 import '../bloc/ticket_state.dart';
@@ -31,7 +30,7 @@ class TicketAnalysisPage extends StatelessWidget {
       child: Scaffold(
         appBar: AppBar(
           title: const Text(
-            'Analyse des résultats',
+            'Nutrition Analysis',
             style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 20,
@@ -60,7 +59,6 @@ class TicketAnalysisPage extends StatelessWidget {
               return _buildLoadingState();
             }
 
-            // ✅ Toujours afficher l'analyse si disponible, même pendant ou après une comparaison
             if (state is TicketAnalysisSuccess || state is PriceComparisonsLoaded) {
               late final TicketAnalysisSuccess analysisState;
 
@@ -71,7 +69,7 @@ class TicketAnalysisPage extends StatelessWidget {
                 analysisState = TicketAnalysisSuccess(
                   analysis: loadedState.currentAnalysis,
                   receiptData: loadedState.currentReceiptData,
-                  priceComparisons: loadedState.comparisons, // ✅ Nouvelles données ici
+                  priceComparisons: loadedState.comparisons,
                 );
               }
 
@@ -133,7 +131,7 @@ class TicketAnalysisPage extends StatelessWidget {
           ),
           const SizedBox(height: 24),
           Text(
-            'Analyse en cours...',
+            'Analyzing...',
             style: TextStyle(
               fontSize: 18,
               color: Colors.grey[800],
@@ -144,7 +142,7 @@ class TicketAnalysisPage extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 40),
             child: Text(
-              'Nous analysons les produits de votre ticket pour vous donner les meilleures recommandations.',
+              'We are analyzing your receipt products to provide the best recommendations.',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 14,
@@ -169,7 +167,7 @@ class TicketAnalysisPage extends StatelessWidget {
           ),
           const SizedBox(height: 20),
           const Text(
-            'Aucune donnée disponible',
+            'No data available',
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w600,
@@ -178,7 +176,7 @@ class TicketAnalysisPage extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           const Text(
-            'Veuillez scanner un ticket pour voir l’analyse',
+            'Please scan a receipt to view analysis',
             style: TextStyle(
               fontSize: 14,
               color: Colors.grey,
@@ -191,12 +189,20 @@ class TicketAnalysisPage extends StatelessWidget {
 
   Widget _buildAnalysisSuccess(BuildContext context, TicketAnalysisSuccess state) {
     final receiptData = state.receiptData;
+    final products = state.analysis['products'] as List<dynamic>;
+
+    final uniqueProducts = products.fold<Map<String, dynamic>>({}, (map, product) {
+      final name = product['product_name'] as String;
+      map.putIfAbsent(name, () => product);
+      return map;
+    }).values.toList();
+
     return CustomScrollView(
       physics: const BouncingScrollPhysics(),
       slivers: [
         SliverToBoxAdapter(
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(24, 16, 24, 8),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -205,23 +211,12 @@ class TicketAnalysisPage extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: const Color(0xFFE8F5E9),
                         borderRadius: BorderRadius.circular(12),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
-                            blurRadius: 6,
-                            offset: const Offset(0, 3),
-                          )
-                        ],
                       ),
-                      child: const Icon(
-                        Icons.store,
-                        color: Color(0xFF2C5C2D),
-                        size: 28,
-                      ),
+                      child: const Icon(Icons.store, color: Color(0xFF2C5C2D), size: 28),
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: 16),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -229,50 +224,35 @@ class TicketAnalysisPage extends StatelessWidget {
                           Text(
                             receiptData['storeName'] ?? 'Magasin inconnu',
                             style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFF333333),
+                              fontSize: 20,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF1B1B1B),
                             ),
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            'Acheté le ${receiptData['receiptDate'] ?? 'date inconnue'}',
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.grey[600],
-                            ),
+                            'Acheté le ${_formatDate(receiptData['receiptDate'] as String?)}',
+                            style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                           ),
                         ],
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 12),
                 _buildReceiptSummary(receiptData),
-                const SizedBox(height: 24),
+                const SizedBox(height: 16),
                 Row(
-                  children: [
-                    const Icon(
-                      Icons.shopping_basket,
-                      color: Color(0xFF2C5C2D),
-                      size: 24,
-                    ),
-                    const SizedBox(width: 8),
-                    const Text(
+                  children: const [
+                    Icon(Icons.shopping_basket, color: Color(0xFF2C5C2D), size: 22),
+                    SizedBox(width: 8),
+                    Text(
                       'Analyse des produits',
                       style: TextStyle(
-                        fontSize: 18,
+                        fontSize: 16,
                         fontWeight: FontWeight.w600,
                         color: Color(0xFF2C5C2D),
                       ),
-                    ),
-                    const Spacer(),
-                    Chip(
-                      label: const Text(
-                        'produits',
-                        style: TextStyle(fontSize: 12, color: Colors.white),
-                      ),
-                      backgroundColor: const Color(0xFF2C5C2D),
                     ),
                   ],
                 ),
@@ -280,27 +260,48 @@ class TicketAnalysisPage extends StatelessWidget {
             ),
           ),
         ),
+
+        // Liste des cartes produits
         SliverPadding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           sliver: SliverList(
             delegate: SliverChildBuilderDelegate(
                   (context, index) {
-                final product = state.analysis['products'][index];
-                return _buildProductCard(product, context);
+                if (index >= uniqueProducts.length) return null;
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: _buildProductCard(uniqueProducts[index], context),
+                );
               },
-              childCount: (state.analysis['products'] as List).length,
+              childCount: uniqueProducts.length,
             ),
           ),
         ),
+
+        // Conseil global
         SliverToBoxAdapter(
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(24, 8, 24, 100),
+            padding: const EdgeInsets.fromLTRB(16, 4, 16, 60),
             child: _buildGlobalAdvice(state.analysis['global_advice']),
           ),
         ),
       ],
     );
   }
+
+  String _formatDate(String? isoDate) {
+    if (isoDate == null) return '—';
+    try {
+      final date = DateTime.parse(isoDate);
+      // jour avec 2 chiffres / mois avec 2 chiffres / année
+      final dd = date.day.toString().padLeft(2, '0');
+      final mm = date.month.toString().padLeft(2, '0');
+      return '$dd/$mm/${date.year}';
+    } catch (_) {
+      return '—';
+    }
+  }
+
 
   Widget _buildReceiptSummary(Map<String, dynamic> receiptData) {
     return Container(
@@ -323,7 +324,7 @@ class TicketAnalysisPage extends StatelessWidget {
             child: Column(
               children: [
                 Text(
-                  'Total dépensé',
+                  'Total spent',
                   style: TextStyle(
                     color: Colors.grey[600],
                     fontSize: 14,
@@ -350,7 +351,7 @@ class TicketAnalysisPage extends StatelessWidget {
             child: Column(
               children: [
                 Text(
-                  'Nombre de produits',
+                  'Products count',
                   style: TextStyle(
                     color: Colors.grey[600],
                     fontSize: 14,
@@ -373,157 +374,233 @@ class TicketAnalysisPage extends StatelessWidget {
     );
   }
 
+
   Widget _buildProductCard(Map<String, dynamic> product, BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 16),
-      elevation: 2,
-      shape: RoundedRectangleBorder(
+    final healthRisks = product['health_risks'] is Map
+        ? _formatHealthRisks(product['health_risks'])
+        : (product['health_risks'] as List? ?? []);
+    final healthBenefits = product['health_benefits'] as List? ?? [];
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 20),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF9F9F9), // Fond doux
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.black.withOpacity(0.15), width: 1.2), // Bord noir léger
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            spreadRadius: 1,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(16),
-        onTap: () {},
-        child: Padding(
-          padding: const EdgeInsets.all(16),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildHeader(product),
+            const SizedBox(height: 16),
+            if (healthRisks.isNotEmpty) ...[
+              _buildChipSection("Health Risks", healthRisks, Colors.red[50]!, Colors.red[700]!),
+              const SizedBox(height: 12),
+            ],
+            if (healthBenefits.isNotEmpty) ...[
+              _buildChipSection("Health Benefits", healthBenefits, Colors.green[50]!, Colors.green[700]!),
+              const SizedBox(height: 12),
+            ],
+            _buildInfoTile(
+              icon: Icons.lightbulb_outline_rounded,
+              iconColor: const Color(0xFFFFC107),
+              title: 'Advice',
+              content: product['advice'] ?? 'No analysis available',
+            ),
+            const SizedBox(height: 12),
+            _buildInfoTile(
+              icon: Icons.thumb_up_rounded,
+              iconColor: const Color(0xFF4CAF50),
+              title: 'Recommendation',
+              content: product['consumption_recommendation'] ?? 'Not specified',
+            ),
+            const SizedBox(height: 16),
+            const Divider(height: 1, color: Colors.black12), // Ligne de séparation
+            const SizedBox(height: 12),
+            _buildCompareButton(context, product),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeader(Map<String, dynamic> product) {
+    final processingLevel = product['processing_level'];
+    final nutritionalQuality = product['nutritional_quality'];
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          width: 50,
+          height: 50,
+          decoration: BoxDecoration(
+            color: _getProcessingColor(processingLevel).withOpacity(0.2),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          alignment: Alignment.center,
+          child: Text(
+            _getProcessingEmoji(processingLevel),
+            style: const TextStyle(fontSize: 24),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              Text(
+                product['product_name'] ?? 'Unknown product',
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+              ),
+              const SizedBox(height: 4),
+              // Remplacez la Row par un Wrap pour permettre le passage à la ligne
+              Wrap(
+                spacing: 8,
+                runSpacing: 4,
                 children: [
-                  Container(
-                    width: 50,
-                    height: 50,
-                    decoration: BoxDecoration(
-                      color: _getProcessingColor(product['processing_level'])
-                          .withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(12),
+                  if (processingLevel != null)
+                    _buildTag(
+                      label: processingLevel,
+                      color: _getProcessingColor(processingLevel),
                     ),
-                    alignment: Alignment.center,
-                    child: Text(
-                      _getProcessingEmoji(product['processing_level']),
-                      style: const TextStyle(fontSize: 24),
+                  if (nutritionalQuality != null)
+                    _buildTag(
+                      label: 'Quality: $nutritionalQuality',
+                      color: _getNutritionalQualityColor(nutritionalQuality),
                     ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          product['product_name'] ?? 'Produit inconnu',
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black87,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: _getProcessingColor(
-                                product['processing_level'])
-                                .withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Text(
-                            product['processing_level'] ?? 'N/A',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: _getProcessingColor(
-                                  product['processing_level']),
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
                 ],
-              ),
-              const SizedBox(height: 12),
-              if ((product['health_risks'] as List).isNotEmpty)
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 6,
-                  children: (product['health_risks'] as List)
-                      .map<Widget>((risk) {
-                    return Chip(
-                      label: Text(
-                        risk,
-                        style: const TextStyle(fontSize: 12),
-                      ),
-                      backgroundColor: Colors.red[50],
-                      side: BorderSide.none,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      labelStyle: TextStyle(
-                        color: Colors.red[700],
-                        fontWeight: FontWeight.w500,
-                      ),
-                      padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    );
-                  }).toList(),
-                ),
-              const SizedBox(height: 12),
-              _buildInfoTile(
-                icon: Icons.lightbulb_outline_rounded,
-                iconColor: const Color(0xFFFFC107),
-                title: 'Conseil',
-                content: product['advice'] ?? 'Pas d\'analyse disponible',
-              ),
-              const SizedBox(height: 12),
-              _buildInfoTile(
-                icon: Icons.thumb_up_rounded,
-                iconColor: const Color(0xFF4CAF50),
-                title: 'Recommandation',
-                content:
-                product['consumption_recommendation'] ?? 'Non spécifié',
-              ),
-              const SizedBox(height: 12),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    _showOtherStoresPrices(context, product);
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF4285F4),
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    elevation: 2,
-                    shadowColor: Colors.blue.withOpacity(0.3),
-                    side: BorderSide.none,
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.compare_arrows_rounded, size: 20),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Voir le prix dans d\'autres magasins',
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
               ),
             ],
           ),
         ),
+      ],
+    );
+  }
+
+  Widget _buildTag({
+    required String label,
+    required Color color,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: color.withOpacity(0.3), width: 1),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 12,
+          color: color,
+          fontWeight: FontWeight.w500,
+        ),
       ),
     );
+  }
+  Widget _buildChipSection(String title, List<dynamic> items, Color bgColor, Color textColor) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          '$title:',
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: Colors.grey[700],
+          ),
+        ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          runSpacing: 6,
+          children: items.map<Widget>((item) {
+            return Chip(
+              label: Text(item, style: const TextStyle(fontSize: 12)),
+              backgroundColor: bgColor,
+              labelStyle: TextStyle(color: textColor, fontWeight: FontWeight.w500),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              side: BorderSide.none,
+            );
+          }).toList(),
+        ),
+      ],
+    );
+  }
+  Widget _buildCompareButton(BuildContext context, Map<String, dynamic> product) {
+    return SizedBox(
+      width: double.infinity,
+      child: OutlinedButton.icon(
+        onPressed: () => _showOtherStoresPrices(context, product),
+        icon: const Icon(Icons.compare_arrows_rounded, size: 20, color: Color(0xFF1D7A29)),
+        label: const Text(
+          'Compare prices',
+          style: TextStyle(
+            fontSize: 15,
+            fontWeight: FontWeight.w600,
+            color: Color(0xFF1D7A29),
+          ),
+        ),
+        style: OutlinedButton.styleFrom(
+          side: const BorderSide(color: Color(0xFF1D7A29), width: 1.8),
+          backgroundColor: Colors.transparent,
+          padding: const EdgeInsets.symmetric(vertical: 14),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shadowColor: Colors.transparent,
+        ),
+      ),
+    );
+  }
+
+
+  List<String> _formatHealthRisks(Map<String, dynamic>? healthRisks) {
+    if (healthRisks == null) return [];
+
+    final List<String> formattedRisks = [];
+
+    if (healthRisks['sugar'] != null && healthRisks['sugar'] != 'none') {
+      formattedRisks.add('Sugar: ${healthRisks['sugar']}');
+    }
+
+    if (healthRisks['salt'] != null && healthRisks['salt'] != 'none') {
+      formattedRisks.add('Salt: ${healthRisks['salt']}');
+    }
+
+    if (healthRisks['fats'] != null) {
+      final fats = healthRisks['fats'] as Map;
+      if (fats['saturated'] != null && fats['saturated'] != 'none') {
+        formattedRisks.add('Sat. fats: ${fats['saturated']}');
+      }
+      if (fats['trans'] != null && fats['trans'] != 'none') {
+        formattedRisks.add('Trans fats: ${fats['trans']}');
+      }
+    }
+
+    if (healthRisks['additives'] != null && healthRisks['additives'] != 'none') {
+      formattedRisks.add('Additives: ${healthRisks['additives']}');
+    }
+
+    if (healthRisks['allergens'] != null && (healthRisks['allergens'] as List).isNotEmpty) {
+      formattedRisks.add('Allergens: ${(healthRisks['allergens'] as List).join(', ')}');
+    }
+
+    return formattedRisks;
   }
 
   void _showOtherStoresPrices(
@@ -533,7 +610,7 @@ class TicketAnalysisPage extends StatelessWidget {
 
     if (productName == null || productName.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Nom du produit invalide')),
+        const SnackBar(content: Text('Invalid product name')),
       );
       return;
     }
@@ -575,13 +652,10 @@ class TicketAnalysisPage extends StatelessWidget {
       ),
     );
 
-    // 🔁 Déclencher l’événement après avoir construit la modale
-    print("🔄 Requesting price comparison for: $productName");
     BlocProvider.of<TicketBloc>(context).add(
       GetPriceComparisonsEvent(productName: productName),
     );
   }
-
   Widget _buildLoadingSheet() {
     return Container(
       height: 200,
@@ -594,14 +668,12 @@ class TicketAnalysisPage extends StatelessWidget {
       ),
     );
   }
-
   Widget _buildPriceComparisonSheet(
       BuildContext context,
       String productName,
       double currentPrice,
       List<Map<String, dynamic>> comparisons,
       ) {
-    // Filtrer et trier les comparaisons
     final validComparisons = comparisons
         .where((c) => c['price'] != null)
         .toList()
@@ -611,7 +683,6 @@ class TicketAnalysisPage extends StatelessWidget {
       return _buildNoComparisonsSheet(context, productName);
     }
 
-    // Trouver le meilleur prix (déjà trié donc premier élément)
     final bestPrice = validComparisons.first;
 
     return Container(
@@ -619,7 +690,6 @@ class TicketAnalysisPage extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // En-tête
           Container(
             width: 40,
             height: 5,
@@ -630,61 +700,56 @@ class TicketAnalysisPage extends StatelessWidget {
             ),
           ),
           Text(
-            'Prix de $productName',
+            'Price comparison for $productName',
             style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
             ),
           ),
           const SizedBox(height: 16),
-
-          // Meilleur prix
-          if (bestPrice != null)
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.green[50],
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.star, color: Colors.green),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Meilleur prix trouvé',
-                          style: TextStyle(
-                            color: Colors.green[800],
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        Text(
-                          '${bestPrice['store']} - ${bestPrice['price'].toStringAsFixed(2)} DT',
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        if (bestPrice['date'] != null)
-                          Text(
-                            'Mis à jour: ${bestPrice['date']}',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey[600],
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.green[50],
+              borderRadius: BorderRadius.circular(12),
             ),
+            child: Row(
+              children: [
+                const Icon(Icons.star, color: Colors.green),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Best price found',
+                        style: TextStyle(
+                          color: Colors.green[800],
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        '${bestPrice['store']} - ${bestPrice['price'].toStringAsFixed(2)} DT',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      if (bestPrice['date'] != null)
+                        Text(
+                          'Updated: ${bestPrice['date']}',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
           const SizedBox(height: 16),
-
-          // Liste des autres prix
           Expanded(
             child: ListView.separated(
               itemCount: validComparisons.length,
@@ -695,7 +760,7 @@ class TicketAnalysisPage extends StatelessWidget {
                   leading: comparison['isBest'] == true
                       ? const Icon(Icons.star, color: Colors.green)
                       : const Icon(Icons.store, color: Colors.blue),
-                  title: Text(comparison['store'] ?? 'Magasin inconnu'),
+                  title: Text(comparison['store'] ?? 'Unknown store'),
                   trailing: Text(
                     '${comparison['price']?.toStringAsFixed(2)} DT',
                     style: TextStyle(
@@ -714,23 +779,37 @@ class TicketAnalysisPage extends StatelessWidget {
           const SizedBox(height: 16),
           SizedBox(
             width: double.infinity,
-            child: ElevatedButton(
-              onPressed: Navigator.of(context).pop,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF2C5C2D),
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+            child: ElevatedButton.icon(
+              onPressed: () => Navigator.of(context).pop(),
+              label: const Text(
+                'Close',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 1.0,
+                  fontSize: 16,
                 ),
               ),
-              child: const Text('Fermer'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF2E512E),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(24), // Coins plus arrondis
+                ),
+                elevation: 8,
+                shadowColor: const Color(0x552C5C2D), // Ombre douce
+                textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                animationDuration: const Duration(milliseconds: 100),
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                surfaceTintColor: Colors.transparent,
+              ),
             ),
-          ),
+          )
         ],
       ),
     );
   }
-
   Widget _buildNoComparisonsSheet(BuildContext context, String productName) {
     return Padding(
       padding: const EdgeInsets.all(20),
@@ -740,7 +819,7 @@ class TicketAnalysisPage extends StatelessWidget {
           Icon(Icons.search_off, size: 60, color: Colors.grey[400]),
           const SizedBox(height: 20),
           Text(
-            'Aucune comparaison trouvée',
+            'No comparisons found',
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
@@ -748,16 +827,14 @@ class TicketAnalysisPage extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           Text(
-            'Aucun prix trouvé pour "$productName" dans d’autres magasins',
+            'No prices found for "$productName" in other stores',
             textAlign: TextAlign.center,
             style: TextStyle(fontSize: 16),
           ),
           const SizedBox(height: 30),
           ElevatedButton(
-            onPressed: Navigator
-                .of(context)
-                .pop,
-            child: const Text('Fermer'),
+            onPressed: Navigator.of(context).pop,
+            child: const Text('Close'),
           ),
         ],
       ),
@@ -805,7 +882,38 @@ class TicketAnalysisPage extends StatelessWidget {
     );
   }
 
-  Widget _buildGlobalAdvice(String advice) {
+  Widget _buildGlobalAdvice(dynamic advice) {
+    // Vérifier si l'objet est vide ou inutile
+    if (advice == null ||
+        (advice is String && advice.trim().isEmpty) ||
+        (advice is Map &&
+            (advice['positive_aspects'] == null || (advice['positive_aspects'] as List).isEmpty) &&
+            (advice['main_concerns'] == null || (advice['main_concerns'] as List).isEmpty) &&
+            (advice['improvement_suggestions'] == null || (advice['improvement_suggestions'] as List).isEmpty))) {
+      // Retourne un container vide
+      return const SizedBox.shrink();
+    }
+
+    String adviceText;
+
+    if (advice is String) {
+      adviceText = advice;
+    } else if (advice is Map) {
+      final positive = (advice['positive_aspects'] as List?)?.join('\n• ');
+      final concerns = (advice['main_concerns'] as List?)?.join('\n• ');
+      final suggestions = (advice['improvement_suggestions'] as List?)?.join('\n• ');
+
+      adviceText = '''
+${positive != null && positive.isNotEmpty ? '• $positive' : ''}
+
+${concerns != null && concerns.isNotEmpty ? 'Main concerns:\n• $concerns' : ''}
+
+${suggestions != null && suggestions.isNotEmpty ? 'Suggestions:\n• $suggestions' : ''}
+'''.trim();
+    } else {
+      return const SizedBox.shrink(); // Type non reconnu
+    }
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
@@ -840,7 +948,7 @@ class TicketAnalysisPage extends StatelessWidget {
               ),
               const SizedBox(width: 12),
               const Text(
-                'Conseil Nutritionnel',
+                'Nutritional Advice',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
@@ -851,7 +959,7 @@ class TicketAnalysisPage extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           Text(
-            advice,
+            adviceText,
             style: const TextStyle(
               fontSize: 14,
               color: Color(0xFF333333),
@@ -864,12 +972,28 @@ class TicketAnalysisPage extends StatelessWidget {
   }
 
   Color _getProcessingColor(String? level) {
-    switch (level) {
-      case 'naturel':
+    switch (level?.toLowerCase()) {
+      case 'natural':
         return const Color(0xFF4CAF50);
-      case 'transformé':
+      case 'minimally-processed':
+      case 'processed':
         return const Color(0xFFFFC107);
-      case 'ultra-transformé':
+      case 'ultra-processed':
+        return const Color(0xFFF44336);
+      default:
+        return const Color(0xFF9E9E9E);
+    }
+  }
+
+  Color _getNutritionalQualityColor(String? quality) {
+    switch (quality?.toLowerCase()) {
+      case 'excellent':
+        return const Color(0xFF4CAF50);
+      case 'good':
+        return const Color(0xFF8BC34A);
+      case 'moderate':
+        return const Color(0xFFFFC107);
+      case 'poor':
         return const Color(0xFFF44336);
       default:
         return const Color(0xFF9E9E9E);
@@ -877,12 +1001,13 @@ class TicketAnalysisPage extends StatelessWidget {
   }
 
   String _getProcessingEmoji(String? level) {
-    switch (level) {
-      case 'naturel':
+    switch (level?.toLowerCase()) {
+      case 'natural':
         return '🌿';
-      case 'transformé':
+      case 'minimally-processed':
+      case 'processed':
         return '⚙️';
-      case 'ultra-transformé':
+      case 'ultra-processed':
         return '⚠️';
       default:
         return '❓';

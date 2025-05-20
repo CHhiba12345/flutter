@@ -17,46 +17,88 @@ class HistoryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final date = DateTime.tryParse(history.timestamp); // Utiliser tryParse pour éviter les exceptions
+    final date = DateTime.tryParse(history.timestamp);
     final formattedDate = date != null
         ? '${date.day}/${date.month}/${date.year}'
-        : 'Date inconnue'; // Fournir une valeur par défaut
+        : 'Date inconnue';
 
     return Card(
-      child: ListTile(
-        leading: history.imageUrl.isNotEmpty
-            ? CachedNetworkImage(
-          imageUrl: history.imageUrl,
-          width: 50,
-          height: 50,
-          fit: BoxFit.cover,
-          placeholder: (context, url) => Container(
-            color: Colors.grey[200],
-            child: const Icon(Icons.image),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      elevation: 3,
+      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: () {
+          // Ajouter une action si nécessaire au clic sur la carte
+        },
+        child: ListTile(
+          contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+          leading: ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: history.imageUrl.isNotEmpty
+                ? CachedNetworkImage(
+              imageUrl: history.imageUrl,
+              width: 60,
+              height: 60,
+              fit: BoxFit.cover,
+              placeholder: (context, url) => Container(
+                width: 60,
+                height: 30,
+                color: Colors.grey[200],
+                child: const Icon(Icons.image, color: Colors.grey),
+              ),
+              errorWidget: (context, url, error) =>
+                  Container(
+                    width: 60,
+                    height: 60,
+                    color: Colors.grey[200],
+                    child: const Icon(Icons.error, color: Colors.redAccent),
+                  ),
+            )
+                : Container(
+              width: 60,
+              height: 60,
+              color: Colors.grey[200],
+              child: const Icon(Icons.image, color: Colors.grey),
+            ),
           ),
-          errorWidget: (context, url, error) => const Icon(Icons.error),
-        )
-            : const Icon(Icons.image),
-        title: Text(
-          history.productName.isNotEmpty ? history.productName : 'Produit inconnu',
-        ),
-        subtitle: Text(formattedDate),
-        trailing: IconButton(
-          icon: const Icon(Icons.delete),
-          onPressed: () async {
-            try {
-              onDelete(); // Appel du callback onDelete
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Entrée supprimée avec succès')),
-              );
-            } catch (e) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Erreur lors de la suppression : $e')),
-              );
-            }
-          },
+          title: Text(
+            history.productName.isNotEmpty ? history.productName : 'Produit inconnu',
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+            ),
+          ),
+          subtitle: Text(
+            formattedDate,
+            style: TextStyle(
+              color: Colors.grey[600],
+              fontSize: 14,
+            ),
+          ),
+          trailing: IconButton(
+            icon: const Icon(Icons.delete, color: Colors.redAccent),
+            tooltip: 'Supprimer',
+            onPressed: () async {
+              try {
+                onDelete();
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Entrée supprimée avec succès')),
+                  );
+                }
+              } catch (e) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Erreur lors de la suppression : $e')),
+                  );
+                }
+              }
+            },
+          ),
         ),
       ),
     );
   }
+
 }

@@ -28,34 +28,180 @@ class ProductSearchCard extends StatelessWidget {
     );
   }
 
-  Widget _buildPlaceholder() {
-    return Padding(
-      padding: AppConstants.defaultPadding,
-      child: Center(
+
+    Widget _buildPlaceholder() {
+      final List<Map<String, dynamic>> cards = [
+        {
+          'icon': Icons.local_dining,
+          'title': 'Nutri-Score',
+          'description': 'Nutritional quality of food',
+          'color': Colors.blue,
+        },
+        {
+          'icon': Icons.qr_code_scanner,
+          'title': 'Product Scan',
+          'description': 'Scan a barcode for more info',
+          'color': Colors.deepPurple,
+        },
+        {
+          'icon': Icons.eco,
+          'title': 'Eco-Score',
+          'description': 'Environmental impact of the product',
+          'color': Colors.green,
+        },
+        {
+          'icon': Icons.list_alt,
+          'title': 'Ingredients',
+          'description': 'Detailed list of ingredients',
+          'color': Colors.orange,
+        },
+        {
+          'icon': Icons.warning_amber,
+          'title': 'Allergens',
+          'description': 'Allergen warning',
+          'color': Colors.redAccent,
+        },
+        {
+          'icon': Icons.favorite_outline,
+          'title': 'Favorites',
+          'description': 'Find your favorite products',
+          'color': Colors.pink,
+        },
+      ];
+
+      return SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            SizedBox(
-              width: 320,
-              height: 220,
-              child: Lottie.asset('assets/animations/search.json'),
+            // Optional banner or illustration at the top
+            Container(
+              width: double.infinity,
+              height: 180,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                image: const DecorationImage(
+                  image: AssetImage('assets/images/hel.jpeg'),
+                  fit: BoxFit.cover,
+                ),
+              ),
             ),
             const SizedBox(height: 24),
-            const Text(
-              'No product selected',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black87),
+            RichText(
+              text: TextSpan(
+                text: 'Welcome to ',
+                style: TextStyle(
+                  fontSize: 26,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                  height: 1.3,
+                ),
+                children: [
+                  TextSpan(
+                    text: 'EyeVolve',
+                    style: TextStyle(
+                      color: Colors.green.shade800,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 10),
             const Text(
-              'Scan or search for a product to see\nnutritional information here.',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 14, color: Colors.black54),
+              'Your smart guide to healthier eating 🌿',
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.black54,
+              ),
+            ),
+            const SizedBox(height: 24),
+            GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              padding: EdgeInsets.zero,
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: 16,
+                mainAxisSpacing: 16,
+                childAspectRatio: 0.60,
+              ),
+              itemCount: cards.length,
+              itemBuilder: (context, index) {
+                final card = cards[index];
+                return GestureDetector(
+                  onTap: () {
+                    // Action on tap
+                  },
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                      gradient: LinearGradient(
+                        colors: [
+                          card['color'].withOpacity(0.15),
+                          card['color'].withOpacity(0.05)
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: card['color'].withOpacity(0.1),
+                          blurRadius: 10,
+                          spreadRadius: 1,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    padding: const EdgeInsets.all(18),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            gradient: LinearGradient(
+                              colors: [
+                                card['color'].withOpacity(0.8),
+                                card['color'].withOpacity(0.6),
+                              ],
+                            ),
+                          ),
+                          child: Icon(
+                            card['icon'],
+                            size: 28,
+                            color: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(height: 18),
+                        Text(
+                          card['title'],
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          card['description'],
+                          style: const TextStyle(
+                            fontSize: 13,
+                            color: Colors.black54,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
             ),
           ],
         ),
-      ),
-    );
-  }
+      );
+    }
 
   Widget _buildProductInfo(BuildContext context, Product product) {
     return BlocBuilder<FavoriteBloc, FavoriteState>(

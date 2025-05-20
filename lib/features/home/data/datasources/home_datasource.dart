@@ -26,7 +26,8 @@ class HomeDataSource {
     );
 
     if (response.statusCode == 200) {
-      return json.decode(response.body);
+     // return json.decode(response.body);
+      return json.decode(utf8.decode(response.bodyBytes));
     } else if (response.statusCode == 404) {
       throw Exception('Produit non trouvé');
     } else {
@@ -50,7 +51,8 @@ class HomeDataSource {
       print('[HomeDataSource] Full Response Body: ${response.body}');
 
       if (response.statusCode == 200) {
-        final decodedResponse = json.decode(response.body);
+       // final decodedResponse = json.decode(response.body);
+        final decodedResponse = json.decode(utf8.decode(response.bodyBytes)); // ✅ UTF-8 fix
         print('[HomeDataSource] Decoded Response: $decodedResponse');
 
         if (decodedResponse is List) {

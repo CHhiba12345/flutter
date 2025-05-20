@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:http/http.dart' as http;
+import 'package:shimmer/shimmer.dart';
 import '../../../../app_router.dart';
 import '../../../auth/data/datasources/auth_service.dart';
 import '../../../favorites/data/datasources/favorite_datasource.dart';
@@ -111,7 +112,7 @@ class _HomeContent extends StatelessWidget {
     );
     final double statusBarHeight = MediaQuery.of(context).padding.top;
     // Charger les allergènes dès que la page est affichée
-      context.read<ProfileBloc>().add(InitializeAllergens());
+    context.read<ProfileBloc>().add(InitializeAllergens());
 
     return GestureDetector(
       onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
@@ -249,6 +250,7 @@ class _SearchBarAndScan extends StatelessWidget {
   }
 }
 
+
 class _ProductDisplay extends StatefulWidget {
   const _ProductDisplay();
 
@@ -261,9 +263,10 @@ class _ProductDisplayState extends State<_ProductDisplay> {
 
   @override
   void initState() {
-    super.didChangeDependencies();
+    super.initState();
     _loadUserAllergens();
   }
+
   Future<void> _loadUserAllergens() async {
     final authService = AuthService();
     final token = await authService.getCurrentUserToken();
@@ -274,11 +277,6 @@ class _ProductDisplayState extends State<_ProductDisplay> {
       }
     }
   }
-
-
-
-
-
   Future<String> getCurrentUserId() async {
     final authService = AuthService();
     final token = await authService.getCurrentUserToken();
@@ -291,38 +289,27 @@ class _ProductDisplayState extends State<_ProductDisplay> {
   Widget build(BuildContext context) {
     return MultiBlocListener(
       listeners: [
-        BlocListener<FavoriteBloc, FavoriteState>(
-          listener: (context, state) {
-            if (state is FavoriteSuccess) {
-              setState(() {});
-            }
-          },
-        ),
         BlocListener<ProfileBloc, ProfileState>(
           listener: (context, state) {
-            if (state is AllergensLoaded || state is AllergensUpdated ) {
+            if (state is AllergensLoaded || state is AllergensUpdated) {
               final allergens = state is AllergensLoaded
                   ? state.allergens
                   : (state as AllergensUpdated).allergens;
-
-              if (mounted) {
-                setState(() {
-                  userAllergens = allergens;
-                  debugPrint('✅ Allergènes mis à jour dans HomePage: $userAllergens');
-                });
-              }
+              setState(() {
+                userAllergens = allergens;
+              });
             }
           },
-        )
+        ),
       ],
       child: BlocBuilder<HomeBloc, HomeState>(
         builder: (context, state) {
           if (state is ProductLoading) {
-            return const Center(child: CircularProgressIndicator());
+            return _buildLoadingShimmer();
           } else if (state is ProductDetailState) {
             return _buildProductDetail(state.product);
           } else if (state is ProductsLoaded) {
-            return _buildProductList(state.products, state.favorites);
+            return _buildProductList(state.products);
           } else if (state is ProductError) {
             return Center(child: Text(state.message));
           } else {
@@ -333,15 +320,36 @@ class _ProductDisplayState extends State<_ProductDisplay> {
     );
   }
 
+  Widget _buildLoadingShimmer() {
+    return ListView.builder(
+      itemCount: 5,
+      itemBuilder: (context, index) {
+        return Shimmer.fromColors(
+          baseColor: Colors.grey.shade300,
+          highlightColor: Colors.grey.shade100,
+          child: Container(
+            margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            height: 100,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(15),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+
   Widget _buildProductDetail(Product product) {
     return BlocBuilder<FavoriteBloc, FavoriteState>(
       builder: (context, favoriteState) {
         bool isFavorite = false;
         if (favoriteState is FavoritesLoaded) {
-          isFavorite = favoriteState.favorites.any((fav) => fav.productId == product.code);
+          isFavorite = favoriteState.favorites
+              .any((fav) => fav.productId == product.code);
         }
 
-        // Vérifier si le produit contient des allergènes de l'utilisateur
         bool hasAllergenAlert = false;
         String? alertMessage;
 
@@ -351,250 +359,367 @@ class _ProductDisplayState extends State<_ProductDisplay> {
               .toList();
 
           final matchingAllergens = userAllergens
-              .where((userAllergen) => productAllergens.contains(userAllergen.toLowerCase()))
+              .where((userAllergen) =>
+              productAllergens.contains(userAllergen.toLowerCase()))
               .toList();
 
           if (matchingAllergens.isNotEmpty) {
             hasAllergenAlert = true;
-            alertMessage = ' Be careful! This product may contain your allergens 😯: ${matchingAllergens.join(', ')}';
+            alertMessage =
+            'Warning! This product contains allergens that may affect you: ${matchingAllergens.join(', ')}';
           }
-
-          debugPrint('🔍 Allergènes de l\'utilisateur: $userAllergens');
-          debugPrint('🔍 Allergènes du produit: $productAllergens');
-          debugPrint('🔍 Allergènes correspondants: $matchingAllergens');
         }
 
-
         return Scaffold(
-          appBar: AppBar(
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-            leading: Padding(
-              padding: const EdgeInsets.only(left: 8.0),
-              child: IconButton(
-                icon: const Icon(Icons.arrow_back, color: Colors.black, size: 24),
-                onPressed: () {
-                  context.read<HomeBloc>().add(BackToHomeEvent());
-                },
-              ),
-            ),
-            title: Text(
-              'Détails',
-              style: TextStyle(
-                color: Colors.black,
-                fontWeight: FontWeight.bold,
-                fontSize: 20,
-              ),
-            ),
-            centerTitle: true,
-            toolbarHeight: 30,
-          ),
-          body: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Product Image
-                  Container(
-                    height: 120,
-                    margin: const EdgeInsets.only(bottom: 20),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
-                      color: Colors.grey[200],
-                    ),
-                    child: product.imageUrl?.isNotEmpty == true
-                        ? ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: Image.network(
-                        product.imageUrl!,
-                        fit: BoxFit.contain,
-                        width: double.infinity,
-                        errorBuilder: (context, error, stackTrace) => const Icon(Icons.broken_image, size: 50),
-                      ),
-                    )
-                        : const Center(child: Icon(Icons.image, size: 50)),
-                  ),
-                  // Product name and favorite button
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          product.name,
-                          style: const TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      IconButton(
-                        icon: Icon(
-                          isFavorite ? Icons.favorite : Icons.favorite_border,
-                          color: isFavorite ? Colors.red : Colors.grey,
-                          size: 28,
-                        ),
-                        onPressed: () async {
-                          final userId = await getCurrentUserId();
-                          context.read<FavoriteBloc>().add(
-                            ToggleFavoriteEvent(
-                              uid: userId,
-                              productId: product.code,
-                              isFavorite: !isFavorite,
-                            ),
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                  // Allergen Alert
-                  if (hasAllergenAlert)
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      margin: const EdgeInsets.only(bottom: 16),
-                      decoration: BoxDecoration(
-                        color: Colors.red[50],
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: Colors.red),
-                      ),
-                      child: Row(
+          body: Stack(
+            children: [
+              CustomScrollView(
+                slivers: <Widget>[
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Icon(Icons.warning, color: Colors.red),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              alertMessage!,
-                              style: const TextStyle(color: Colors.red),
+                          // Product name and brand
+                          Center(
+                            child: Column(
+                              children: [
+                                Text(
+                                  product.name,
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                    fontSize: 28,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black87,
+                                    height: 1.2,
+                                  ),
+                                ),
+                                if (product.brand != null) ...[
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    'Brand: ${product.brand!}',
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      color: Colors.grey.shade600,
+                                      fontStyle: FontStyle.italic,
+                                    ),
+                                  ),
+                                ],
+                              ],
                             ),
                           ),
+                          const SizedBox(height: 20),
+
+                          // Product image with shadow and better border radius
+                          Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(0.2),
+                                  blurRadius: 10,
+                                  spreadRadius: 2,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(16),
+                              child: Stack(
+                                children: [
+                                  Container(
+                                    height: 220,
+                                    width: double.infinity,
+                                    color: Colors.grey.shade100,
+                                    child: product.imageUrl?.isNotEmpty == true
+                                        ? Image.network(
+                                      product.imageUrl!,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (_, __, ___) =>
+                                      const Center(
+                                        child: Icon(Icons.image_not_supported,
+                                            size: 60, color: Colors.grey),
+                                      ),
+                                    )
+                                        : const Center(
+                                      child: Icon(Icons.image,
+                                          size: 60, color: Colors.grey),
+                                    ),
+                                  ),
+                                  Positioned(
+                                    top: 12,
+                                    right: 12,
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        color: Colors.white.withOpacity(0.9),
+                                        shape: BoxShape.circle,
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.grey.withOpacity(0.3),
+                                            blurRadius: 4,
+                                            offset: const Offset(0, 2),
+                                          ),
+                                        ],
+                                      ),
+                                      child: IconButton(
+                                        icon: Icon(
+                                          isFavorite
+                                              ? Icons.favorite
+                                              : Icons.favorite_border,
+                                          color: isFavorite ? Colors.red : Colors.grey,
+                                          size: 28,
+                                        ),
+                                        onPressed: () async {
+                                          final authService = AuthService();
+                                          final token = await authService
+                                              .getCurrentUserToken();
+                                          if (token != null) {
+                                            final userId = await authService
+                                                .getUserIdFromToken(token);
+                                            if (userId != null) {
+                                              context.read<FavoriteBloc>().add(
+                                                ToggleFavoriteEvent(
+                                                  uid: userId,
+                                                  productId: product.code,
+                                                  isFavorite: !isFavorite,
+                                                ),
+                                              );
+                                            }
+                                          }
+                                        },
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+
+                          // Allergen alert with improved design
+                          if (hasAllergenAlert)
+                            Container(
+                              padding: const EdgeInsets.all(16),
+                              margin: const EdgeInsets.only(bottom: 16),
+                              decoration: BoxDecoration(
+                                color: Colors.red.shade50,
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: Colors.red.shade200,
+                                  width: 1.5,
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(Icons.warning_amber_rounded,
+                                      size: 28, color: Colors.red.shade700),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Text(
+                                      alertMessage!,
+                                      style: TextStyle(
+                                        color: Colors.red.shade800,
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 15,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+
+                          // Nutriscore and Ecoscore badges with better spacing
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 8.0), // Augmenté de 1 à 8
+                            child: LayoutBuilder(
+                              builder: (context, constraints) {
+                                final badgeWidth = (constraints.maxWidth - 16) / 2 - 8; // Calcul dynamique
+                                return Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    if (product.nutriscore != null)
+                                      Flexible( // Utilisation de Flexible au lieu de Expanded
+                                        child: SizedBox(
+                                          width: badgeWidth, // Largeur calculée dynamiquement
+                                          child: _ScoreBadge(
+                                            label: 'NUTRI-SCORE',
+                                            value: product.nutriscore!.toUpperCase(),
+                                            color: _getNutriscoreColor(product.nutriscore!),
+                                          ),
+                                        ),
+                                      ),
+                                    if (product.environment?.ecoscore != null)
+                                      Flexible(
+                                        child: SizedBox(
+                                          width: badgeWidth,
+                                          child: _ScoreBadge(
+                                            label: 'ECO-SCORE',
+                                            value: product.environment!.ecoscore!.toUpperCase(),
+                                            color: _getEcoscoreColor(product.environment!.ecoscore!),
+                                          ),
+                                        ),
+                                      ),
+                                  ],
+                                );
+                              },
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+
+                          // Product details sections with improved cards
+                          _buildDetailSection(
+                            title: 'Information',
+                            icon: Icons.info_outline,
+                            children: [
+                              _buildDetailItem(
+                                'Categories',
+                                product.categories ?? 'Not specified',
+                                icon: Icons.category,
+                              ),
+                              _buildDetailItem(
+                                'Halal status',
+                                product.halalStatus == true ? '✅ Yes' : '❌ No',
+                                icon: Icons.verified_user,
+                              ),
+                              if (product.processing?.novaGroup != null)
+                                _buildDetailItem(
+                                  'Level of processing',
+                                  'NOVA ${product.processing!.novaGroup}',
+                                  icon: Icons.transform,
+                                ),
+                            ],
+                          ),
+
+                          if (product.ingredients?.text != null)
+                            _buildDetailSection(
+                              title: 'Ingredients',
+                              icon: Icons.list_alt_outlined,
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey.shade50,
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Text(
+                                    product.ingredients!.text!,
+                                    style: const TextStyle(
+                                      fontSize: 15,
+                                      height: 1.4,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+
+                          if (product.ingredients?.allergens?.isNotEmpty == true)
+                            _buildDetailSection(
+                              title: 'Allergens',
+                              icon: Icons.warning_amber_outlined,
+                              children: [
+                                Wrap(
+                                  spacing: 8,
+                                  runSpacing: 8,
+                                  children: product.ingredients!.allergens!
+                                      .map((allergen) => Chip(
+                                    label: Text(
+                                      allergen,
+                                      style: TextStyle(
+                                        color: userAllergens.contains(
+                                            allergen.toLowerCase())
+                                            ? Colors.white
+                                            : Colors.black,
+                                      ),
+                                    ),
+                                    backgroundColor: userAllergens.contains(
+                                        allergen.toLowerCase())
+                                        ? Colors.red.shade400
+                                        : Colors.grey.shade200,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                  ))
+                                      .toList(),
+                                ),
+                              ],
+                            ),
+
+                          if (product.nutrition?.facts != null)
+                            _buildDetailSection(
+                              title: 'Nutrition facts',
+                              icon: Icons.abc_outlined,
+                              children: [
+                                _NutritionFactsTable(facts: product.nutrition!.facts!),
+                              ],
+                            ),
+
+                          const SizedBox(height: 40),
                         ],
                       ),
                     ),
-                  // Basic info
-                  _buildInfoCard(
-                    children: [
-                      if (product.nutriscore != null) _buildInfoRow('Nutriscore', product.nutriscore!.toUpperCase()),
-                      if (product.brand != null) _buildInfoRow('Marque', product.brand!),
-                      if (product.categories != null) _buildInfoRow('Catégories', product.categories!),
-                      _buildInfoRow('Statut Halal', product.halalStatus == true ? 'Oui' : 'Non'),
-                    ],
                   ),
-                  // Ingredients
-                  if (product.ingredients?.text != null) ...[
-                    _buildSectionTitle('Ingrédients'),
-                    _buildInfoCard(
-                      children: [
-                        Text(
-                          product.ingredients!.text!,
-                          style: const TextStyle(fontSize: 15),
-                        ),
-                      ],
-                    ),
-                  ],
-                  // Allergens
-                  if (product.ingredients?.allergens?.isNotEmpty == true) ...[
-                    _buildSectionTitle('Allergènes'),
-                    _buildInfoCard(
-                      children: [
-                        Text(
-                          product.ingredients!.allergens!.join(', '),
-                          style: const TextStyle(fontSize: 15),
-                        ),
-                      ],
-                    ),
-                  ],
-                  // Nutrition facts
-                  if (product.nutrition?.facts != null) ...[
-                    _buildSectionTitle('Valeurs nutritionnelles'),
-                    _buildInfoCard(
-                      children: [
-                        if (product.nutrition!.facts!.energyKcal != null)
-                          _buildInfoRow('Énergie', '${product.nutrition!.facts!.energyKcal} kcal'),
-                        if (product.nutrition!.facts!.fat != null)
-                          _buildInfoRow('Matières grasses', '${product.nutrition!.facts!.fat} g'),
-                        if (product.nutrition!.facts!.carbohydrates != null)
-                          _buildInfoRow('Glucides', '${product.nutrition!.facts!.carbohydrates} g'),
-                        if (product.nutrition!.facts!.proteins != null)
-                          _buildInfoRow('Protéines', '${product.nutrition!.facts!.proteins} g'),
-                        if (product.nutrition!.facts!.salt != null)
-                          _buildInfoRow('Sel', '${product.nutrition!.facts!.salt} g'),
-                      ],
-                    ),
-                  ],
-                  // Nova group
-                  if (product.processing?.novaGroup != null) ...[
-                    _buildSectionTitle('Niveau de transformation'),
-                    _buildInfoCard(
-                      children: [
-                        _buildInfoRow('NOVA', 'Groupe ${product.processing!.novaGroup}'),
-                      ],
-                    ),
-                  ],
-                  // Ecoscore
-                  if (product.environment?.ecoscore != null) ...[
-                    _buildSectionTitle('Impact environnemental'),
-                    _buildInfoCard(
-                      children: [
-                        _buildInfoRow('Ecoscore', product.environment!.ecoscore!.toUpperCase()),
-                      ],
-                    ),
-                  ],
-                  const SizedBox(height: 20),
                 ],
               ),
-            ),
+
+              // Bouton de retour positionné en absolu dans le Stack
+              Positioned(
+                top: MediaQuery.of(context).padding.top + 12,
+                left: 12,
+                child: SafeArea(
+                  child: CircleAvatar(
+                    radius: 18,
+                    backgroundColor: Colors.white.withOpacity(0.7),
+                    child: IconButton(
+                      padding: EdgeInsets.zero,
+                      icon: const Icon(Icons.arrow_back,
+                          color: Colors.black,
+                          size: 24),
+                      onPressed: () {
+                        context.read<HomeBloc>().add(BackToHomeEvent());
+                      },
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         );
       },
     );
   }
 
-  Widget _buildSectionTitle(String title) {
+// Ajoutez ces méthodes si elles n'existent pas déjà
+  Widget _buildDetailItem(String label, String value, {IconData? icon}) {
     return Padding(
-      padding: const EdgeInsets.only(top: 16.0, bottom: 8.0),
-      child: Text(
-        title,
-        style: const TextStyle(
-          fontSize: 18,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildInfoCard({required List<Widget> children}) {
-    return Card(
-      elevation: 1,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: children,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildInfoRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            '$label : ',
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 15,
+          if (icon != null)
+            Padding(
+              padding: const EdgeInsets.only(right: 12.0),
+              child: Icon(icon, size: 20, color: Colors.grey.shade600),
+            ),
+          Expanded(
+            flex: 2,
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 15,
+                color: Colors.grey.shade700,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ),
           Expanded(
+            flex: 3,
             child: Text(
               value,
-              style: const TextStyle(fontSize: 15),
+              style: const TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w400,
+              ),
             ),
           ),
         ],
@@ -602,44 +727,198 @@ class _ProductDisplayState extends State<_ProductDisplay> {
     );
   }
 
-  Widget _buildProductList(List<Product> products, List<FavoriteModel> favorites) {
+  Widget _buildDetailSection({
+    required String title,
+    required IconData icon,
+    required List<Widget> children,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(height: 24),
+        Row(
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: LinearGradient(
+                  colors: [Colors.green.shade400, Colors.lightGreen.shade700],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.green.withOpacity(0.3),
+                    blurRadius: 2,
+                    offset: Offset(0, 3),
+                  ),
+                ],
+              ),
+              padding: const EdgeInsets.all(10),
+              child: Icon(icon, color: Colors.white, size: 15),
+            ),
+            const SizedBox(width: 12),
+            Text(
+              title,
+              style: const TextStyle(
+                fontSize: 23,
+                fontWeight: FontWeight.w700,
+                color: Colors.black87,
+                letterSpacing: 0.5,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 14),
+        Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(18),
+            gradient: LinearGradient(
+              colors: [Color(0xBBF6E5E8), Color(0xFFC8E6C9)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.green.withOpacity(0.1),
+                blurRadius: 10,
+                offset: Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: children.map((child) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: child,
+                );
+              }).toList(),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+
+
+
+  Widget _buildProductList(List<Product> products) {
     return BlocBuilder<FavoriteBloc, FavoriteState>(
       builder: (context, favoriteState) {
         final favoriteIds = favoriteState is FavoritesLoaded
             ? favoriteState.favorites.map((f) => f.productId).toSet()
             : <String>{};
-        return ListView.builder(
+
+        return ListView.separated(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           itemCount: products.length,
+          separatorBuilder: (_, __) => const SizedBox(height: 12),
           itemBuilder: (context, index) {
             final product = products[index];
             final isFavorite = favoriteIds.contains(product.code);
-            return Card(
-              margin: const EdgeInsets.all(10),
+
+            return AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 6,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+              ),
               child: ListTile(
-                leading: product.imageUrl?.isNotEmpty == true
-                    ? Image.network(
-                  product.imageUrl!,
-                  width: 50,
-                  height: 50,
-                  errorBuilder: (context, error, stackTrace) => const Icon(Icons.broken_image),
-                )
-                    : const Icon(Icons.image),
-                title: Text(product.name),
-                subtitle: Text(product.brand ?? ''),
+                contentPadding: const EdgeInsets.all(12),
+                leading: ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: product.imageUrl?.isNotEmpty == true
+                      ? Image.network(
+                    product.imageUrl!,
+                    width: 60,
+                    height: 60,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Container(
+                      width: 60,
+                      height: 60,
+                      color: Colors.grey.shade100,
+                      child: const Icon(Icons.broken_image, color: Colors.grey),
+                    ),
+                  )
+                      : Container(
+                    width: 60,
+                    height: 60,
+                    color: Colors.grey.shade100,
+                    child: const Icon(Icons.image, color: Colors.grey),
+                  ),
+                ),
+                title: Text(
+                  product.name,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 16,
+                    color: Colors.black87,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (product.brand != null)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 4),
+                        child: Text(
+                          product.brand!,
+                          style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+                        ),
+                      ),
+                    if (product.nutriscore != null)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 6),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: _getNutriscoreColor(product.nutriscore!),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            'Nutri-Score: ${product.nutriscore!.toUpperCase()}',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
                 trailing: IconButton(
                   icon: Icon(
                     isFavorite ? Icons.favorite : Icons.favorite_border,
-                    color: isFavorite ? Colors.red : null,
+                    color: isFavorite ? Colors.red : Colors.grey,
                   ),
                   onPressed: () async {
-                    final userId = await getCurrentUserId();
-                    context.read<FavoriteBloc>().add(
-                      ToggleFavoriteEvent(
-                        uid: userId,
-                        productId: product.code,
-                        isFavorite: !isFavorite,
-                      ),
-                    );
+                    final authService = AuthService();
+                    final token = await authService.getCurrentUserToken();
+                    final userId = token != null ? await authService.getUserIdFromToken(token) : null;
+                    if (userId != null) {
+                      context.read<FavoriteBloc>().add(
+                        ToggleFavoriteEvent(
+                          uid: userId,
+                          productId: product.code,
+                          isFavorite: !isFavorite,
+                        ),
+                      );
+                    }
                   },
                 ),
                 onTap: () {
@@ -652,6 +931,173 @@ class _ProductDisplayState extends State<_ProductDisplay> {
           },
         );
       },
+    );
+  }
+
+
+
+  Color _getNutriscoreColor(String score) {
+    switch (score.toLowerCase()) {
+      case 'a': return Colors.green.shade600;
+      case 'b': return Colors.lightGreen.shade400;
+      case 'c': return Colors.yellow.shade600;
+      case 'd': return Colors.orange.shade600;
+      case 'e': return Colors.red.shade600;
+      default: return Colors.grey;
+    }
+  }
+
+  Color _getEcoscoreColor(String score) {
+    switch (score.toLowerCase()) {
+      case 'a': return Colors.green.shade600;
+      case 'b': return Colors.lightGreen.shade400;
+      case 'c': return Colors.yellow.shade600;
+      case 'd': return Colors.orange.shade600;
+      case 'e': return Colors.red.shade600;
+      default: return Colors.grey.shade600;
+    }
+  }
+}
+
+class _ScoreBadge extends StatelessWidget {
+  final String label;
+  final String value;
+  final Color color;
+
+  const _ScoreBadge({
+    required this.label,
+    required this.value,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(15),
+      ),
+      child: Text(
+        '$label: $value',
+        style: const TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+}
+
+class _FeatureCard extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final Color color;
+  final VoidCallback onTap;
+
+  const _FeatureCard({
+    required this.icon,
+    required this.title,
+    required this.color,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 100,
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(15),
+          border: Border.all(color: color.withOpacity(0.3)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 30, color: color),
+            const SizedBox(height: 8),
+            Text(
+              title,
+              style: TextStyle(
+                color: color,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _NutritionFactsTable extends StatelessWidget {
+  final NutritionFacts facts;
+
+  const _NutritionFactsTable({required this.facts});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.grey.shade200.withOpacity(0.3),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Table(
+        columnWidths: const {
+          0: FlexColumnWidth(2), // Colonne gauche : nom du nutriment
+          1: FlexColumnWidth(1), // Colonne droite : valeur
+        },
+        border: TableBorder.symmetric(
+          inside: BorderSide(
+            color: Colors.white,
+            width: 0.8,
+          ),
+        ),
+        children: [
+          _buildTableRow('Energy', '${facts.energyKcal} kcal'),
+          _buildTableRow('Fat', '${facts.fat} g'),
+          _buildTableRow('of which saturated fat', '${facts.fat} g'),
+          _buildTableRow('Carbohydrates', '${facts.carbohydrates} g'),
+          _buildTableRow('of which sugars', '${facts.fat} g'),
+          _buildTableRow('Dietary fiber', '${facts.fat} g'),
+          _buildTableRow('Proteins', '${facts.proteins} g'),
+          _buildTableRow('Salt', '${facts.salt} g'),
+        ],
+
+      ),
+    );
+  }
+
+  TableRow _buildTableRow(String label, String value) {
+    return TableRow(
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+          child: Text(
+            label,
+            style: const TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w500,
+              color: Colors.black,
+            ),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+          child: Text(
+            value,
+            textAlign: TextAlign.right,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.normal,
+              color: Colors.red,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

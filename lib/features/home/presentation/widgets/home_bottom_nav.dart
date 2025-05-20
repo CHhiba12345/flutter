@@ -20,23 +20,23 @@ class HomeBottomNav extends StatelessWidget {
   Widget build(BuildContext context) {
     final List<NavigationItem> items = [
       NavigationItem(
-        icon: Icons.home_rounded,
-        label: 'Accueil',
+        icon: Icons.house_siding,
+        label: 'Home',
       ),
-
       NavigationItem(
-        icon: Icons.mark_chat_read_rounded,
+        icon: Icons.receipt,
+        label: 'Receipt',
+      ),
+      NavigationItem(
+        icon: Icons.smart_toy, // Chatbot
         label: 'Chatbot',
       ),
       NavigationItem(
         icon: Icons.person,
-        label: 'Profil',
-      ),
-      NavigationItem(
-        icon: Icons.receipt_long,
-        label: 'Ticket',
+        label: 'Profile',
       ),
     ];
+
 
     return Container(
       padding: AppConstants.defaultPadding,

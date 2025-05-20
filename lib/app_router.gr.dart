@@ -21,6 +21,12 @@ abstract class _$AppRouter extends RootStackRouter {
         child: const AllergensPage(),
       );
     },
+    ChatbotRoute.name: (routeData) {
+      return AutoRoutePage<dynamic>(
+        routeData: routeData,
+        child: ChatbotPage(),
+      );
+    },
     FavoritesRoute.name: (routeData) {
       return AutoRoutePage<dynamic>(
         routeData: routeData,
@@ -121,6 +127,20 @@ class AllergensRoute extends PageRouteInfo<void> {
         );
 
   static const String name = 'AllergensRoute';
+
+  static const PageInfo<void> page = PageInfo<void>(name);
+}
+
+/// generated route for
+/// [ChatbotPage]
+class ChatbotRoute extends PageRouteInfo<void> {
+  const ChatbotRoute({List<PageRouteInfo>? children})
+      : super(
+          ChatbotRoute.name,
+          initialChildren: children,
+        );
+
+  static const String name = 'ChatbotRoute';
 
   static const PageInfo<void> page = PageInfo<void>(name);
 }

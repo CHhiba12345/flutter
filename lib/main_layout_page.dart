@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 //import 'features/chatbot/presentation/pages/chatbot_page.dart';
+import 'features/chatbot/presentation/pages/chatbot_page.dart';
 import 'features/home/presentation/pages/home_page.dart';
 import 'features/profile/presentation/pages/profile_page.dart';
 
@@ -26,9 +27,9 @@ class _MainLayoutState extends State<MainLayoutPage> {
         physics: NeverScrollableScrollPhysics(), // Disable swipe
         children: [
           HomePage(),
-         // ChatbotPage(),
-          ProfilePage(),
           TicketPage(),
+          ChatbotPage(),
+          ProfilePage(),
         ],
       ),
       bottomNavigationBar: HomeBottomNav(

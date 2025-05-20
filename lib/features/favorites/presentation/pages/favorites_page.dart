@@ -107,7 +107,7 @@ class _FavoritesContent extends StatelessWidget {
                 child: Text(state.errorMessage ?? 'Une erreur est survenue'),
               );
             } else {
-              return const Center(child: Text('Aucun favori trouvé'));
+              return const Center(child: Text('Loading...'));
             }
           },
         ),

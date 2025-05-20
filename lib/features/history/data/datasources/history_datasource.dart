@@ -30,8 +30,13 @@ class HistoryDataSource {
       final response = await http.get(url, headers: headers);
 
       if (response.statusCode == 200) {
-        final List<dynamic> jsonList = jsonDecode(response.body);
-        return jsonList.map((json) => HistoryModel.fromJson(json)).toList();
+        // ✅ Utilisation de utf8.decode + jsonDecode
+        final decodedJson = jsonDecode(utf8.decode(response.bodyBytes));
+        if (decodedJson is List) {
+          return decodedJson.map((json) => HistoryModel.fromJson(json)).toList();
+        } else {
+          throw Exception('Unexpected JSON structure: expected a list');
+        }
       } else {
         throw Exception('Failed to load history: ${response.statusCode}');
       }

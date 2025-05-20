@@ -5,6 +5,7 @@ import 'features/auth/presentation/pages/ForgotPasswordPage.dart';
 import 'features/auth/presentation/pages/ResetPasswordPage.dart';
 import 'features/auth/presentation/pages/sign_in_page.dart';
 import 'features/auth/presentation/pages/sign_up_page.dart';
+import 'features/chatbot/presentation/pages/chatbot_page.dart';
 import 'features/favorites/presentation/pages/favorites_page.dart';
 import 'features/history/presentation/pages/history_page.dart';
 import 'features/home/presentation/pages/home_page.dart';
@@ -48,10 +49,9 @@ class AppRouter extends _$AppRouter {
       page: MainLayoutRoute.page,
       children: [
         AutoRoute(path: 'home', page: HomeRoute.page, initial: true),
-
-        //AutoRoute(path: 'chatbot', page: ChatbotRoute.page),
-        AutoRoute(path: 'profile', page: ProfileRoute.page),
         AutoRoute(path: 'ticket', page: TicketRoute.page),
+        AutoRoute(path: 'chatbot', page: ChatbotRoute.page),
+        AutoRoute(path: 'profile', page: ProfileRoute.page),
 
       ],
     ),

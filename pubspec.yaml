@@ -75,6 +75,7 @@ dependencies:
   flutter_email_sender: ^7.0.0
   hive: ^2.2.3
   hive_flutter: ^1.1.0
+  shimmer: ^3.0.0
 
 
 dev_dependencies:
@@ -121,6 +122,8 @@ flutter:
   - assets/animations/fed.json
   - assets/animations/pr.json
   - assets/animations/ab.json
+  - assets/images/hel.jpeg
+  - assets/animations/chat.json
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

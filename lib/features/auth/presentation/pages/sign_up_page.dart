@@ -29,6 +29,7 @@ class _SignUpPageState extends State<SignUpPage> {
   final _formKey = GlobalKey<FormState>();
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
+  String? _emailError;
 
   @override
   void dispose() {
@@ -51,30 +52,18 @@ class _SignUpPageState extends State<SignUpPage> {
           if (state is AuthSuccess) {
             context.router.replaceAll([AllergensRoute()]);
           } else if (state is AuthError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  state.message,
-                  style: const TextStyle(color: Colors.white),
-                ),
-                backgroundColor: AppColors.error,
-                behavior: SnackBarBehavior.floating,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                margin: const EdgeInsets.all(16),
-              ),
-            );
+            // On supprime complètement le SnackBar et on gère seulement l'erreur email
+            if (state.message.toLowerCase().contains('email')) {
+              setState(() {
+                _emailError = state.message;
+              });
+            }
           }
         },
         builder: (context, state) {
           return Container(
             decoration: BoxDecoration(
-
                 color: AppColors.secondary,
-
-
-
             ),
             child: SafeArea(
               child: SingleChildScrollView(
@@ -98,7 +87,27 @@ class _SignUpPageState extends State<SignUpPage> {
                         const SizedBox(height: 32),
 
                         // Form Fields (without Card)
-                        _buildFormContent(state, context),
+                        SignUpForm(
+                          firstNameController: _firstNameController,
+                          lastNameController: _lastNameController,
+                          emailController: _emailController,
+                          passwordController: _passwordController,
+                          confirmPasswordController: _confirmPasswordController,
+                          obscurePassword: _obscurePassword,
+                          obscureConfirmPassword: _obscureConfirmPassword,
+                          togglePasswordVisibility: _togglePasswordVisibility,
+                          toggleConfirmPasswordVisibility: _toggleConfirmPasswordVisibility,
+                          formKey: _formKey,
+                          externalError: _emailError, // Passer l'erreur d'email au formulaire
+                        ),
+
+                        const SizedBox(height: 24),
+
+                        // Sign Up Button
+                        SignUpButton(
+                          state: state,
+                          onPressed: _submitForm,
+                        ).animate().fadeIn(delay: 300.ms),
 
                         const SizedBox(height: 24),
 
@@ -124,6 +133,7 @@ class _SignUpPageState extends State<SignUpPage> {
       children: [
         Text(
           'Create Account',
+          textAlign: TextAlign.center,
           style: AppTextStyles.headlineLarge.copyWith(
             color: Color(0xFFD5D5D5),
             fontWeight: FontWeight.bold,
@@ -136,6 +146,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
         Text(
           'Join our community today',
+          textAlign: TextAlign.center,
           style: AppTextStyles.bodyMedium?.copyWith(
             color: Colors.white38.withOpacity(0.8),
             fontSize: 16,

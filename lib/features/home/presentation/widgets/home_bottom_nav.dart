@@ -1,10 +1,17 @@
 import 'package:eye_volve/features/profile/data/datasources/profile_datasource.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../../../app_router.dart';
 import '../../../../core/theme/app_theme.dart';
-import '../pages/comp/navigation_item_class.dart';
 import '../styles/constant.dart';
 
+/// Classe déplacée en dehors du widget
+class NavigationItem {
+  final Widget icon;
+  final String label;
+
+  NavigationItem({required this.icon, required this.label});
+}
 
 class HomeBottomNav extends StatelessWidget {
   final int currentIndex;
@@ -20,23 +27,22 @@ class HomeBottomNav extends StatelessWidget {
   Widget build(BuildContext context) {
     final List<NavigationItem> items = [
       NavigationItem(
-        icon: Icons.house_siding,
+        icon: FaIcon(FontAwesomeIcons.home),
         label: 'Home',
       ),
       NavigationItem(
-        icon: Icons.receipt,
+        icon: FaIcon(FontAwesomeIcons.receipt),
         label: 'Receipt',
       ),
       NavigationItem(
-        icon: Icons.smart_toy, // Chatbot
+        icon: FaIcon(FontAwesomeIcons.robot), // Chatbot
         label: 'Chatbot',
       ),
       NavigationItem(
-        icon: Icons.person,
+        icon: FaIcon(FontAwesomeIcons.user),
         label: 'Profile',
       ),
     ];
-
 
     return Container(
       padding: AppConstants.defaultPadding,
@@ -69,9 +75,10 @@ class HomeBottomNav extends StatelessWidget {
     );
   }
 
+  /// 🔁 Changement : on accepte un Widget au lieu d'IconData
   Widget _buildNavItem(
       BuildContext context, {
-        required IconData icon,
+        required Widget icon,
         required String label,
         required bool isActive,
         required VoidCallback onTap,
@@ -84,20 +91,19 @@ class HomeBottomNav extends StatelessWidget {
           AnimatedContainer(
             duration: const Duration(milliseconds: 300),
             curve: Curves.easeInOut,
-            child: Icon(
-              icon,
-              size: isActive ? 29 : 24, // Agrandir si actif
-              color: isActive ? Color(0xFF4E7A03) : Colors.black,
-
+            child: IconTheme(
+              data: IconThemeData(
+                size: isActive ? 29 : 24,
+                color: isActive ? const Color(0xFF4E7A03) : Colors.black,
+              ),
+              child: icon,
             ),
           ),
           const SizedBox(height: 2),
           AnimatedDefaultTextStyle(
             duration: const Duration(milliseconds: 200),
             style: TextStyle(
-              color: isActive ? Color(0xFF4E7A03) : Colors.black,
-
-
+              color: isActive ? const Color(0xFF4E7A03) : Colors.black,
               fontSize: isActive ? 13 : 12,
               fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
             ),

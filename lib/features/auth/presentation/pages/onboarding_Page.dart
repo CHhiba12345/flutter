@@ -17,7 +17,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
 
   final List<Map<String, dynamic>> sections = [
     {
-      "title": "Welcome to FooDScan!",
+      "title": "Welcome to FooDTruth!",
       "subtitle": "Scan or Search Products",
       "description":
       "Quickly scan a barcode or search manually to get detailed info: ingredients, allergens, additives, Nutri-Score, and more. Make smarter choices in seconds.",
@@ -28,7 +28,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
       "title": "Customize Based on Your Preferences",
       "subtitle": "Personalized Alerts",
       "description":
-      "Set your dietary preferences in seconds. Whether you have allergies (milk, gluten, peanuts…) or follow a specific diet (vegetarian, vegan…), the app will automatically alert you.",
+      "Set your dietary preferences in seconds. Whether you have allergies (milk, gluten, peanuts…) , the app will automatically alert you.",
       "lottieAsset": "assets/animations/s2.json",
       "bgColors": [Color(0xFF3E6839), Color(0xFF3E6839), Color(0xFF5D705D)],
     },

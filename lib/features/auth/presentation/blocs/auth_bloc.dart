@@ -73,7 +73,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(AuthLoading());
     try {
       if (!EmailValidator.validate(event.email)) {
-        emit(AuthError('Adresse email invalide'));
+        emit(AuthError('Invalid email address'));
         return;
       }
       final user = await signUpWithEmailAndPassword(
@@ -84,7 +84,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       );
       emit(AuthSuccess(user));
     } catch (e) {
-      emit(AuthError(e.toString()));
+      emit(AuthError('This email is already in use'));
     }
   }
 

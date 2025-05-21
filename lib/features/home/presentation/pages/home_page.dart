@@ -142,7 +142,19 @@ class _HomeContent extends StatelessWidget {
                     const SizedBox(width: 16),
                     Expanded(
                       child: Center(
-                        child: HomeStyles.appTitle(context),
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            'Home',
+                            style: const TextStyle(
+                              fontSize: 34,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+
+
                       ),
                     ),
                     Row(

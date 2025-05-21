@@ -1,6 +1,7 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../../../app_router.dart';
 import '../../../auth/presentation/blocs/auth_bloc.dart';
 import '../../../auth/presentation/blocs/auth_state.dart';
@@ -17,6 +18,7 @@ class AllergensPage extends StatefulWidget {
 
 class _AllergensPageState extends State<AllergensPage> {
   final Map<String, bool> _selectedAllergens = {
+    'None': false,
     'Milk': false,
     'Fish': false,
     'Tree Nuts': false,
@@ -29,6 +31,12 @@ class _AllergensPageState extends State<AllergensPage> {
     'Soy': false,
     'Gluten': false,
     'Lactose': false,
+    'Mustard': false,          // Ajouté
+    'Sesame Seeds': false,     // Ajouté
+    'Celery': false,           // Ajouté
+    'Sulphur Dioxide': false,  // Ajouté
+    'Sulfites': false,         // Ajouté
+    'Lupin': false,
   };
 
   bool _isLoading = true;
@@ -152,7 +160,26 @@ class _AllergensPageState extends State<AllergensPage> {
               SizedBox(height: 20),
               Expanded(
                 child: _isLoading
-                    ? Center(child: CircularProgressIndicator())
+                    ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      CircularProgressIndicator(
+                        color: AppColors.background,
+                        strokeWidth: 5,
+                      ),
+                      SizedBox(height: 20),
+                      Text(
+                        'Loading your allergens...',
+                        style: TextStyle(
+                          color: AppColors.background,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                )
                     : GridView.builder(
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 3,
@@ -173,24 +200,43 @@ class _AllergensPageState extends State<AllergensPage> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.background,
                   minimumSize: Size(double.infinity, 50),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 3,
+                  shadowColor: Colors.black26,
                 ),
                 child: _isLoading
-                    ? SizedBox(
-                  width: 20,
-                  height: 20,
-                  child: CircularProgressIndicator(
-                    color: AppColors.secondary,
-                    strokeWidth: 2,
-                  ),
+                    ? Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        color: AppColors.secondary,
+                        strokeWidth: 3,
+                      ),
+                    ),
+                    SizedBox(width: 12),
+                    Text(
+                      'Saving...',
+                      style: TextStyle(
+                        fontSize: 18,
+                        color: AppColors.secondary,
+                      ),
+                    ),
+                  ],
                 )
                     : Text(
                   'Continue',
                   style: TextStyle(
                     fontSize: 18,
                     color: AppColors.secondary,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
-              ),
+              )
             ],
           ),
         ),
@@ -209,6 +255,7 @@ class _AllergensPageState extends State<AllergensPage> {
             width: 2,
           ),
           borderRadius: BorderRadius.circular(50),
+          color: isSelected ? Colors.green.withOpacity(0.1) : Colors.transparent,
         ),
         child: CircleAvatar(
           radius: 30,
@@ -216,20 +263,28 @@ class _AllergensPageState extends State<AllergensPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                _getIconForAllergen(allergen),
-                size: 30,
-                color: isSelected ? Colors.lightGreen : Colors.black,
+              AnimatedScale(
+                duration: Duration(milliseconds: 200),
+                scale: isSelected ? 1.2 : 1.0,
+                child: Text(
+                  getIconForAllergen(allergen),
+                  style: TextStyle(
+                    fontSize: 30,
+                    color: isSelected ? Colors.green : Colors.black,
+                  ),
+                ),
               ),
-              SizedBox(height: 5),
+              SizedBox(height: 4),
               Text(
                 allergen,
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w900,
-                  color: AppColors.textPrimary,
+                  color: isSelected ? Colors.green : AppColors.textPrimary,
                 ),
                 textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
               ),
             ],
           ),
@@ -238,24 +293,32 @@ class _AllergensPageState extends State<AllergensPage> {
     );
   }
 
-  IconData _getIconForAllergen(String allergen) {
-    const allergenIcons = {
-      'Milk': Icons.local_drink,
-      'Fish': Icons.abc,
-      'Tree Nuts': Icons.nature_people,
-      'Peanuts': Icons.food_bank,
-      'Shellfish': Icons.beach_access,
-      'Crustacean Shellfish': Icons.beach_access,
-      'Molluscan Shellfish': Icons.beach_access,
-      'Wheat': Icons.grain,
-      'Eggs': Icons.egg,
-      'Soy': Icons.lunch_dining,
-      'Gluten': Icons.bakery_dining,
-      'Lactose': Icons.local_drink,
+  String getIconForAllergen(String allergen) {
+    final Map<String, String> allergenEmojis = {
+      'None': '❌',
+      'Milk': '🥛',
+      'Lactose': '🥛',
+      'Fish': '🐟',
+      'Tree Nuts': '🌰',
+      'Peanuts': '🥜',
+      'Shellfish': '🦐',
+      'Crustacean Shellfish': '🦀',
+      'Molluscan Shellfish': '🦪',
+      'Wheat': '🌾',
+      'Gluten': '🌾',
+      'Eggs': '🥚',
+      'Soy': '🫘',
+      'Mustard': '🌿',
+      'Sesame Seeds': '⚪',
+      'Celery': '🥬',
+      'Sulphur Dioxide': '☁️',
+      'Sulfites': '☁️',
+      'Lupin': '🌱',
     };
-    return allergenIcons[allergen] ?? Icons.help_outline;
+    return allergenEmojis[allergen] ?? '❓';
   }
-}
+
+  }
 
 extension StringExtension on String {
   String capitalize() {

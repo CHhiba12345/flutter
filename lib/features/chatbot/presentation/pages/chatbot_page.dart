@@ -78,20 +78,29 @@ print('⚠️ Aucun texte à envoyer');
 
 @override
 Widget build(BuildContext context) {
-return Scaffold(
-appBar: AppBar(
-backgroundColor: Colors.lightGreen,
-elevation: 0,
-title: const Text(
-"Nutrition Chatbot",
-style: TextStyle(color: Colors.black87),
+return Scaffold(appBar: AppBar(
+  elevation: 0,
+  flexibleSpace: Container(
+    decoration: const BoxDecoration(
+      gradient: LinearGradient(
+        colors: [Color(0xFF3E6839), Color(0xFF83BC6D)],
+        begin: Alignment.centerLeft,
+        end: Alignment.centerRight,
+      ),
+    ),
+  ),
+  title: const Text(
+    "Nutrition Chatbot",
+    style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+  ),
+  leading: IconButton(
+    icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
+    onPressed: () => context.router.pop(),
+  ),
+  backgroundColor: Colors.transparent,
 ),
-leading: IconButton(
-icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
-onPressed: () => context.router.pop(),
-),
-),
-body: Container(
+
+  body: Container(
 padding: const EdgeInsets.all(16),
 child: Column(
 children: [

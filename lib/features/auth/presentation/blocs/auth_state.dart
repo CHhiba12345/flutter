@@ -41,3 +41,5 @@ class ResetPasswordError extends AuthState {
   final String message;
   ResetPasswordError(this.message);
 }
+
+class AuthEmailAlreadyExistsError extends AuthState {}

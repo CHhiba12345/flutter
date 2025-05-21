@@ -9,7 +9,7 @@ abstract class ChatBotRemoteDataSource {
 
 class ChatBotRemoteDataSourceImpl implements ChatBotRemoteDataSource {
   final http.Client client;
-  final String baseUrl = 'http://192.168.100.168:8000';
+  final String baseUrl = 'http://164.132.53.159:8000';
 
   ChatBotRemoteDataSourceImpl({required this.client});
 

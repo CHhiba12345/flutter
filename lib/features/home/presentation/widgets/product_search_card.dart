@@ -99,7 +99,7 @@ class ProductSearchCard extends StatelessWidget {
                 ),
                 children: [
                   TextSpan(
-                    text: 'EyeVolve',
+                    text: 'FoodTruth',
                     style: TextStyle(
                       color: Colors.green.shade800,
                       fontWeight: FontWeight.w900,

@@ -12,6 +12,7 @@ class SignUpForm extends StatefulWidget {
   final VoidCallback togglePasswordVisibility;
   final VoidCallback toggleConfirmPasswordVisibility;
   final GlobalKey<FormState> formKey;
+  final String? externalError; // Ajoutez ce paramètre
 
   const SignUpForm({
     Key? key,
@@ -25,6 +26,7 @@ class SignUpForm extends StatefulWidget {
     required this.togglePasswordVisibility,
     required this.toggleConfirmPasswordVisibility,
     required this.formKey,
+    this.externalError, // Ajoutez ce paramètre
   }) : super(key: key);
 
   @override
@@ -32,6 +34,20 @@ class SignUpForm extends StatefulWidget {
 }
 
 class _SignUpFormState extends State<SignUpForm> {
+  String? _emailError;
+
+  @override
+  void didUpdateWidget(covariant SignUpForm oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.externalError != oldWidget.externalError) {
+      // Si l'erreur externe concerne l'email, on l'affiche
+      if (widget.externalError?.contains('email') ?? false) {
+        setState(() {
+          _emailError = widget.externalError;
+        });
+      }
+    }
+  }
   final FocusNode _firstNameFocus = FocusNode();
   final FocusNode _lastNameFocus = FocusNode();
   final FocusNode _emailFocus = FocusNode();
@@ -89,6 +105,11 @@ class _SignUpFormState extends State<SignUpForm> {
         ),
         filled: true,
         fillColor: Colors.white,
+        errorStyle: const TextStyle(color: Colors.red), // Add this line
+        errorBorder: OutlineInputBorder( // Optional: customize error border
+          borderRadius: BorderRadius.circular(22),
+          borderSide: const BorderSide(color: Colors.redAccent),
+        ),
       ),
       validator: (value) => _validateName(value, 'First'),
     );
@@ -107,6 +128,11 @@ class _SignUpFormState extends State<SignUpForm> {
         ),
         filled: true,
         fillColor: Colors.white,
+        errorStyle: const TextStyle(color: Colors.red), // Add this line
+        errorBorder: OutlineInputBorder( // Optional: customize error border
+          borderRadius: BorderRadius.circular(22),
+          borderSide: const BorderSide(color: Colors.redAccent),
+        ),
       ),
       validator: (value) => _validateName(value, 'Last'),
     );
@@ -126,8 +152,22 @@ class _SignUpFormState extends State<SignUpForm> {
         ),
         filled: true,
         fillColor: Colors.white,
+        errorText: _emailError, // Utilisez l'erreur locale ou externe
+        errorStyle: const TextStyle(color: Colors.red),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(22),
+          borderSide: const BorderSide(color: Colors.redAccent),
+        ),
       ),
-      validator: (value) => _validateEmail(value),
+      validator: (value) {
+        // Réinitialise l'erreur quand l'utilisateur modifie le texte
+        if (_emailError != null && value != widget.emailController.text) {
+          setState(() {
+            _emailError = null;
+          });
+        }
+        return _validateEmail(value);
+      },
     );
   }
 
@@ -152,8 +192,13 @@ class _SignUpFormState extends State<SignUpForm> {
         ),
         filled: true,
         fillColor: Colors.white,
+        errorStyle: const TextStyle(color: Colors.red), // Add this line
+        errorBorder: OutlineInputBorder( // Optional: customize error border
+          borderRadius: BorderRadius.circular(22),
+          borderSide: const BorderSide(color: Colors.redAccent),
+        ),
       ),
-      validator: (value) => _validatePassword(value),
+      validator: _validatePassword,
     );
   }
 
@@ -178,6 +223,12 @@ class _SignUpFormState extends State<SignUpForm> {
         ),
         filled: true,
         fillColor: Colors.white,
+        // Error styling
+        errorStyle: const TextStyle(color: Colors.red), // Add this line
+        errorBorder: OutlineInputBorder( // Optional: customize error border
+          borderRadius: BorderRadius.circular(22),
+          borderSide: const BorderSide(color: Colors.redAccent),
+        ),
       ),
       validator: _validateConfirmPassword,
     );

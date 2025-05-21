@@ -233,10 +233,27 @@ class _ProfilePageState extends State<ProfilePage> {
 
   void _showAllergySelectionDialog(BuildContext context) {
     List<String> commonAllergies = [
-      'Milk', 'Fish', 'Tree Nuts', 'Peanuts', 'Shellfish',
-      'Crustacean Shellfish', 'Molluscan Shellfish', 'Wheat',
-      'Eggs', 'Soy', 'Gluten', 'Lactose'
+      'Milk',
+      'Lactose',
+      'Eggs',
+      'Fish',
+      'Crustacean Shellfish',
+      'Molluscan Shellfish',
+      'Shellfish',
+      'Tree Nuts',
+      'Peanuts',
+      'Soy',
+      'Wheat',
+      'Gluten',
+      'Mustard',
+      'Sesame Seeds',
+      'Celery',
+      'Sulphur Dioxide',
+      'Sulfites',
+      'Lupin',
+      'None',
     ];
+
     showDialog(
       context: context,
       builder: (context) {

@@ -145,7 +145,7 @@ class _ProfilePageState extends State<ProfilePage> {
               MaterialPageRoute(builder: (context) => const FeedbackPage()),
             );
           }),
-          ProfileItem(title: 'About Us', icon: Icons.abc_outlined, color: Colors.amber, onTap: () {
+          ProfileItem(title: 'About Us', icon: Icons.info_outline_rounded, color: Colors.amber, onTap: () {
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const AboutUsPage()),

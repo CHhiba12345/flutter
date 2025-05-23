@@ -1,7 +1,9 @@
+import 'package:app_settings/app_settings.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:barcode_scan2/barcode_scan2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:http/http.dart' as http;
 import 'package:shimmer/shimmer.dart';
@@ -241,17 +243,45 @@ class _SearchBarAndScan extends StatelessWidget {
                 }
               } on PlatformException catch (e) {
                 if (e.code == BarcodeScanner.cameraAccessDenied) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Camera permission denied')),
+                  // Proposez d'ouvrir les paramètres
+                  showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: const Text('Permission requise'),
+                      content: const Text('L\'accès à la caméra est nécessaire pour scanner les codes barres'),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text('Annuler'),
+                        ),
+                        TextButton(
+                          onPressed: () async {
+                            Navigator.pop(context);
+                            await AppSettings.openAppSettings();
+                          },
+                          child: const Text('Paramètres'),
+                        ),
+                      ],
+                    ),
                   );
                 } else {
+                  // Message plus user-friendly
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Error: ${e.message}')),
+                    SnackBar(
+                      content: const Text('Échec du scan'),
+                      action: SnackBarAction(
+                        label: 'OK',
+                        onPressed: () {},
+                      ),
+                    ),
                   );
                 }
               } catch (e) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Error: $e')),
+                  const SnackBar(
+                    content: Text('Une erreur est survenue'),
+                    duration: Duration(seconds: 2),
+                  ),
                 );
               }
             },
@@ -324,13 +354,96 @@ class _ProductDisplayState extends State<_ProductDisplay> {
             return _buildProductList(state.products);
           } else if (state is ProductError) {
             return Center(child: Text(state.message));
-          } else {
+
+          }
+          else if (state is ProductNotFoundState) {
+            return _buildProductNotFoundView(context, state.barcode);
+          }else {
             return const ProductSearchCard();
           }
         },
       ),
     );
   }
+
+  // Ajoutez cette méthode
+  Widget _buildProductNotFoundView(BuildContext context, String barcode) {
+    return Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Icône améliorée avec animation et effet de gradient
+            Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Colors.black38, Colors.lightGreen[400]!],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black38.withOpacity(0.2),
+                    blurRadius: 15,
+                    spreadRadius: 3,
+                  )
+                ],
+              ),
+              padding: const EdgeInsets.all(24),
+              child: Icon(
+                Icons.qr_code_scanner_rounded,
+                size: 80,
+                color: Colors.white,
+              ),
+            ).animate().shake(duration: 600.ms).scale(delay: 200.ms),
+
+            const SizedBox(height: 32),
+
+            // Titre avec animation
+            Text(
+              'Product Not Found',
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.w800,
+                color: Colors.grey[800],
+                letterSpacing: 0.5,
+              ),
+            ).animate().fadeIn(delay: 300.ms).slideY(begin: 0.5),
+
+            const SizedBox(height: 16),
+
+            // Contenu avec animation
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32),
+              child: Column(
+                children: [
+                  Text(
+                    'No products matched your scan. Please check the barcode and try again.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 16,
+                      height: 1.5,
+                      color: Colors.grey[600],
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+
+                ],
+              ),
+            ).animate().fadeIn(delay: 400.ms),
+
+            const SizedBox(height: 32),
+
+
+            const SizedBox(height: 16),
+          ],
+        ),
+      ),
+    );
+  }
+
 
   Widget _buildLoadingShimmer() {
     return ListView.builder(

@@ -87,7 +87,6 @@ class _FeedbackPageState extends State<FeedbackPage> {
 
       await FlutterEmailSender.send(email);
     } on Exception catch (e) {
-      _showErrorSnackbar('Could not send email: ${e.toString()}');
       _suggestEmailClient();
     }
   }

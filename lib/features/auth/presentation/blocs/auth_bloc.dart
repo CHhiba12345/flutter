@@ -98,10 +98,16 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       if (user != null) {
         emit(AuthSuccess(user));
       } else {
-        emit(AuthError("Google Sign-In failed"));
+        emit( AuthError("google_sign_in_failed"));
       }
     } catch (e) {
-      emit(AuthError(e.toString()));
+      String errorMessage = "Google Sign-In failed";
+      if (e.toString().contains('sign_in_canceled')) {
+        errorMessage = "You canceled the Google sign-in !";
+      } else if (e.toString().contains('network_error')) {
+        errorMessage = "Oops! Something went wrong. Make sure you're online";
+      }
+      emit(AuthError(errorMessage));
     }
   }
 
@@ -115,13 +121,18 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       if (user != null) {
         emit(AuthSuccess(user));
       } else {
-        emit(AuthError("Facebook Sign-In failed"));
+        emit( AuthError("facebook_sign_in_failed"));
       }
     } catch (e) {
-      emit(AuthError(e.toString()));
+      String errorMessage = "Facebook Sign-In failed";
+      if (e.toString().contains('CANCELLED')) {
+        errorMessage = "Facebook Sign-In was canceled";
+      } else if (e.toString().contains('NETWORK_ERROR')) {
+        errorMessage = "Network error during Facebook Sign-In";
+      }
+      emit(AuthError(errorMessage));
     }
   }
-
   Future<void> _handleSignOut(
       SignOutEvent event,
       Emitter<AuthState> emit,

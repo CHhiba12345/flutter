@@ -27,7 +27,7 @@ class HomeStyles {
   static TextStyle searchTextStyle(BuildContext context) =>
       Theme.of(context).textTheme.bodyMedium!;
 
-  static const Icon cameraIcon = Icon(Icons.camera_alt, color: AppTheme.primaryDark);
+  static const Icon cameraIcon = Icon(Icons.qr_code_scanner_rounded, color: AppTheme.primaryDark,size: 30,);
 
   static TextStyle detailTitleStyle(BuildContext context) => TextStyle(
     fontSize: 18,

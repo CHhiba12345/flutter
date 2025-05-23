@@ -77,6 +77,10 @@ dependencies:
   hive_flutter: ^1.1.0
   shimmer: ^3.0.0
   font_awesome_flutter: ^9.2.0
+  bloc: ^9.0.0
+  app_settings: ^6.1.1
+  flutter_launcher_icons: ^0.14.3
+  flutter_native_splash: ^2.4.6
 
 
 dev_dependencies:
@@ -125,6 +129,7 @@ flutter:
   - assets/animations/ab.json
   - assets/images/hel.jpeg
   - assets/animations/chat.json
+  - assets/images/ggg.gif
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
@@ -161,3 +166,13 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+flutter_icons:
+  android: true
+  image_path: "assets/images/logo.jpeg"  # Chemin vers votre icône
+  adaptive_icon_background: "#3E6839"    # ✅ Corrigé : Couleur hexadécimale valide
+  adaptive_icon_foreground: "assets/images/logo.jpeg"
+
+flutter_native_splash:
+  color: "#3E6839"         # ✅ Corrigé : Couleur hexadécimale valide
+  image: "assets/images/logo.jpeg"
+  android: true

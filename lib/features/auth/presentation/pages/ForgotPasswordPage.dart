@@ -169,7 +169,11 @@ class ForgotPasswordPage extends StatelessWidget {
         ),
         focusedErrorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppColors.error),
+          borderSide: BorderSide(color: AppColors.error,),
+        ),
+        errorStyle: TextStyle(
+          color: AppColors.error,  // 👉 Couleur personnalisée pour le message d'erreur
+          fontSize: 12,
         ),
       ),
       validator: (value) {

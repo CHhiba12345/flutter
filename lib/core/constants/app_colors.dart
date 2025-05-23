@@ -17,7 +17,7 @@ class AppColors {
   static const Color textWhite = Colors.white;
 
   static const Color success = Color(0xFF48BB78);
-  static const Color error = Color(0xFFE53E3E);
+  static const Color error = Color(0xFFB38E15);
   static const Color warning = Color(0xFFDD6B20);
   static const Color info = Color(0xFF4299E1);
 

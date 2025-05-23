@@ -37,3 +37,11 @@ class ProductError extends HomeState {
   @override
   List<Object> get props => [message];
 }
+class ProductNotFoundState extends HomeState {
+  final String barcode;
+
+  const ProductNotFoundState({required this.barcode});
+
+  @override
+  List<Object> get props => [barcode];
+}

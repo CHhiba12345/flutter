@@ -10,6 +10,9 @@ class AuthForm extends StatelessWidget {
   final bool obscurePassword;
   final VoidCallback togglePasswordVisibility;
   final GlobalKey<FormState> formKey;
+  final bool showErrors; // Nouveau paramètre
+  final String? emailError; // Nouveau paramètre
+  final String? passwordError; // Nouveau paramètre
 
   const AuthForm({
     Key? key,
@@ -18,18 +21,46 @@ class AuthForm extends StatelessWidget {
     required this.obscurePassword,
     required this.togglePasswordVisibility,
     required this.formKey,
+    required this.showErrors, // Ajouté
+    this.emailError, // Ajouté
+    this.passwordError, // Ajouté
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {  // Le context est passé ici
+  Widget build(BuildContext context) {
     return Column(
       children: [
-        _buildEmailField(),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildEmailField(),
+            if (showErrors && emailError != null) _buildErrorText(emailError!),
+          ],
+        ),
         const SizedBox(height: 20),
-        _buildPasswordField(),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildPasswordField(),
+            if (showErrors && passwordError != null) _buildErrorText(passwordError!),
+          ],
+        ),
         const SizedBox(height: 2),
-        _buildForgotPassword(context),  // Passer le context ici
+        _buildForgotPassword(context),
       ],
+    );
+  }
+
+  Widget _buildErrorText(String? errorText) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 16, top: 4),
+      child: Text(
+        errorText ?? '',
+        style: TextStyle(
+          color: AppColors.error,
+          fontSize: 12,
+        ),
+      ),
     );
   }
 
@@ -38,14 +69,7 @@ class AuthForm extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(32),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.3),
-            spreadRadius: 5,
-            blurRadius: 8,
-            offset: Offset(0, 4),
-          ),
-        ],
+
       ),
       child: TextFormField(
         controller: emailController,
@@ -57,6 +81,7 @@ class AuthForm extends StatelessWidget {
           border: InputBorder.none,
           contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           filled: false,
+          errorStyle: TextStyle(height: 0), // Cache le texte d'erreur par défaut
         ),
         validator: _validateEmail,
       ),
@@ -68,14 +93,7 @@ class AuthForm extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(32),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.3),
-            spreadRadius: 2,
-            blurRadius: 8,
-            offset: Offset(0, 4),
-          ),
-        ],
+
       ),
       child: TextFormField(
         controller: passwordController,
@@ -94,6 +112,7 @@ class AuthForm extends StatelessWidget {
           border: InputBorder.none,
           contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           filled: false,
+          errorStyle: TextStyle(height: 0), // Cache le texte d'erreur par défaut
         ),
         validator: _validatePassword,
       ),

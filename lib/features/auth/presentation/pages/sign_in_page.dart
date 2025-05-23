@@ -25,6 +25,9 @@ class _SignInPageState extends State<SignInPage> {
   final TextEditingController _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _obscurePassword = true;
+  bool _showErrors = false; // Nouvel état pour contrôler l'affichage des erreurs
+  String? _emailError; // Stocke l'erreur d'email
+  String? _passwordError; // Stocke l'erreur de mot de passe
 
   @override
   Widget build(BuildContext context) {
@@ -36,9 +39,48 @@ class _SignInPageState extends State<SignInPage> {
           if (state is AuthSuccess) {
             context.router.replaceAll([const HomeRoute()]);
           } else if (state is AuthError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message)),
-            );
+            // Gestion des erreurs spécifiques
+            if (state.message.contains('wrong-password') ||
+                state.message.contains('user-not-found')) {
+              setState(() {
+                _showErrors = true;
+                _passwordError = 'Password incorrect'; // Message personnalisé
+              });
+            } else {
+              // Personnalisation des messages et du design du SnackBar
+              String displayMessage = state.message;
+              Color backgroundColor = AppColors.error; // Utilisez votre couleur d'erreur
+
+              if (state.message == "google_sign_in_failed") {
+                displayMessage = "Google Sign-In failed. Please try again.";
+              } else if (state.message == "facebook_sign_in_failed") {
+                displayMessage = "Facebook Sign-In failed. Please try again.";
+              }
+
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    displayMessage,
+                    style: AppTextStyles.bodyMedium.copyWith(color: Colors.white),
+                  ),
+                  backgroundColor: backgroundColor,
+                  behavior: SnackBarBehavior.floating,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  margin: EdgeInsets.all(20),
+                  elevation: 6,
+                  duration: const Duration(seconds: 3),
+                  action: SnackBarAction(
+                    label: 'OK',
+                    textColor: Colors.white,
+                    onPressed: () {
+                      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                    },
+                  ),
+                ),
+              );
+            }
           }
         },
         builder: (context, state) {
@@ -136,6 +178,9 @@ class _SignInPageState extends State<SignInPage> {
           obscurePassword: _obscurePassword,
           togglePasswordVisibility: _togglePasswordVisibility,
           formKey: _formKey,
+          showErrors: _showErrors, // Ajouté
+          emailError: _emailError, // Ajouté
+          passwordError: _passwordError, // Ajouté
         ),
         const SizedBox(height: 24),
         SignInButton(
@@ -182,7 +227,16 @@ class _SignInPageState extends State<SignInPage> {
   void _togglePasswordVisibility() => setState(() => _obscurePassword = !_obscurePassword);
 
   void _submitForm() {
-    if (_formKey.currentState?.validate() ?? false) {
+    setState(() {
+      _showErrors = true;
+      _emailError = _validateEmail(_emailController.text);
+      _passwordError = _validatePassword(_passwordController.text);
+
+      // Réinitialiser l'erreur de mot de passe avant de soumettre
+      _passwordError ??= null;
+    });
+
+    if (_emailError == null && _passwordError == null) {
       context.read<AuthBloc>().add(
         SignInWithEmailAndPasswordEvent(
           _emailController.text.trim(),
@@ -190,5 +244,19 @@ class _SignInPageState extends State<SignInPage> {
         ),
       );
     }
+  }
+  // Ajoutez ces méthodes à la classe _SignInPageState
+  String? _validateEmail(String? value) {
+    if (value == null || value.isEmpty) return 'Please enter your email';
+    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+      return 'Please enter a valid email';
+    }
+    return null;
+  }
+
+  String? _validatePassword(String? value) {
+    if (value == null || value.isEmpty) return 'Please enter your password';
+    if (value.length < 6) return 'Password must be at least 6 characters';
+    return null;
   }
 }

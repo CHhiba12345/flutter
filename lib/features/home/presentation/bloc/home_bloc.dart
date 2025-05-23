@@ -67,13 +67,13 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     try {
       final product = await scanProduct.execute(event.barcode);
       if (product.code.isEmpty) {
-        emit(ProductError(message: "Produit invalide"));
+        emit(ProductNotFoundState(barcode: event.barcode)); // Nouvel état pour produit non trouvé
       } else {
         await recordHistory.recordScan(productId: product.code);
         emit(ProductDetailState(product: product));
       }
     } catch (e) {
-      emit(ProductError(message: e.toString()));
+      emit(ProductNotFoundState(barcode: event.barcode)); // Utilisez le même état pour les erreurs
     }
   }
 

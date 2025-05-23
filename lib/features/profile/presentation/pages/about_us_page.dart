@@ -143,26 +143,7 @@ class AboutUsPage extends StatelessWidget {
             const SizedBox(height: 30),
 
             // Bouton Contact
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                icon: const Icon(Icons.email),
-                label: const Text('Contact Us'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                onPressed: () {
-                  // Naviguer vers la page de contact
-                },
-              ),
-            ),
 
-            const SizedBox(height: 20),
           ],
         ),
       ),

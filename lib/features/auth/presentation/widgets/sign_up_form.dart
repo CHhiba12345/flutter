@@ -105,10 +105,10 @@ class _SignUpFormState extends State<SignUpForm> {
         ),
         filled: true,
         fillColor: Colors.white,
-        errorStyle: const TextStyle(color: Colors.red), // Add this line
+        errorStyle: const TextStyle(color: AppColors.error,), // Add this line
         errorBorder: OutlineInputBorder( // Optional: customize error border
           borderRadius: BorderRadius.circular(22),
-          borderSide: const BorderSide(color: Colors.redAccent),
+          borderSide: const BorderSide(color: AppColors.error,),
         ),
       ),
       validator: (value) => _validateName(value, 'First'),
@@ -128,10 +128,10 @@ class _SignUpFormState extends State<SignUpForm> {
         ),
         filled: true,
         fillColor: Colors.white,
-        errorStyle: const TextStyle(color: Colors.red), // Add this line
+        errorStyle: const TextStyle(color: AppColors.error,), // Add this line
         errorBorder: OutlineInputBorder( // Optional: customize error border
           borderRadius: BorderRadius.circular(22),
-          borderSide: const BorderSide(color: Colors.redAccent),
+          borderSide: const BorderSide(color: AppColors.error,),
         ),
       ),
       validator: (value) => _validateName(value, 'Last'),
@@ -153,10 +153,10 @@ class _SignUpFormState extends State<SignUpForm> {
         filled: true,
         fillColor: Colors.white,
         errorText: _emailError, // Utilisez l'erreur locale ou externe
-        errorStyle: const TextStyle(color: Colors.red),
+        errorStyle: const TextStyle(color: AppColors.error,),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(22),
-          borderSide: const BorderSide(color: Colors.redAccent),
+          borderSide: const BorderSide(color: AppColors.error,),
         ),
       ),
       validator: (value) {
@@ -192,10 +192,10 @@ class _SignUpFormState extends State<SignUpForm> {
         ),
         filled: true,
         fillColor: Colors.white,
-        errorStyle: const TextStyle(color: Colors.red), // Add this line
+        errorStyle: const TextStyle(color: AppColors.error,), // Add this line
         errorBorder: OutlineInputBorder( // Optional: customize error border
           borderRadius: BorderRadius.circular(22),
-          borderSide: const BorderSide(color: Colors.redAccent),
+          borderSide: const BorderSide(color: AppColors.error,),
         ),
       ),
       validator: _validatePassword,
@@ -224,10 +224,10 @@ class _SignUpFormState extends State<SignUpForm> {
         filled: true,
         fillColor: Colors.white,
         // Error styling
-        errorStyle: const TextStyle(color: Colors.red), // Add this line
+        errorStyle: const TextStyle(color: AppColors.error,), // Add this line
         errorBorder: OutlineInputBorder( // Optional: customize error border
           borderRadius: BorderRadius.circular(22),
-          borderSide: const BorderSide(color: Colors.redAccent),
+          borderSide: const BorderSide(color: AppColors.error,),
         ),
       ),
       validator: _validateConfirmPassword,

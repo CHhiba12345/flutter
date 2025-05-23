@@ -144,33 +144,84 @@ class FAQPage extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 15),
-            Row(
+            Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                IconButton(
-                  icon: const Icon(Icons.email),
-                  onPressed: () => _launchEmail(context, 'mariemanaya20@gmail.com'),
+                // Premier contact email
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8), // Espace vertical entre les éléments
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(8),
+                    onTap: () => _launchEmail(context, 'mariemanaya20@gmail.com'),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12), // Padding augmenté
+                      decoration: BoxDecoration(
+                        color: Colors.grey[100],
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.grey[300]!),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.email_rounded,
+                            size: 22,
+                            color: Colors.blue[600],
+                          ),
+                          const SizedBox(width: 12), // Espacement augmenté
+                          Text(
+                            'mariemanaya20@gmail.com',
+                            style: TextStyle(
+                              fontSize: 15, // Taille de police légèrement augmentée
+                              color: Colors.grey[800],
+                              fontWeight: FontWeight.w500, // Texte un peu plus gras
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                 ),
-                IconButton(
-                  icon: const Icon(Icons.email),
-                  onPressed: () => _launchEmail(context, 'chaoualihiba25@gmail.com'),
+
+                // Deuxième contact email
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8), // Espace vertical entre les éléments
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(8),
+                    onTap: () => _launchEmail(context, 'chaoualihiba25@gmail.com'),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12), // Padding augmenté
+                      decoration: BoxDecoration(
+                        color: Colors.grey[100],
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.grey[300]!),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.email_rounded,
+                            size: 22,
+                            color: Colors.blue[600],
+                          ),
+                          const SizedBox(width: 12), // Espacement augmenté
+                          Text(
+                            'chaoualihiba25@gmail.com',
+                            style: TextStyle(
+                              fontSize: 15, // Taille de police légèrement augmentée
+                              color: Colors.grey[800],
+                              fontWeight: FontWeight.w500, // Texte un peu plus gras
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                 ),
               ],
             ),
             const SizedBox(height: 10),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              ),
-              onPressed: () {
-                // Action pour ouvrir le chat de support
-                print('Live Chat Support clicked');
-              },
-              child: const Text('Live Chat Support'),
-            ),
+
           ],
         ),
       ),

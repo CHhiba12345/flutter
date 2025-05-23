@@ -128,9 +128,11 @@ class _SignUpPageState extends State<SignUpPage> {
   }
 
   Widget _buildHeader() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
+    return Center(
+        child: Column(
+        mainAxisSize: MainAxisSize.min, // Pour éviter que la Column ne prenne toute la hauteur
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
         Text(
           'Create Account',
           textAlign: TextAlign.center,
@@ -152,7 +154,8 @@ class _SignUpPageState extends State<SignUpPage> {
             fontSize: 16,
           ),
         ).animate().fadeIn(delay: 200.ms),
-      ],
+        ],
+        ),
     );
   }
 

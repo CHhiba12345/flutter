@@ -143,29 +143,34 @@ class _SignInPageState extends State<SignInPage> {
   }
 
   Widget _buildHeader() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Welcome Back',
-          style: AppTextStyles.headlineLarge?.copyWith(
-            color: Colors.white, // Changé pour meilleur contraste
-            fontWeight: FontWeight.w800,
-            fontSize: 32,
-            letterSpacing: 0.5,
-          ),
-        ).animate().fadeIn(duration: 500.ms).slideY(begin: -0.2),
+    return Center( // <-- Ajout du widget Center
+      child: Column(
+        mainAxisSize: MainAxisSize.min, // Pour éviter que la Column ne prenne toute la hauteur
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text(
+            'Welcome Back',
+            textAlign: TextAlign.center,
+            style: AppTextStyles.headlineLarge?.copyWith(
+              color: Colors.white,
+              fontWeight: FontWeight.w800,
+              fontSize: 32,
+              letterSpacing: 0.5,
+            ),
+          ).animate().fadeIn(duration: 500.ms).slideY(begin: -0.2),
 
-        const SizedBox(height: 8),
+          const SizedBox(height: 8),
 
-        Text(
-          'Sign in to continue',
-          style: AppTextStyles.bodyMedium?.copyWith(
-            color: Colors.white.withOpacity(0.9), // Opacité augmentée
-            fontSize: 16,
-          ),
-        ).animate().fadeIn(delay: 200.ms),
-      ],
+          Text(
+            'Sign in to continue',
+            textAlign: TextAlign.center,
+            style: AppTextStyles.bodyMedium?.copyWith(
+              color: Colors.white.withOpacity(0.9),
+              fontSize: 16,
+            ),
+          ).animate().fadeIn(delay: 200.ms),
+        ],
+      ),
     );
   }
 

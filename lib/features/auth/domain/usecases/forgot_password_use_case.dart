@@ -1,12 +1,19 @@
-// fichier: lib/domain/usecases/forgot_password_use_case.dart
+
 import '../repositories/auth_repository.dart';
 
 class ForgotPasswordUseCase {
   final AuthRepository repository;
 
+  /// Constructeur prenant en charge l'injection de dépendances.
   ForgotPasswordUseCase(this.repository);
 
-  Future<void> execute(String email) => repository.sendPasswordResetEmail(email);
-}
+  // ===========================================================================
+  // 🔧 Exécution du cas d'utilisation
+  // ===========================================================================
 
-///gérer la logique métier spécifique
+
+  /// Cette méthode est appelée depuis la présentation (ex: bloc ou page),et délègue l'action au repository.
+  Future<void> execute(String email) async {
+    await repository.sendPasswordResetEmail(email);
+  }
+}

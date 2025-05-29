@@ -4,10 +4,12 @@ import '../../../auth/data/datasources/auth_service.dart';
 import '../../domain/entities/product.dart';
 import '../models/product_model.dart';
 
+// Classe principale pour la source de données de l'écran d'accueil
 class HomeDataSource {
   static const String _baseUrl = "http://164.132.53.159:3002/products";
   final AuthService _authService = AuthService();
 
+  // Méthode privée pour obtenir les headers avec le token d'authentification
   Future<Map<String, String>> _getHeaders() async {
     final token = await _authService.getCurrentUserToken();
     return {
@@ -16,6 +18,7 @@ class HomeDataSource {
     };
   }
 
+  // Méthode pour obtenir les données d'un produit spécifique par son code
   Future<Map<String, dynamic>> getProductData(String code) async {
     final uri = Uri.parse("$_baseUrl/$code");
     final headers = await _getHeaders();
@@ -26,7 +29,6 @@ class HomeDataSource {
     );
 
     if (response.statusCode == 200) {
-     // return json.decode(response.body);
       return json.decode(utf8.decode(response.bodyBytes));
     } else if (response.statusCode == 404) {
       throw Exception('Produit non trouvé');
@@ -35,6 +37,7 @@ class HomeDataSource {
     }
   }
 
+  // Méthode pour rechercher des produits par nom
   Future<List<Product>> searchProductByName(String name) async {
     print('[HomeDataSource] Searching for: $name');
     final uri = Uri.parse("$_baseUrl/search/$name");
@@ -51,7 +54,6 @@ class HomeDataSource {
       print('[HomeDataSource] Full Response Body: ${response.body}');
 
       if (response.statusCode == 200) {
-       // final decodedResponse = json.decode(response.body);
         final decodedResponse = json.decode(utf8.decode(response.bodyBytes)); // ✅ UTF-8 fix
         print('[HomeDataSource] Decoded Response: $decodedResponse');
 
@@ -81,6 +83,7 @@ class HomeDataSource {
     }
   }
 
+  // Méthode pour gérer les favoris d'un produit
   Future<Map<String, dynamic>>getProductFavorite(
       String uid,
       String productid,

@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:email_validator/email_validator.dart';
-import 'package:lottie/lottie.dart'; // Import pour Lottie
+import 'package:lottie/lottie.dart';
 
 import '../../../../app_router.dart';
 import '../../../../core/constants/export.dart';
@@ -31,22 +31,19 @@ class ForgotPasswordPage extends StatelessWidget {
                 content: Text(state.message),
                 backgroundColor: AppColors.error,
                 behavior: SnackBarBehavior.floating,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 margin: const EdgeInsets.all(16),
               ),
             );
           }
+
           if (state is ForgotPasswordSuccess) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text('A reset link has been sent to ${_emailController.text}'),
                 backgroundColor: AppColors.success,
                 behavior: SnackBarBehavior.floating,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 margin: const EdgeInsets.all(16),
               ),
             );
@@ -59,7 +56,6 @@ class ForgotPasswordPage extends StatelessWidget {
               colors: [AppColors.background, AppColors.secondary],
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-
               stops: [0.2, 0.8],
             ),
           ),
@@ -78,33 +74,35 @@ class ForgotPasswordPage extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      // Back button
                       IconButton(
                         icon: Icon(Icons.arrow_back, color: Colors.white),
                         onPressed: () => context.router.pop(),
                       ).animate().fadeIn(duration: 200.ms),
 
-                      // Animation Lottie
+                      // Lottie animation
                       Center(
                         child: Lottie.asset(
                           'assets/animations/forget.json',
                           width: size.width * 0.7,
                           height: size.width * 0.7,
                           fit: BoxFit.contain,
-                        )                   ),
+                        ),
+                      ),
 
                       const SizedBox(height: 20),
 
-                      // Header
+                      // Header text
                       _buildHeader(),
 
                       const SizedBox(height: 32),
 
-                      // Email Field
+                      // Email field
                       _buildEmailField(),
 
                       const SizedBox(height: 24),
 
-                      // Submit Button
+                      // Submit button
                       _buildSubmitButton(context),
 
                       const SizedBox(height: 40),
@@ -119,6 +117,7 @@ class ForgotPasswordPage extends StatelessWidget {
     );
   }
 
+  // Header section
   Widget _buildHeader() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -146,6 +145,7 @@ class ForgotPasswordPage extends StatelessWidget {
     );
   }
 
+  // Email input field
   Widget _buildEmailField() {
     return TextFormField(
       controller: _emailController,
@@ -169,10 +169,10 @@ class ForgotPasswordPage extends StatelessWidget {
         ),
         focusedErrorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppColors.error,),
+          borderSide: BorderSide(color: AppColors.error),
         ),
         errorStyle: TextStyle(
-          color: AppColors.error,  // 👉 Couleur personnalisée pour le message d'erreur
+          color: AppColors.error,
           fontSize: 12,
         ),
       ),
@@ -188,6 +188,7 @@ class ForgotPasswordPage extends StatelessWidget {
     ).animate().fadeIn(delay: 300.ms).slideY(begin: 0.2);
   }
 
+  // Submit button
   Widget _buildSubmitButton(BuildContext context) {
     return SizedBox(
       width: double.infinity,

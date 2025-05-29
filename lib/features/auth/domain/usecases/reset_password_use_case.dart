@@ -1,4 +1,4 @@
-// fichier: lib/domain/usecases/reset_password_use_case.dart
+// Use case pour la réinitialisation du mot de passe
 import '../repositories/auth_repository.dart';
 
 class ResetPasswordUseCase {
@@ -6,6 +6,8 @@ class ResetPasswordUseCase {
 
   ResetPasswordUseCase(this.repository);
 
-  Future<void> execute(String oobCode, String newPassword) =>
-      repository.confirmPasswordReset(oobCode, newPassword);
+  // Confirme la réinitialisation du mot de passe avec le code et le nouveau mot de passe
+  Future<void> execute(String oobCode, String newPassword) async {
+    await repository.confirmPasswordReset(oobCode, newPassword);
+  }
 }

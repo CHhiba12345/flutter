@@ -25,9 +25,9 @@ class _SignInPageState extends State<SignInPage> {
   final TextEditingController _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _obscurePassword = true;
-  bool _showErrors = false; // Nouvel état pour contrôler l'affichage des erreurs
-  String? _emailError; // Stocke l'erreur d'email
-  String? _passwordError; // Stocke l'erreur de mot de passe
+  bool _showErrors = false;
+  String? _emailError;
+  String? _passwordError;
 
   @override
   Widget build(BuildContext context) {
@@ -44,31 +44,28 @@ class _SignInPageState extends State<SignInPage> {
                 state.message.contains('user-not-found')) {
               setState(() {
                 _showErrors = true;
-                _passwordError = 'Password incorrect'; // Message personnalisé
+                _passwordError = 'Mot de passe incorrect';
               });
             } else {
-              // Personnalisation des messages et du design du SnackBar
               String displayMessage = state.message;
-              Color backgroundColor = AppColors.error; // Utilisez votre couleur d'erreur
+              Color backgroundColor = AppColors.error;
 
               if (state.message == "google_sign_in_failed") {
-                displayMessage = "Google Sign-In failed. Please try again.";
+                displayMessage = "Échec de connexion Google. Réessayez.";
               } else if (state.message == "facebook_sign_in_failed") {
-                displayMessage = "Facebook Sign-In failed. Please try again.";
+                displayMessage = "Échec de connexion Facebook. Réessayez.";
               }
 
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(
                     displayMessage,
-                    style: AppTextStyles.bodyMedium.copyWith(color: Colors.white),
+                    style: AppTextStyles.bodyMedium?.copyWith(color: Colors.white),
                   ),
                   backgroundColor: backgroundColor,
                   behavior: SnackBarBehavior.floating,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  margin: EdgeInsets.all(20),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  margin: const EdgeInsets.all(20),
                   elevation: 6,
                   duration: const Duration(seconds: 3),
                   action: SnackBarAction(
@@ -87,7 +84,6 @@ class _SignInPageState extends State<SignInPage> {
           return Container(
             decoration: const BoxDecoration(
               color: AppColors.secondary,
-
             ),
             child: SafeArea(
               child: SingleChildScrollView(
@@ -106,17 +102,17 @@ class _SignInPageState extends State<SignInPage> {
                       children: [
                         const SizedBox(height: 40),
 
-                        // Header avec animations
+                        // En-tête
                         _buildHeader(),
 
                         const SizedBox(height: 32),
 
-                        // Formulaire sans Card
+                        // Formulaire
                         _buildFormContent(state, context),
 
                         const SizedBox(height: 24),
 
-                        // Section de connexion sociale
+                        // Connexion sociale
                         SocialLoginSection(
                           onGooglePressed: () =>
                               context.read<AuthBloc>().add(SignInWithGoogleEvent()),
@@ -126,7 +122,7 @@ class _SignInPageState extends State<SignInPage> {
 
                         const SizedBox(height: 24),
 
-                        // Lien vers l'inscription
+                        // Lien vers inscription
                         _buildSignUpRedirect(context),
 
                         const SizedBox(height: 40),
@@ -142,10 +138,12 @@ class _SignInPageState extends State<SignInPage> {
     );
   }
 
+  // === UI Builders ===
+
   Widget _buildHeader() {
-    return Center( // <-- Ajout du widget Center
+    return Center(
       child: Column(
-        mainAxisSize: MainAxisSize.min, // Pour éviter que la Column ne prenne toute la hauteur
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Text(
@@ -183,9 +181,9 @@ class _SignInPageState extends State<SignInPage> {
           obscurePassword: _obscurePassword,
           togglePasswordVisibility: _togglePasswordVisibility,
           formKey: _formKey,
-          showErrors: _showErrors, // Ajouté
-          emailError: _emailError, // Ajouté
-          passwordError: _passwordError, // Ajouté
+          showErrors: _showErrors,
+          emailError: _emailError,
+          passwordError: _passwordError,
         ),
         const SizedBox(height: 24),
         SignInButton(
@@ -201,7 +199,7 @@ class _SignInPageState extends State<SignInPage> {
       child: Text.rich(
         TextSpan(
           text: "Don't have an account? ",
-          style: AppTextStyles.bodyMedium.copyWith(
+          style: AppTextStyles.bodyMedium?.copyWith(
             color: Colors.white.withOpacity(0.8),
           ),
           children: [
@@ -214,7 +212,7 @@ class _SignInPageState extends State<SignInPage> {
                   padding: const EdgeInsets.symmetric(horizontal: 4),
                   child: Text(
                     'Sign Up',
-                    style: AppTextStyles.button.copyWith(
+                    style: AppTextStyles.button?.copyWith(
                       color: AppColors.background,
                       fontWeight: FontWeight.w600,
                       decoration: TextDecoration.underline,
@@ -229,16 +227,19 @@ class _SignInPageState extends State<SignInPage> {
     );
   }
 
-  void _togglePasswordVisibility() => setState(() => _obscurePassword = !_obscurePassword);
+  // === Actions ===
+
+  void _togglePasswordVisibility() {
+    setState(() {
+      _obscurePassword = !_obscurePassword;
+    });
+  }
 
   void _submitForm() {
     setState(() {
       _showErrors = true;
       _emailError = _validateEmail(_emailController.text);
       _passwordError = _validatePassword(_passwordController.text);
-
-      // Réinitialiser l'erreur de mot de passe avant de soumettre
-      _passwordError ??= null;
     });
 
     if (_emailError == null && _passwordError == null) {
@@ -250,7 +251,9 @@ class _SignInPageState extends State<SignInPage> {
       );
     }
   }
-  // Ajoutez ces méthodes à la classe _SignInPageState
+
+  // === Validations ===
+
   String? _validateEmail(String? value) {
     if (value == null || value.isEmpty) return 'Please enter your email';
     if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {

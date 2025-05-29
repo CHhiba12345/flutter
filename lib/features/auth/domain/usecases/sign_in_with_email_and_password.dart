@@ -1,18 +1,13 @@
 import '../repositories/auth_repository.dart';
 import '../entities/app_user.dart';
 
-/// Cas d'utilisation pour la connexion avec email et mot de passe.
-///
-/// Permet d'exécuter l'authentification via le dépôt d'authentification.
+/// Connexion via email et mot de passe
 class SignInWithEmailAndPassword {
-  final AuthRepository repository; // Référencement du dépôt d'authentification
+  final AuthRepository repository;
 
-  /// Constructeur injectant le dépôt d'authentification
   SignInWithEmailAndPassword(this.repository);
 
-  /// Exécute la connexion avec email et mot de passe
-  ///
-  /// Retourne un [AppUser] en cas de succès
+  /// Connecte l'utilisateur et retourne un [AppUser]
   Future<AppUser> call(String email, String password) {
     return repository.signInWithEmailAndPassword(email, password);
   }

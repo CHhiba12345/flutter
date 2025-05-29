@@ -20,7 +20,7 @@ class FavoriteRepositoryImpl implements FavoriteRepository {
   Future<List<FavoriteModel>> getFavorites(String uid) async {
     final favoriteList = await dataSource.getFavorites(uid);
     return favoriteList;
-    //return favoriteList.toList(); // Convertir le Set en List
+
   }
 
 }

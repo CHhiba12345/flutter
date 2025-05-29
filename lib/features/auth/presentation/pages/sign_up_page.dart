@@ -44,15 +44,14 @@ class _SignUpPageState extends State<SignUpPage> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    final theme = Theme.of(context);
 
     return Scaffold(
       body: BlocConsumer<AuthBloc, AuthState>(
         listener: (context, state) {
           if (state is AuthSuccess) {
-            context.router.replaceAll([AllergensRoute()]);
+            context.router.replaceAll([const AllergensRoute()]);
           } else if (state is AuthError) {
-            // On supprime complètement le SnackBar et on gère seulement l'erreur email
+            // On gère uniquement les erreurs liées à l'email
             if (state.message.toLowerCase().contains('email')) {
               setState(() {
                 _emailError = state.message;
@@ -63,7 +62,7 @@ class _SignUpPageState extends State<SignUpPage> {
         builder: (context, state) {
           return Container(
             decoration: BoxDecoration(
-                color: AppColors.secondary,
+              color: AppColors.secondary,
             ),
             child: SafeArea(
               child: SingleChildScrollView(
@@ -81,12 +80,12 @@ class _SignUpPageState extends State<SignUpPage> {
                       children: [
                         const SizedBox(height: 40),
 
-                        // Header
+                        // En-tête
                         _buildHeader(),
 
                         const SizedBox(height: 32),
 
-                        // Form Fields (without Card)
+                        // Formulaire d'inscription
                         SignUpForm(
                           firstNameController: _firstNameController,
                           lastNameController: _lastNameController,
@@ -98,12 +97,12 @@ class _SignUpPageState extends State<SignUpPage> {
                           togglePasswordVisibility: _togglePasswordVisibility,
                           toggleConfirmPasswordVisibility: _toggleConfirmPasswordVisibility,
                           formKey: _formKey,
-                          externalError: _emailError, // Passer l'erreur d'email au formulaire
+                          externalError: _emailError,
                         ),
 
                         const SizedBox(height: 24),
 
-                        // Sign Up Button
+                        // Bouton d'inscription
                         SignUpButton(
                           state: state,
                           onPressed: _submitForm,
@@ -111,7 +110,7 @@ class _SignUpPageState extends State<SignUpPage> {
 
                         const SizedBox(height: 24),
 
-                        // Sign In Redirect
+                        // Redirection vers connexion
                         _buildSignInRedirect(context),
 
                         const SizedBox(height: 40),
@@ -127,62 +126,38 @@ class _SignUpPageState extends State<SignUpPage> {
     );
   }
 
+  // === UI Builders ===
+
   Widget _buildHeader() {
     return Center(
-        child: Column(
-        mainAxisSize: MainAxisSize.min, // Pour éviter que la Column ne prenne toute la hauteur
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-        Text(
-          'Create Account',
-          textAlign: TextAlign.center,
-          style: AppTextStyles.headlineLarge.copyWith(
-            color: Color(0xFFD5D5D5),
-            fontWeight: FontWeight.bold,
-            fontSize: 32,
-            letterSpacing: 0.5,
-          ),
-        ).animate().fadeIn(duration: 500.ms).slideY(begin: -0.2),
+          Text(
+            'Create Account',
+            textAlign: TextAlign.center,
+            style: AppTextStyles.headlineLarge?.copyWith(
+              color: Color(0xFFD5D5D5),
+              fontWeight: FontWeight.bold,
+              fontSize: 32,
+              letterSpacing: 0.5,
+            ),
+          ).animate().fadeIn(duration: 500.ms).slideY(begin: -0.2),
 
-        const SizedBox(height: 8),
+          const SizedBox(height: 8),
 
-        Text(
-          'Join our community today',
-          textAlign: TextAlign.center,
-          style: AppTextStyles.bodyMedium?.copyWith(
-            color: Colors.white38.withOpacity(0.8),
-            fontSize: 16,
-          ),
-        ).animate().fadeIn(delay: 200.ms),
+          Text(
+            'Join our community today',
+            textAlign: TextAlign.center,
+            style: AppTextStyles.bodyMedium?.copyWith(
+              color: Colors.white.withOpacity(0.8),
+              fontSize: 16,
+            ),
+          ).animate().fadeIn(delay: 200.ms),
         ],
-        ),
+      ),
     );
-  }
-
-  Widget _buildFormContent(AuthState state, BuildContext context) {
-    return Column(
-      children: [
-        SignUpForm(
-          firstNameController: _firstNameController,
-          lastNameController: _lastNameController,
-          emailController: _emailController,
-          passwordController: _passwordController,
-          confirmPasswordController: _confirmPasswordController,
-          obscurePassword: _obscurePassword,
-          obscureConfirmPassword: _obscureConfirmPassword,
-          togglePasswordVisibility: _togglePasswordVisibility,
-          toggleConfirmPasswordVisibility: _toggleConfirmPasswordVisibility,
-          formKey: _formKey,
-        ),
-
-        const SizedBox(height: 24),
-
-        SignUpButton(
-          state: state,
-          onPressed: _submitForm,
-        ).animate().fadeIn(delay: 300.ms),
-      ],
-    ).animate().fadeIn(delay: 100.ms).slideY(begin: 0.2);
   }
 
   Widget _buildSignInRedirect(BuildContext context) {
@@ -190,16 +165,16 @@ class _SignUpPageState extends State<SignUpPage> {
       child: Text.rich(
         TextSpan(
           text: 'Already have an account? ',
-          style: AppTextStyles.bodyMedium.copyWith(
+          style: AppTextStyles.bodyMedium?.copyWith(
             color: Colors.white.withOpacity(0.7),
           ),
           children: [
             WidgetSpan(
               child: InkWell(
-                onTap: () => context.router.push(SignInRoute()),
+                onTap: () => context.router.push(const SignInRoute()),
                 child: Text(
                   'Sign In',
-                  style: AppTextStyles.button.copyWith(
+                  style: AppTextStyles.button?.copyWith(
                     color: AppColors.background,
                     fontWeight: FontWeight.w600,
                     decoration: TextDecoration.none,
@@ -213,8 +188,19 @@ class _SignUpPageState extends State<SignUpPage> {
     );
   }
 
-  void _togglePasswordVisibility() => setState(() => _obscurePassword = !_obscurePassword);
-  void _toggleConfirmPasswordVisibility() => setState(() => _obscureConfirmPassword = !_obscureConfirmPassword);
+  // === Actions ===
+
+  void _togglePasswordVisibility() {
+    setState(() {
+      _obscurePassword = !_obscurePassword;
+    });
+  }
+
+  void _toggleConfirmPasswordVisibility() {
+    setState(() {
+      _obscureConfirmPassword = !_obscureConfirmPassword;
+    });
+  }
 
   void _submitForm() {
     if (_formKey.currentState?.validate() ?? false) {

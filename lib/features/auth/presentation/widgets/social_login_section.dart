@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_typography.dart';
 
+/// Section d'authentification sociale (Google / Facebook)
+///
+/// Affiche une ligne de séparation avec l'option "Or continue with",
+/// suivie par les boutons de connexion sociale.
 class SocialLoginSection extends StatelessWidget {
   final VoidCallback onGooglePressed;
   final VoidCallback onFacebookPressed;
@@ -16,6 +20,7 @@ class SocialLoginSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
+        // Ligne de séparation + texte "Or continue with"
         Row(
           children: [
             const Expanded(
@@ -27,7 +32,7 @@ class SocialLoginSection extends StatelessWidget {
             ),
             Text(
               'Or continue with',
-              style: AppTextStyles.bodyMedium.copyWith(
+              style: AppTextStyles.bodyMedium?.copyWith(
                 color: AppColors.backgroundLight,
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
@@ -43,6 +48,8 @@ class SocialLoginSection extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 24),
+
+        // Boutons Google & Facebook
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -67,6 +74,7 @@ class SocialLoginSection extends StatelessWidget {
     );
   }
 
+  /// Bouton rond pour la connexion sociale
   Widget _buildCircularSocialButton({
     required IconData icon,
     required VoidCallback onPressed,
@@ -79,19 +87,13 @@ class SocialLoginSection extends StatelessWidget {
       style: ElevatedButton.styleFrom(
         backgroundColor: backgroundColor,
         shape: const CircleBorder(
-          side: BorderSide(
-            width: 1.5,
-          ),
+          side: BorderSide(width: 1.5),
         ),
         side: BorderSide(color: borderColor, width: 1.5),
         padding: const EdgeInsets.all(16),
         elevation: 0,
       ),
-      child: Icon(
-        icon,
-        size: 24,
-        color: iconColor,
-      ),
+      child: Icon(icon, size: 24, color: iconColor),
     );
   }
 }

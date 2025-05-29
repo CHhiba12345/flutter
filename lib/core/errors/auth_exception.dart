@@ -1,12 +1,12 @@
 // lib/core/errors/auth_exception.dart
 class AuthException implements Exception {
   final String message;
-  final String? code;  // Ajout du paramètre 'code'
+  final String? code;
   final StackTrace? stackTrace;
 
   AuthException({
     required this.message,
-    this.code,  // Paramètre optionnel 'code'
+    this.code,
     this.stackTrace,
   });
 

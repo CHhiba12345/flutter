@@ -1,16 +1,17 @@
-// Classe abstraite représentant un événement d'authentification
+// Événements liés à l'authentification
+
+/// Classe abstraite représentant un événement d'authentification
 abstract class AuthEvent {}
 
-/// Événement pour la connexion avec un email et un mot de passe
+/// Événement déclenché lors d'une tentative de connexion par email/mot de passe
 class SignInWithEmailAndPasswordEvent extends AuthEvent {
-  final String email;  // Adresse email de l'utilisateur
-  final String password;  // Mot de passe de l'utilisateur
+  final String email;
+  final String password;
 
-  /// Constructeur pour initialiser l'email et le mot de passe
   SignInWithEmailAndPasswordEvent(this.email, this.password);
 }
 
-/// Événement pour l'inscription avec un email et un mot de passe
+/// Événement déclenché lors d'une inscription via email/mot de passe
 class SignUpWithEmailAndPasswordEvent extends AuthEvent {
   final String email;
   final String password;
@@ -21,32 +22,30 @@ class SignUpWithEmailAndPasswordEvent extends AuthEvent {
       this.email,
       this.password,
       this.firstName,
-      this.lastName,);
+      this.lastName,
+      );
 }
 
-/// Événement pour la connexion avec Google
-class SignInWithGoogleEvent extends AuthEvent {
-  // Aucun paramètre nécessaire pour cet événement
-}
+/// Événement pour une connexion via Google
+class SignInWithGoogleEvent extends AuthEvent {}
 
-/// Événement pour la connexion avec Facebook
-class SignInWithFacebookEvent extends AuthEvent {
-  // Aucun paramètre nécessaire pour cet événement
-}
+/// Événement pour une connexion via Facebook
+class SignInWithFacebookEvent extends AuthEvent {}
 
-/// Événement pour la déconnexion de l'utilisateur
-class SignOutEvent extends AuthEvent {
-  // Aucun paramètre nécessaire pour cet événement
-}
-// Ajoutez ces nouveaux événements
+/// Événement pour une déconnexion utilisateur
+class SignOutEvent extends AuthEvent {}
+
+/// Événement pour demander la réinitialisation du mot de passe
 class ForgotPasswordRequested extends AuthEvent {
   final String email;
+
   ForgotPasswordRequested(this.email);
 }
 
+/// Événement pour confirmer la réinitialisation du mot de passe
 class PasswordResetRequested extends AuthEvent {
   final String oobCode;
   final String newPassword;
 
-   PasswordResetRequested(this.oobCode, this.newPassword);
+  PasswordResetRequested(this.oobCode, this.newPassword);
 }

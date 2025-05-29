@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
+/// Source distante pour interagir avec le chatbot via une API HTTP
 abstract class ChatBotRemoteDataSource {
   Future<Map<String, dynamic>> getChatbotResponse({
     required String question,
@@ -13,21 +14,19 @@ class ChatBotRemoteDataSourceImpl implements ChatBotRemoteDataSource {
 
   ChatBotRemoteDataSourceImpl({required this.client});
 
+  /// Envoie une question au chatbot et retourne la réponse de l'API
   @override
   Future<Map<String, dynamic>> getChatbotResponse({
     required String question,
   }) async {
     try {
-      // Appel direct à /chatbot sans session
       final response = await client.post(
         Uri.parse('$baseUrl/chatbot'),
         headers: {
           'Content-Type': 'application/json; charset=utf-8',
           'Accept': 'application/json; charset=utf-8',
         },
-        body: jsonEncode({
-          'question': question,
-        }),
+        body: jsonEncode({'question': question}),
         encoding: utf8,
       );
 
@@ -35,10 +34,10 @@ class ChatBotRemoteDataSourceImpl implements ChatBotRemoteDataSource {
         final jsonResponse = json.decode(utf8.decode(response.bodyBytes));
         return jsonResponse;
       } else {
-        throw Exception('Failed to load chatbot response: ${response.statusCode}');
+        throw Exception('Échec de la requête - Code: ${response.statusCode}');
       }
     } catch (e) {
-      throw Exception('Network error: $e');
+      throw Exception('Erreur réseau: $e');
     }
   }
 }

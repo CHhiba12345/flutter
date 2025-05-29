@@ -33,6 +33,7 @@ class ResetPasswordPage extends StatelessWidget {
               }
             });
           }
+
           if (state is ResetPasswordError) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(state.message)),
@@ -51,13 +52,16 @@ class ResetPasswordPage extends StatelessWidget {
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () {
-                  if (oobCode != null && oobCode!.isNotEmpty && _passwordController.text.isNotEmpty) {
+                  if (oobCode != null &&
+                      oobCode!.isNotEmpty &&
+                      _passwordController.text.isNotEmpty) {
                     context.read<AuthBloc>().add(
                       PasswordResetRequested(oobCode!, _passwordController.text),
                     );
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("Code ou mot de passe invalide")),
+                      const SnackBar(
+                          content: Text("Code ou mot de passe invalide")),
                     );
                   }
                 },

@@ -24,17 +24,14 @@ class FavoriteCard extends StatelessWidget {
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
         onTap: () {
-          // Ajouter une action au clic si besoin
+          // Action optionnelle au clic(je ajouter au future )
         },
         child: ListTile(
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           leading: _buildProductImage(favorite.imageUrl),
           title: Text(
             favorite.productName.isNotEmpty ? favorite.productName : 'Produit inconnu',
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 16,
-            ),
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
           ),
           subtitle: Text(
             formattedDate,
@@ -51,6 +48,7 @@ class FavoriteCard extends StatelessWidget {
     );
   }
 
+  /// Construit l'image du produit avec gestion du placeholder et erreur
   Widget _buildProductImage(String imageUrl) {
     const double size = 60;
 
@@ -89,6 +87,7 @@ class FavoriteCard extends StatelessWidget {
     );
   }
 
+  /// Supprime le produit des favoris via le bloc
   void _removeFavorite(BuildContext context) {
     if (favorite.productId.isEmpty || favorite.productId == 'default_id') {
       ScaffoldMessenger.of(context).showSnackBar(

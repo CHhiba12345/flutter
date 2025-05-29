@@ -7,6 +7,7 @@ import 'package:eye_volve/app_router.dart';
 import 'package:lottie/lottie.dart';
 
 import '../../data/datasources/auth_service.dart';
+
 @RoutePage()
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -22,24 +23,26 @@ class _SplashPageState extends State<SplashPage> {
     _checkAuthStatus();
   }
 
+  /// Vérifie si l'utilisateur est connecté et redirige en conséquence
   Future<void> _checkAuthStatus() async {
     final authService = AuthService();
     final isLoggedIn = await authService.isUserLoggedIn();
 
-    // Attendre un minimum de 2 secondes pour l'animation
+    // Affiche l'écran splash pendant au moins 2 secondes
     await Future.delayed(const Duration(seconds: 2));
 
     if (mounted) {
       if (isLoggedIn) {
-        // Mettre à jour le token et naviguer
+        // Met à jour le token et navigue vers l'accueil
         await authService.updateToken();
         context.router.replace(const MainLayoutRoute());
       } else {
-        // Naviguer vers onboarding
+        // Redirection vers l'onboarding
         context.router.replace(const OnboardingRoute());
       }
     }
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

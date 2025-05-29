@@ -42,7 +42,6 @@ class AppRouter extends _$AppRouter {
     AutoRoute(page: HistoryRoute.page),
     AutoRoute(page:TicketAnalysisRoute.page),
 
-    //Allergens
     // Route principale avec sous-routes
     AutoRoute(
       path: '/main',

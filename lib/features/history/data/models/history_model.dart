@@ -1,8 +1,8 @@
 class HistoryModel {
   final String id;
   final String uid;
-  final String productName; // Nouveau
-  final String imageUrl;    // Nouveau
+  final String productName;
+  final String imageUrl;
   final String productId;
   final String actionType;
   final String timestamp;
@@ -17,15 +17,17 @@ class HistoryModel {
     required this.timestamp,
   });
 
+  /// Crée une instance depuis un JSON
+  ///
+  /// Accepte plusieurs noms de champs pour la compatibilité API
   factory HistoryModel.fromJson(Map<String, dynamic> json) {
-    // Récupérer _id du JSON (maintenant présent)
     final id = json['_id']?.toString();
     if (id == null) {
-      throw FormatException('_id manquant dans : $json');
+      throw FormatException('_id manquant dans le JSON: $json');
     }
 
     return HistoryModel(
-      id: id, // Maintenant obligatoire
+      id: id,
       uid: json['uid'] as String,
       productName: (json['productName'] ?? json['product_name'] ?? '') as String,
       imageUrl: (json['imageUrl'] ?? json['image_url'] ?? '') as String,
@@ -35,14 +37,14 @@ class HistoryModel {
     );
   }
 
+  /// Convertit l'instance en Map<String, dynamic>
   Map<String, dynamic> toJson() {
     return {
-      'id':id,
+      'id': id,
       'uid': uid,
       'product_id': productId,
-      'productName':productName,
-      'imageUrl':imageUrl,
-
+      'productName': productName,
+      'imageUrl': imageUrl,
       'actionType': actionType,
       'timestamp': timestamp,
     };

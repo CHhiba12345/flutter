@@ -1,19 +1,14 @@
 import '../repositories/auth_repository.dart';
 import '../entities/app_user.dart';
 
-/// Cas d'utilisation pour la connexion avec Google.
-///
-/// Permet d'exécuter l'authentification via le dépôt d'authentification.
+/// Connexion via Google
 class SignInWithGoogle {
-  final AuthRepository repository; // Référencement du dépôt d'authentification
+  final AuthRepository repository;
 
-  /// Constructeur injectant le dépôt d'authentification
   SignInWithGoogle(this.repository);
 
-  /// Exécute la connexion avec Google
+  /// Tente une connexion avec Google
   ///
-  /// Retourne un [AppUser] en cas de succès, sinon null
-  Future<AppUser?> call() {
-    return repository.signInWithGoogle();
-  }
+  /// Retourne un [AppUser] si réussi, sinon null
+  Future<AppUser?> call() => repository.signInWithGoogle();
 }

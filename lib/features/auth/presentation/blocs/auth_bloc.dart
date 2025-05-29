@@ -1,5 +1,6 @@
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 import '../../domain/repositories/auth_repository.dart';
 import '../../domain/usecases/forgot_password_use_case.dart';
 import '../../domain/usecases/reset_password_use_case.dart';
@@ -8,6 +9,7 @@ import '../../domain/usecases/sign_up_with_email_and_password.dart';
 import '../../domain/usecases/sign_in_with_google.dart';
 import '../../domain/usecases/sign_in_with_facebook.dart';
 import '../../domain/usecases/sign_out.dart';
+
 import 'auth_event.dart';
 import 'auth_state.dart';
 
@@ -31,7 +33,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     required this.resetPasswordUseCase,
     required this.authRepository,
   }) : super(AuthInitial()) {
-
     on<SignInWithEmailAndPasswordEvent>(_handleSignInWithEmailAndPassword);
     on<SignUpWithEmailAndPasswordEvent>(_handleSignUpWithEmailAndPassword);
     on<SignInWithGoogleEvent>(_handleSignInWithGoogle);
@@ -41,10 +42,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<PasswordResetRequested>(_handlePasswordReset);
   }
 
+  // Connexion email/mot de passe
   Future<void> _handleSignInWithEmailAndPassword(
       SignInWithEmailAndPasswordEvent event,
-      Emitter<AuthState> emit,
-      ) async {
+      Emitter<AuthState> emit) async {
     emit(AuthLoading());
     try {
       if (!EmailValidator.validate(event.email)) {
@@ -66,77 +67,80 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
+  // Inscription email/mot de passe
   Future<void> _handleSignUpWithEmailAndPassword(
       SignUpWithEmailAndPasswordEvent event,
-      Emitter<AuthState> emit,
-      ) async {
+      Emitter<AuthState> emit) async {
     emit(AuthLoading());
     try {
       if (!EmailValidator.validate(event.email)) {
-        emit(AuthError('Invalid email address'));
+        emit(AuthError('Adresse email invalide'));
         return;
       }
+
       final user = await signUpWithEmailAndPassword(
         event.email,
         event.password,
         event.firstName,
         event.lastName,
       );
+
       emit(AuthSuccess(user));
     } catch (e) {
-      emit(AuthError('This email is already in use'));
+      emit(AuthError('Cet email est déjà utilisé'));
     }
   }
 
+  // Connexion Google
   Future<void> _handleSignInWithGoogle(
       SignInWithGoogleEvent event,
-      Emitter<AuthState> emit,
-      ) async {
+      Emitter<AuthState> emit) async {
     emit(AuthLoading());
     try {
       final user = await signInWithGoogle();
       if (user != null) {
         emit(AuthSuccess(user));
       } else {
-        emit( AuthError("google_sign_in_failed"));
+        emit(AuthError("Échec de connexion Google"));
       }
     } catch (e) {
-      String errorMessage = "Google Sign-In failed";
+      String errorMessage = "Échec de connexion Google";
       if (e.toString().contains('sign_in_canceled')) {
-        errorMessage = "You canceled the Google sign-in !";
+        errorMessage = "Vous avez annulé la connexion Google";
       } else if (e.toString().contains('network_error')) {
-        errorMessage = "Oops! Something went wrong. Make sure you're online";
+        errorMessage = "Vérifiez votre connexion Internet";
       }
       emit(AuthError(errorMessage));
     }
   }
 
+  // Connexion Facebook
   Future<void> _handleSignInWithFacebook(
       SignInWithFacebookEvent event,
-      Emitter<AuthState> emit,
-      ) async {
+      Emitter<AuthState> emit) async {
     emit(AuthLoading());
     try {
       final user = await signInWithFacebook();
       if (user != null) {
         emit(AuthSuccess(user));
       } else {
-        emit( AuthError("facebook_sign_in_failed"));
+        emit(AuthError("Échec de connexion Facebook"));
       }
     } catch (e) {
-      String errorMessage = "Facebook Sign-In failed";
+      String errorMessage = "Échec de connexion Facebook";
       if (e.toString().contains('CANCELLED')) {
-        errorMessage = "Facebook Sign-In was canceled";
+        errorMessage = "Connexion Facebook annulée";
       } else if (e.toString().contains('NETWORK_ERROR')) {
-        errorMessage = "Network error during Facebook Sign-In";
+        errorMessage = "Problème réseau lors de la connexion Facebook";
       }
       emit(AuthError(errorMessage));
     }
   }
+
+  // Déconnexion
   Future<void> _handleSignOut(
       SignOutEvent event,
-      Emitter<AuthState> emit,
-      ) async {
+      Emitter<AuthState> emit) async {
     emit(AuthLoading());
     try {
       await signOut();
@@ -146,10 +150,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
+  // Mot de passe oublié
   Future<void> _handleForgotPassword(
       ForgotPasswordRequested event,
-      Emitter<AuthState> emit,
-      ) async {
+      Emitter<AuthState> emit) async {
     emit(ForgotPasswordLoading());
     try {
       if (!EmailValidator.validate(event.email)) {
@@ -163,10 +167,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
+  // Réinitialiser mot de passe
   Future<void> _handlePasswordReset(
       PasswordResetRequested event,
-      Emitter<AuthState> emit,
-      ) async {
+      Emitter<AuthState> emit) async {
     emit(ResetPasswordLoading());
     try {
       await resetPasswordUseCase.execute(event.oobCode, event.newPassword);

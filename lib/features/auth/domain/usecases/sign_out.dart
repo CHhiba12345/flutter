@@ -1,11 +1,11 @@
 import '../repositories/auth_repository.dart';
 
+/// Déconnecte l'utilisateur de l'application
 class SignOut {
   final AuthRepository repository;
 
   SignOut(this.repository);
 
-  Future<void> call() {
-    return repository.signOut();
-  }
+  /// Exécute la déconnexion
+  Future<void> call() => repository.signOut();
 }

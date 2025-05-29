@@ -1,4 +1,3 @@
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -10,9 +9,11 @@ class AuthService {
     final String baseUrl = "http://164.132.53.159:3001";
     final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
 
+    // ===========================================================================
+    // 🔐 GESTION DE LA CONNEXION ET TOKEN : Vérification et persistance
+    // ===========================================================================
 
-    //////////////////////////
-    // Ajoutez cette méthode pour vérifier la connexion persistante
+    /// Vérifie si l'utilisateur est connecté via le token stocké.
     Future<bool> isUserLoggedIn() async {
         final token = await getToken();
         if (token == null) return false;
@@ -25,10 +26,8 @@ class AuthService {
             return false;
         }
     }
-    //////////////////////////////////////////////////////////////
 
-
-
+    /// Affiche les informations de l'utilisateur actuel (UID).
     Future<void> printCurrentUserInfo() async {
         final token = await getCurrentUserToken();
         if (token == null) {
@@ -40,20 +39,26 @@ class AuthService {
             final decodedToken = JwtDecoder.decode(token);
             final uid = decodedToken['user_id'] ?? decodedToken['sub'] ?? 'Non trouvé';
             print('🔐 Token JWT décodé - UID: $uid');
-            //print('Token complet: $decodedToken');
         } catch (e) {
             print('Erreur de décodage du token: $e');
         }
     }
-    ///////////////////////////////////////////////////////////
+
+    // ===========================================================================
+    // 🗃️ GESTION DES TOKENS : Stockage, lecture et extraction d'ID utilisateur
+    // ===========================================================================
+
+    /// Stocke un token dans le stockage sécurisé.
     Future<void> storeToken(String token) async {
         await _storage.write(key: 'firebase_token', value: token);
     }
 
+    /// Récupère le token depuis le stockage sécurisé.
     Future<String?> getToken() async {
         return await _storage.read(key: 'firebase_token');
     }
 
+    /// Extrait l'ID utilisateur à partir du token JWT.
     Future<String> getUserIdFromToken(String token) async {
         try {
             final decodedToken = JwtDecoder.decode(token);
@@ -64,6 +69,12 @@ class AuthService {
             throw Exception("Erreur décodage token : ${e.toString()}");
         }
     }
+
+    // ===========================================================================
+    // 🔁 SYNCHRONISATION ET VALIDATION DES TOKENS : Firebase + Backend
+    // ===========================================================================
+
+    /// Vérifie le token Firebase auprès du backend et le stocke localement.
     Future<void> verifyFirebaseToken(String firebaseToken) async {
         try {
             final response = await http.post(
@@ -82,27 +93,7 @@ class AuthService {
         }
     }
 
-    // Envoyer l'email de réinitialisation
-    Future<void> sendPasswordResetEmail(String email) async {
-        try {
-            await _firebaseAuth.sendPasswordResetEmail(email: email);
-        } catch (e) {
-            throw Exception("Erreur lors de l'envoi de l'email : $e");
-        }
-    }
-
-    // Confirmer le nouveau mot de passe
-    Future<void> confirmPasswordReset(String oobCode, String newPassword) async {
-        try {
-            await _firebaseAuth.confirmPasswordReset(
-                code: oobCode,
-                newPassword: newPassword,
-            );
-        } catch (e) {
-            throw Exception("Erreur lors de la confirmation : $e");
-        }
-    }
-
+    /// Met à jour le token JWT en récupérant un nouveau token Firebase.
     Future<void> updateToken() async {
         try {
             final user = FirebaseAuth.instance.currentUser;
@@ -110,17 +101,14 @@ class AuthService {
                 throw Exception("Aucun utilisateur connecté");
             }
 
-            // Récupération du token JWT
             final token = await user.getIdToken();
             if (token == null) {
                 throw Exception("Le token Firebase est null");
             }
 
-            // Stockage sécurisé du token
             await storeToken(token);
 
             print("Token JWT mis à jour et stocké localement.");
-            ////////////////
             await printCurrentUserInfo();
         } catch (e) {
             print("Erreur lors de la mise à jour du token : $e");
@@ -128,6 +116,7 @@ class AuthService {
         }
     }
 
+    /// Récupère le token courant (stocké ou depuis Firebase).
     Future<String?> getCurrentUserToken() async {
         String? token = await _storage.read(key: 'firebase_token');
         if (token != null) {
@@ -138,25 +127,46 @@ class AuthService {
         if (user != null) {
             token = await user.getIdToken();
             if (token != null) {
-                await storeToken(
-                    token); // Stocke le token pour une utilisation future
+                await storeToken(token);
                 return token;
             }
         }
-        return null; // Retourne null si aucun token n'est trouvé
+        return null;
     }
-    // Dans AuthService
+
+    /// Récupère l'ID de l'utilisateur connecté à partir du token.
     Future<String?> getCurrentUserId() async {
         try {
             final token = await getCurrentUserToken();
             if (token == null) {
                 throw Exception("Aucun token trouvé pour l'utilisateur connecté");
             }
-            final userId = await getUserIdFromToken(token);
-            return userId;
+            return await getUserIdFromToken(token);
         } catch (e) {
             print("Erreur lors de la récupération de l'ID utilisateur : $e");
-            return null; // Retournez null en cas d'erreur
+            return null;
+        }
+    }
+
+    // ===========================================================================
+    // 📨 MOT DE PASSE OUBLIÉ : Réinitialisation via Firebase Auth
+    // ===========================================================================
+
+    /// Envoie un email de réinitialisation du mot de passe.
+    Future<void> sendPasswordResetEmail(String email) async {
+        try {
+            await _firebaseAuth.sendPasswordResetEmail(email: email);
+        } catch (e) {
+            throw Exception("Erreur lors de l'envoi de l'email : $e");
+        }
+    }
+
+    /// Confirme la réinitialisation du mot de passe avec le code reçu.
+    Future<void> confirmPasswordReset(String oobCode, String newPassword) async {
+        try {
+            await _firebaseAuth.confirmPasswordReset(code: oobCode, newPassword: newPassword);
+        } catch (e) {
+            throw Exception("Erreur lors de la confirmation : $e");
         }
     }
 }

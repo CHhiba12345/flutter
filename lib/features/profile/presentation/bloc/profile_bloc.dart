@@ -66,7 +66,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       // Sauvegarde les nouveaux allergènes
       await setUserAllergens(event.uid, event.allergens);
 
-      // Optionnel : Charger les données fraîches si tu veux les garder localement
+//////////////
       final freshAllergens = await getUserAllergens(event.uid);
       _currentAllergens = freshAllergens;
 

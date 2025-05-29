@@ -2,6 +2,7 @@ import 'package:auto_route/annotations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lottie/lottie.dart';
+
 import '../../domain/usecases/delete_history_usecase.dart';
 import '../../domain/usecases/get_history_usecase.dart';
 import '../../domain/usecases/record_history.dart';
@@ -20,6 +21,7 @@ class HistoryPage extends StatefulWidget {
 
 class _HistoryPageState extends State<HistoryPage> with SingleTickerProviderStateMixin {
   late TabController _tabController;
+
   final statusBarHeight = MediaQueryData.fromWindow(WidgetsBinding.instance.window).padding.top;
 
   @override
@@ -42,83 +44,78 @@ class _HistoryPageState extends State<HistoryPage> with SingleTickerProviderStat
       body: GestureDetector(
         onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
         child: NestedScrollView(
-          headerSliverBuilder: (context, innerBoxIsScrolled) {
-            return [
-              SliverAppBar(
-                expandedHeight: 120,
-                floating: true,
-                pinned: true,
-                flexibleSpace: FlexibleSpaceBar(
-                  background: Container(
-                    decoration: const BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [Color(0xFF3E6839), Color(0xFF83BC6D)],
-                        begin: Alignment.centerLeft,
-                        end: Alignment.centerRight,
-                      ),
-                    ),
-                    child: SafeArea(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: const [
-                                Icon(Icons.history, color: Colors.white, size: 30),
-                                SizedBox(width: 12),
-                                Text(
-                                  'History',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 16),
-                          ],
-                        ),
-                      ),
+          headerSliverBuilder: (context, innerBoxIsScrolled) => [
+            SliverAppBar(
+              expandedHeight: 120,
+              floating: true,
+              pinned: true,
+              flexibleSpace: FlexibleSpaceBar(
+                background: Container(
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(
+                      colors: [Color(0xFF3E6839), Color(0xFF83BC6D)],
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
                     ),
                   ),
-                ),
-                bottom: PreferredSize(
-                  preferredSize: const Size.fromHeight(60),
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 16),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: TabBar(
-                      controller: _tabController,
-                      indicatorSize: TabBarIndicatorSize.label,
-                      indicator: const UnderlineTabIndicator(
-                        borderSide: BorderSide(
-                          width: 4.0,
-                          color: Color(0xFF8598A1),
-                        ),
-                        insets: EdgeInsets.symmetric(horizontal: 50),
+                  child: SafeArea(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: const [
+                          Row(
+                            children: [
+                              Icon(Icons.history, color: Colors.white, size: 30),
+                              SizedBox(width: 12),
+                              Text(
+                                'History',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 16),
+                        ],
                       ),
-                      labelColor: Colors.lightGreen,
-                      unselectedLabelColor: Color(0xFF708E98),
-                      tabs: const [
-                        Tab(text: 'History'),
-                        Tab(text: 'Analyse'),
-                      ],
                     ),
                   ),
                 ),
               ),
-            ];
-          },
+              bottom: PreferredSize(
+                preferredSize: const Size.fromHeight(60),
+                child: Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: TabBar(
+                    controller: _tabController,
+                    indicatorSize: TabBarIndicatorSize.label,
+                    indicator: const UnderlineTabIndicator(
+                      borderSide: BorderSide(width: 4.0, color: Color(0xFF8598A1)),
+                      insets: EdgeInsets.symmetric(horizontal: 50),
+                    ),
+                    labelColor: Colors.lightGreen,
+                    unselectedLabelColor: Color(0xFF708E98),
+                    tabs: const [
+                      Tab(text: 'History'),
+                      Tab(text: 'Analyse'),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
           body: TabBarView(
             controller: _tabController,
             children: [
-              // History Tab
+              // === Onglet Historique ===
               BlocBuilder<HistoryBloc, HistoryState>(
                 builder: (context, state) {
                   if (state is HistoryLoading) {
@@ -131,11 +128,7 @@ class _HistoryPageState extends State<HistoryPage> with SingleTickerProviderStat
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Lottie.asset(
-                              'assets/animations/empty_history.json',
-                              width: 200,
-                              height: 200,
-                            ),
+                            Lottie.asset('assets/animations/empty_history.json', width: 200, height: 200),
                             const SizedBox(height: 16),
                             const Text(
                               'No history available',
@@ -164,7 +157,7 @@ class _HistoryPageState extends State<HistoryPage> with SingleTickerProviderStat
                             },
                           );
                         },
-                        separatorBuilder: (context, index) => const SizedBox(height: 12),
+                        separatorBuilder: (_, __) => const SizedBox(height: 12),
                       ),
                     );
                   } else {
@@ -173,7 +166,7 @@ class _HistoryPageState extends State<HistoryPage> with SingleTickerProviderStat
                 },
               ),
 
-              // Analyse Tab
+              // === Onglet Analyse (temporairement statique) ===
               const Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,

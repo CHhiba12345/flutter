@@ -2,7 +2,7 @@ import 'package:auto_route/annotations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
-import 'package:lottie/lottie.dart'; // <-- Import Lottie
+import 'package:lottie/lottie.dart';
 
 import '../../../auth/data/datasources/auth_service.dart';
 import '../../domain/entities/favorite.dart';
@@ -21,6 +21,7 @@ class FavoritesPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Récupère l'UID utilisateur avant d'afficher la page
     return FutureBuilder<String?>(
       future: AuthService().getCurrentUserId(),
       builder: (context, snapshot) {
@@ -57,8 +58,8 @@ class _FavoritesContent extends StatelessWidget {
             if (state is FavoriteLoading) {
               return const Center(child: CircularProgressIndicator());
             } else if (state is FavoritesLoaded) {
+              // Liste vide → affiche un message + animation Lottie
               if (state.favorites.isEmpty) {
-                // ✅ Affichage de l'animation quand la liste est vide
                 return Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -78,11 +79,13 @@ class _FavoritesContent extends StatelessWidget {
                 );
               }
 
+              // Affichage des favoris
               return ListView.builder(
                 itemCount: state.favorites.length,
                 itemBuilder: (context, index) {
                   final product = state.favorites[index];
 
+                  // Gestion URL image
                   String imageUrl = product.imageUrl;
                   if (imageUrl.isEmpty || !imageUrl.startsWith('http')) {
                     imageUrl = 'https://via.placeholder.com/150';
@@ -107,7 +110,7 @@ class _FavoritesContent extends StatelessWidget {
                 child: Text(state.errorMessage ?? 'Une erreur est survenue'),
               );
             } else {
-              return const Center(child: Text('Loading...'));
+              return const Center(child: Text('Chargement...'));
             }
           },
         ),

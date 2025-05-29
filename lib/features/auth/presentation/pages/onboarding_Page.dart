@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:auto_route/auto_route.dart';
+
 import '../../../../app_router.dart';
 
 @RoutePage()
@@ -15,6 +16,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
 
+  // Données des différentes étapes de l'onboarding
   final List<Map<String, dynamic>> sections = [
     {
       "title": "Welcome to FooDTruth!",
@@ -28,7 +30,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
       "title": "Customize Based on Your Preferences",
       "subtitle": "Personalized Alerts",
       "description":
-      "Set your dietary preferences in seconds. Whether you have allergies (milk, gluten, peanuts…) , the app will automatically alert you.",
+      "Set your dietary preferences in seconds. Whether you have allergies (milk, gluten, peanuts…), the app will automatically alert you.",
       "lottieAsset": "assets/animations/s2.json",
       "bgColors": [Color(0xFF3E6839), Color(0xFF3E6839), Color(0xFF5D705D)],
     },
@@ -56,6 +58,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
       body: SafeArea(
         child: Stack(
           children: [
+            // PageView avec les différentes étapes d'onboarding
             PageView.builder(
               controller: _pageController,
               itemCount: sections.length,
@@ -167,7 +170,8 @@ class _OnboardingPageState extends State<OnboardingPage> {
                 );
               },
             ),
-            // Afficher le bouton Skip seulement si ce n'est pas la dernière page
+
+            // Bouton Skip (visible sauf sur la dernière page)
             if (_currentPage != sections.length - 1)
               Positioned(
                 top: 16,
@@ -176,8 +180,8 @@ class _OnboardingPageState extends State<OnboardingPage> {
                   onPressed: _skipOnboarding,
                   style: TextButton.styleFrom(
                     foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 8),
+                    padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20),
                     ),
@@ -185,9 +189,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                   ),
                   child: const Text(
                     "Skip",
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ),
               ),
@@ -197,6 +199,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
     );
   }
 
+  // Génère les stops du dégradé en fonction du nombre de couleurs
   List<double> _generateStops(int length) {
     switch (length) {
       case 2:
@@ -208,6 +211,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
     }
   }
 
+  // Indicateur de progression entre les étapes
   Widget _buildProgressIndicator() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,

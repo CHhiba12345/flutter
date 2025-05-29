@@ -7,9 +7,13 @@ import '../../../../core/errors/auth_exception.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
   final FirebaseAuthDataSource dataSource;
-  final AuthService authService; // Ajouter AuthService
+  final AuthService authService;
 
-  AuthRepositoryImpl(this.dataSource, this.authService); // Injecter AuthService
+  AuthRepositoryImpl(this.dataSource, this.authService);
+
+  // ===========================================================================
+  // 📦 SIGN IN / SIGN UP AVEC EMAIL & MOT DE PASSE
+  // ===========================================================================
 
   @override
   Future<AppUser> signInWithEmailAndPassword(String email, String password) async {
@@ -41,10 +45,9 @@ class AuthRepositoryImpl implements AuthRepository {
     return user;
   }
 
-  @override
-  Future<void> signOut() {
-    return dataSource.signOut();
-  }
+  // ===========================================================================
+  // 🟡 GOOGLE SIGN-IN
+  // ===========================================================================
 
   @override
   Future<AppUser?> signInWithGoogle() async {
@@ -55,6 +58,10 @@ class AuthRepositoryImpl implements AuthRepository {
     return user;
   }
 
+  // ===========================================================================
+  // 🔵 FACEBOOK SIGN-IN
+  // ===========================================================================
+
   @override
   Future<AppUser?> signInWithFacebook() async {
     final user = await dataSource.signInWithFacebook();
@@ -62,12 +69,20 @@ class AuthRepositoryImpl implements AuthRepository {
       await authService.verifyFirebaseToken(user.jwt!); // Envoyer le token au backend
     }
     return user;
-
   }
 
+  // ===========================================================================
+  // 🔚 DÉCONNEXION
+  // ===========================================================================
 
+  @override
+  Future<void> signOut() {
+    return dataSource.signOut();
+  }
 
-
+  // ===========================================================================
+  // 📧 RÉINITIALISATION DU MOT DE PASSE
+  // ===========================================================================
 
   @override
   Future<void> sendPasswordResetEmail(String email) async {
@@ -86,6 +101,12 @@ class AuthRepositoryImpl implements AuthRepository {
       throw AuthException(message: 'Erreur: ${e.toString()}');
     }
   }
+
+  // ===========================================================================
+  // 🔍 UTILITAIRES : Récupération d'informations utilisateur
+  // ===========================================================================
+
+  /// Récupère l'UID de l'utilisateur à partir du token stocké localement.
   Future<String?> getUserId() async {
     try {
       final token = await authService.getToken(); // Récupère le token stocké localement
@@ -97,19 +118,19 @@ class AuthRepositoryImpl implements AuthRepository {
       throw Exception('Erreur lors de la récupération de l\'UID: ${e.toString()}');
     }
   }
-  //
 
+  // ===========================================================================
+  // 🔐 RÉCUPÉRATION DES TOKENS
+  // ===========================================================================
 
-
-  // Implémentation de la méthode getFirebaseToken
+  /// Récupère le token Firebase actuel.
   @override
   Future<String?> getFirebaseToken() async {
     try {
       final user = await FirebaseAuth.instance.currentUser;
-      return await user?.getIdToken();  // Récupère le token Firebase
+      return await user?.getIdToken(); // Récupère le token Firebase
     } catch (e) {
       throw AuthException(message: 'Erreur lors de la récupération du token Firebase: ${e.toString()}');
     }
   }
 }
-///implémenter répository en utilisant datasource =======

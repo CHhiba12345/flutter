@@ -2,9 +2,10 @@ import 'dart:io';
 
 import 'package:eye_volve/features/history/domain/usecases/delete_history_usecase.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 import '../../domain/usecases/get_history_usecase.dart';
 import '../../domain/usecases/record_history.dart';
-import 'history_event.dart'; // Ajout de cet import
+import 'history_event.dart';
 import 'history_state.dart';
 
 class HistoryBloc extends Bloc<HistoryEvent, HistoryState> {
@@ -17,17 +18,16 @@ class HistoryBloc extends Bloc<HistoryEvent, HistoryState> {
     required this.recordHistory,
     required this.deleteHistory,
   }) : super(HistoryInitial()) {
-    // Move all event registrations here in the constructor
     on<LoadHistoryEvent>(_onLoadHistory);
     on<RecordScanEvent>(_onRecordScan);
     on<RecordViewEvent>(_onRecordView);
     on<DeleteHistoryEvent>(_onDeleteHistory);
   }
 
+  /// Charge l'historique complet de l'utilisateur
   Future<void> _onLoadHistory(
       LoadHistoryEvent event,
-      Emitter<HistoryState> emit
-      ) async {
+      Emitter<HistoryState> emit) async {
     emit(HistoryLoading());
     try {
       final histories = await getHistoryUseCase.execute();
@@ -35,42 +35,43 @@ class HistoryBloc extends Bloc<HistoryEvent, HistoryState> {
     } on FormatException catch (e) {
       emit(HistoryError('Format de données invalide : ${e.message}'));
     } on Exception catch (e) {
-      emit(HistoryError('Erreur : ${e.toString()}'));
+      emit(HistoryError('Erreur lors du chargement : ${e.toString()}'));
     }
   }
 
+  /// Enregistre une action de scan
   Future<void> _onRecordScan(
       RecordScanEvent event,
-      Emitter<HistoryState> emit
-      ) async {
+      Emitter<HistoryState> emit) async {
     try {
       await recordHistory.recordScan(productId: event.productId);
       add(LoadHistoryEvent());
     } catch (e) {
-      emit(HistoryError('Failed to record scan: ${e.toString()}'));
+      emit(HistoryError('Échec de l\'enregistrement du scan : $e'));
     }
   }
 
+  /// Enregistre une consultation de produit
   Future<void> _onRecordView(
       RecordViewEvent event,
-      Emitter<HistoryState> emit
-      ) async {
+      Emitter<HistoryState> emit) async {
     try {
       await recordHistory.recordView(productId: event.productId);
       add(LoadHistoryEvent());
     } catch (e) {
-      emit(HistoryError('Failed to record view: ${e.toString()}'));
+      emit(HistoryError('Échec de l\'enregistrement de la vue : $e'));
     }
   }
 
+  /// Supprime une entrée d'historique
   Future<void> _onDeleteHistory(
       DeleteHistoryEvent event,
-      Emitter<HistoryState> emit
-      ) async {
+      Emitter<HistoryState> emit) async {
     if (event.historyId.isEmpty) {
       emit(HistoryError('ID invalide pour la suppression'));
       return;
     }
+
     try {
       await deleteHistory.execute(event.historyId);
       add(LoadHistoryEvent());

@@ -1,5 +1,6 @@
 import 'package:eye_volve/features/home/domain/entities/product.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 import '../../../auth/data/datasources/auth_service.dart';
 import '../../data/models/favorite_model.dart';
 import '../../domain/usecases/add_to_favorites.dart';
@@ -22,20 +23,17 @@ class FavoriteBloc extends Bloc<FavoriteEvent, FavoriteState> {
     on<LoadFavoritesEvent>(_handleLoadFavorites);
   }
 
-  Future<void> _handleToggleFavorite(ToggleFavoriteEvent event, Emitter<FavoriteState> emit) async {
-    // État actuel
+  /// Gère l'ajout ou la suppression d'un produit dans les favoris
+  Future<void> _handleToggleFavorite(
+      ToggleFavoriteEvent event, Emitter<FavoriteState> emit) async {
     final currentState = state;
     List<FavoriteModel> updatedFavorites = [];
 
-    print("[ToggleFavorite] Event reçu : isFavorite=${event.isFavorite}, uid=${event.uid}, productId=${event.productId}");
-
+    // Mise à jour optimiste de l'UI
     if (currentState is FavoritesLoaded) {
-      // Copie des favoris actuels
       updatedFavorites = List.from(currentState.favorites);
 
-      // Mise à jour optimiste
       if (event.isFavorite) {
-        print("[ToggleFavorite] Ajout optimiste du favori");
         updatedFavorites.add(FavoriteModel(
           id: 'temp_${event.productId}',
           uid: event.uid,
@@ -45,7 +43,6 @@ class FavoriteBloc extends Bloc<FavoriteEvent, FavoriteState> {
           timestamp: DateTime.now().toIso8601String(),
         ));
       } else {
-        print("[ToggleFavorite] Suppression optimiste du favori");
         updatedFavorites.removeWhere((f) => f.productId == event.productId);
       }
 
@@ -53,23 +50,18 @@ class FavoriteBloc extends Bloc<FavoriteEvent, FavoriteState> {
     }
 
     try {
+      // Appel API
       if (event.isFavorite) {
-        print("[ToggleFavorite] Appel serveur pour ajouter au favori");
         await addToFavorites.execute(uid: event.uid, productId: event.productId);
       } else {
-        print("[ToggleFavorite] Appel serveur pour SUPPRIMER des favoris");
         await removeFromFavorites.execute(uid: event.uid, productId: event.productId);
       }
 
-      print("[ToggleFavorite] Rechargement des favoris depuis le serveur...");
+      // Rechargement depuis le serveur
       final favorites = await getFavorites.execute(event.uid);
-
-      print("[ToggleFavorite] Favoris rechargés: $favorites");
-
       emit(FavoritesLoaded(await favorites));
     } catch (e) {
-      print("[ToggleFavorite] ERREUR : $e");
-
+      // Annulation en cas d'erreur
       if (currentState is FavoritesLoaded) {
         emit(FavoritesLoaded(currentState.favorites));
       }
@@ -77,25 +69,26 @@ class FavoriteBloc extends Bloc<FavoriteEvent, FavoriteState> {
     }
   }
 
+  /// Récupère les favoris depuis le backend
+  ///
+  /// Lance une erreur si l'utilisateur n'est pas connecté
   Future<String> getCurrentUserId() async {
     final authService = AuthService();
     final token = await authService.getCurrentUserToken();
-    if (token == null) {
-      throw Exception("Token JWT non disponible");
-    }
+    if (token == null) throw Exception("Token JWT non disponible");
+
     final userId = await authService.getUserIdFromToken(token);
     return userId ?? 'default_user_uid';
   }
 
-  Future<void> _handleLoadFavorites(LoadFavoritesEvent event, Emitter<FavoriteState> emit) async {
+  /// Charge tous les favoris de l'utilisateur
+  Future<void> _handleLoadFavorites(
+      LoadFavoritesEvent event, Emitter<FavoriteState> emit) async {
     emit(FavoriteLoading());
+
     try {
       final favorites = await getFavorites.execute(event.uid);
-      print("$favorites");
-
-      print("this is the list of the favs : $favorites");
-
-      emit(FavoritesLoaded(await favorites)); // Convertir le Future<List<Product>> en List<Product>
+      emit(FavoritesLoaded(await favorites));
     } catch (e) {
       emit(FavoriteError(e.toString()));
     }

@@ -1,23 +1,23 @@
 abstract class HistoryEvent {
-  const HistoryEvent(); // Ajout du constructeur constant
+  const HistoryEvent();
 }
 
 class LoadHistoryEvent extends HistoryEvent {
-  const LoadHistoryEvent(); // Constructeur constant
+  const LoadHistoryEvent();
 }
 
 class RecordScanEvent extends HistoryEvent {
   final String productId;
 
-  const RecordScanEvent({required this.productId}); // Constructeur constant
+  const RecordScanEvent({required this.productId});
 }
 
 class RecordViewEvent extends HistoryEvent {
   final String productId;
 
-  const RecordViewEvent({required this.productId}); // Constructeur constant
+  const RecordViewEvent({required this.productId});
 }
 class DeleteHistoryEvent extends HistoryEvent {
   final String historyId;
-  const DeleteHistoryEvent({required this.historyId}); // Constructeur constant
+  const DeleteHistoryEvent({required this.historyId});
 }

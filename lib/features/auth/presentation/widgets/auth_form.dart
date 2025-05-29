@@ -10,9 +10,11 @@ class AuthForm extends StatelessWidget {
   final bool obscurePassword;
   final VoidCallback togglePasswordVisibility;
   final GlobalKey<FormState> formKey;
-  final bool showErrors; // Nouveau paramètre
-  final String? emailError; // Nouveau paramètre
-  final String? passwordError; // Nouveau paramètre
+
+  // Gestion des erreurs personnalisées
+  final bool showErrors;
+  final String? emailError;
+  final String? passwordError;
 
   const AuthForm({
     Key? key,
@@ -21,55 +23,52 @@ class AuthForm extends StatelessWidget {
     required this.obscurePassword,
     required this.togglePasswordVisibility,
     required this.formKey,
-    required this.showErrors, // Ajouté
-    this.emailError, // Ajouté
-    this.passwordError, // Ajouté
+    required this.showErrors,
+    this.emailError,
+    this.passwordError,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
+        // Champ Email
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildEmailField(),
-            if (showErrors && emailError != null) _buildErrorText(emailError!),
+            if (showErrors && emailError != null)
+              _buildErrorText(emailError!),
           ],
         ),
+
         const SizedBox(height: 20),
+
+        // Champ Mot de passe
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildPasswordField(),
-            if (showErrors && passwordError != null) _buildErrorText(passwordError!),
+            if (showErrors && passwordError != null)
+              _buildErrorText(passwordError!),
           ],
         ),
+
         const SizedBox(height: 2),
+        // Lien "Mot de passe oublié"
         _buildForgotPassword(context),
       ],
     );
   }
 
-  Widget _buildErrorText(String? errorText) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 16, top: 4),
-      child: Text(
-        errorText ?? '',
-        style: TextStyle(
-          color: AppColors.error,
-          fontSize: 12,
-        ),
-      ),
-    );
-  }
+  // === Champs de formulaire ===
 
+  /// Champ d'email
   Widget _buildEmailField() {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(32),
-
       ),
       child: TextFormField(
         controller: emailController,
@@ -81,19 +80,19 @@ class AuthForm extends StatelessWidget {
           border: InputBorder.none,
           contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           filled: false,
-          errorStyle: TextStyle(height: 0), // Cache le texte d'erreur par défaut
+          errorStyle: TextStyle(height: 0), // Cache l'erreur standard
         ),
         validator: _validateEmail,
       ),
     );
   }
 
+  /// Champ de mot de passe
   Widget _buildPasswordField() {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(32),
-
       ),
       child: TextFormField(
         controller: passwordController,
@@ -103,38 +102,51 @@ class AuthForm extends StatelessWidget {
           labelStyle: TextStyle(color: Colors.grey),
           prefixIcon: Icon(Icons.lock_outline, color: AppColors.primary),
           suffixIcon: IconButton(
-            icon: Icon(
-              obscurePassword ? Icons.visibility_off : Icons.visibility,
-              color: AppColors.primary,
-            ),
+            icon: Icon(obscurePassword ? Icons.visibility_off : Icons.visibility),
+            color: AppColors.primary,
             onPressed: togglePasswordVisibility,
           ),
           border: InputBorder.none,
           contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           filled: false,
-          errorStyle: TextStyle(height: 0), // Cache le texte d'erreur par défaut
+          errorStyle: TextStyle(height: 0), // Cache l'erreur standard
         ),
         validator: _validatePassword,
       ),
     );
   }
 
-  // Passer le context ici pour la navigation
-  Widget _buildForgotPassword(BuildContext context) {
-    return Align(
-      alignment: Alignment.centerRight,
-      child: TextButton(
-        onPressed: () {
-          // Utilisation du context pour naviguer vers la page de mot de passe oublié
-          context.router.push(ForgotPasswordRoute());
-        },
-        child: Text(
-          'Forgot Password?',
-          style: AppTextStyles.bodyMedium.copyWith(color: AppColors.background),
+  // === UI Helpers ===
+
+  /// Affiche un message d'erreur personnalisé sous le champ
+  Widget _buildErrorText(String errorText) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 16, top: 4),
+      child: Text(
+        errorText,
+        style: TextStyle(
+          color: AppColors.error,
+          fontSize: 12,
         ),
       ),
     );
   }
+
+  /// Bouton "Mot de passe oublié"
+  Widget _buildForgotPassword(BuildContext context) {
+    return Align(
+      alignment: Alignment.centerRight,
+      child: TextButton(
+        onPressed: () => context.router.push(ForgotPasswordRoute()),
+        child: Text(
+          'Forgot Password?',
+          style: AppTextStyles.bodyMedium?.copyWith(color: AppColors.background),
+        ),
+      ),
+    );
+  }
+
+  // === Validations ===
 
   String? _validateEmail(String? value) {
     if (value == null || value.isEmpty) return 'Please enter your email';

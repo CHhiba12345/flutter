@@ -8,6 +8,11 @@ class FirebaseAuthDataSource {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
 
+  // ===========================================================================
+  // 🔐 AUTHENTIFICATION EMAIL / MOT DE PASSE
+  // ===========================================================================
+
+  /// Connexion avec email et mot de passe.
   Future<AppUser> signInWithEmailAndPassword(String email, String password) async {
     try {
       final userCredential = await _firebaseAuth.signInWithEmailAndPassword(
@@ -39,12 +44,12 @@ class FirebaseAuthDataSource {
     }
   }
 
+  /// Création d'un compte utilisateur avec email et mot de passe.
   Future<AppUser> signUpWithEmailAndPassword(
       String email,
       String password,
       String firstName,
-      String lastName,)
-  async {
+      String lastName,) async {
     try {
       final userCredential = await _firebaseAuth.createUserWithEmailAndPassword(
         email: email,
@@ -53,10 +58,9 @@ class FirebaseAuthDataSource {
 
       final user = userCredential.user;
       if (user == null) throw Exception("Utilisateur non créé");
-      // Mise à jour du profil avec firstName et lastName
-      await user.updateDisplayName("$firstName $lastName");
-      await user.reload(); // Recharger les données utilisateur
 
+      await user.updateDisplayName("$firstName $lastName");
+      await user.reload();
 
       final token = await user.getIdToken();
       if (token == null) throw Exception("Token non généré");
@@ -78,6 +82,11 @@ class FirebaseAuthDataSource {
     }
   }
 
+  // ===========================================================================
+  // 🟡 GOOGLE SIGN-IN
+  // ===========================================================================
+
+  /// Connexion via Google.
   Future<AppUser?> signInWithGoogle() async {
     try {
       await GoogleSignIn().signOut();
@@ -112,6 +121,11 @@ class FirebaseAuthDataSource {
     }
   }
 
+  // ===========================================================================
+  // 🔵 FACEBOOK SIGN-IN
+  // ===========================================================================
+
+  /// Connexion via Facebook.
   Future<AppUser?> signInWithFacebook() async {
     try {
       final LoginResult loginResult = await FacebookAuth.instance.login();
@@ -143,10 +157,25 @@ class FirebaseAuthDataSource {
     }
   }
 
+  // ===========================================================================
+  // 💾 GESTION DU TOKEN LOCAL
+  // ===========================================================================
+
+  /// Stocke le token Firebase dans un stockage sécurisé.
   Future<void> storeTokenLocally(String token) async {
     await _storage.write(key: 'firebase_token', value: token);
   }
 
+  /// Récupère le token actuel depuis Firebase Auth.
+  Future<String?> getFirebaseToken() async {
+    return FirebaseAuth.instance.currentUser?.getIdToken();
+  }
+
+  // ===========================================================================
+  // 🔚 DÉCONNEXION
+  // ===========================================================================
+
+  /// Déconnecte l'utilisateur et nettoie les données locales.
   Future<void> signOut() async {
     try {
       await _storage.delete(key: 'firebase_token');
@@ -156,9 +185,5 @@ class FirebaseAuthDataSource {
     } catch (e) {
       throw Exception("Erreur déconnexion : ${e.toString()}");
     }
-  }
-
-  Future<String?> getFirebaseToken() async {
-    return FirebaseAuth.instance.currentUser?.getIdToken();
   }
 }

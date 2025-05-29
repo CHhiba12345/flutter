@@ -21,8 +21,9 @@ class HistoryRepositoryImpl implements HistoryRepository {
   Future<void> recordScan({required String uid, required String productId}) async {
     final currentUserUid = await getCurrentUser();
     if (currentUserUid == null) {
-      throw Exception('User not authenticated');
+      throw Exception('Utilisateur non authentifié');
     }
+
     await dataSource.recordAction(
       uid: currentUserUid,
       productId: productId,
@@ -43,18 +44,20 @@ class HistoryRepositoryImpl implements HistoryRepository {
   Future<String?> getCurrentUser() async {
     return _firebaseAuth.currentUser?.uid;
   }
+
   @override
   Future<void> deleteHistory(String historyId) async {
-    await dataSource.deleteHistory(historyId); // Appel au DataSource
+    await dataSource.deleteHistory(historyId);
   }
 
+  /// Convertit un [HistoryModel] en entité [History]
   History _mapModelToEntity(HistoryModel model) {
     if (model.id == null) {
       throw Exception('ID manquant dans l\'historique');
     }
 
     return History(
-      id: model.id!, // Maintenant sécurisé car vérifié
+      id: model.id!,
       uid: model.uid,
       productName: model.productName,
       imageUrl: model.imageUrl,

@@ -1,13 +1,16 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
+
 import '../../../auth/data/datasources/auth_service.dart';
 import '../models/history_model.dart';
 
+/// Source de données distante pour l'historique des actions utilisateur
 class HistoryDataSource {
   static const String baseUrl = 'http://164.132.53.159:3002';
   final AuthService _authService = AuthService();
 
+  /// Retourne les en-têtes avec le token d'autorisation
   Future<Map<String, String>> _getHeaders() async {
     final token = await _authService.getCurrentUserToken();
     return {
@@ -16,13 +19,14 @@ class HistoryDataSource {
     };
   }
 
+  /// Récupère l'historique complet d'un utilisateur via son UID
   Future<List<HistoryModel>> getUserHistory(String uid) async {
     try {
       final url = Uri.parse('$baseUrl/products/history').replace(
         queryParameters: {
           'uid': uid,
           'include_details': 'true',
-          'populate_product': 'true'
+          'populate_product': 'true',
         },
       );
       final headers = await _getHeaders();
@@ -30,7 +34,6 @@ class HistoryDataSource {
       final response = await http.get(url, headers: headers);
 
       if (response.statusCode == 200) {
-        // ✅ Utilisation de utf8.decode + jsonDecode
         final decodedJson = jsonDecode(utf8.decode(response.bodyBytes));
         if (decodedJson is List) {
           return decodedJson.map((json) => HistoryModel.fromJson(json)).toList();
@@ -47,6 +50,7 @@ class HistoryDataSource {
     }
   }
 
+  /// Enregistre une action dans l'historique (scan ou view)
   Future<void> recordAction({
     required String uid,
     required String productId,
@@ -70,6 +74,7 @@ class HistoryDataSource {
     }
   }
 
+  /// Supprime une entrée d'historique par ID
   Future<void> deleteHistory(String historyId) async {
     final url = Uri.parse('$baseUrl/products/history/$historyId');
     final headers = await _getHeaders();
